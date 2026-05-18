@@ -3,968 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>INCUNABULA — v3 — N°06</title>
+<title>INCUNABULA — v3</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=EB+Garamond:ital,wght@0,400;1,400&family=Space+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;overflow:hidden;background:#0c0a08;color:#e8dfcf;font-family:'EB Garamond','Cormorant Garamond',Georgia,serif;cursor:crosshair}
-  canvas{display:block;position:fixed;inset:0}
-  #overture{position:fixed;inset:0;z-index:60;background:#0c0a08;color:#e8dfcf;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;transition:opacity 2s ease}
+  html,body{height:100%;width:100%;background:#0c0a08;color:#e8dfcf;font-family:'EB Garamond',Georgia,serif;overflow:hidden}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0c0a08;overflow:auto}
+  #overture{position:fixed;inset:0;z-index:50;background:#0c0a08;color:#e8dfcf;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;transition:opacity 2s}
   #overture.gone{opacity:0;pointer-events:none}
-  #overture .ln{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.4rem,3.2vw,2.4rem);font-weight:300;font-style:italic;letter-spacing:.02em;line-height:1.5;max-width:30em;opacity:0;transition:opacity 2.4s ease}
-  #overture .ln.in{opacity:.9}
-  #overture .ln + .ln{margin-top:2.4rem}
-  #overture .cta{margin-top:4rem;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.55em;text-transform:uppercase;color:#9a8e72;opacity:0;transition:opacity 1.4s ease;cursor:pointer;border:1px solid #9a8e72;padding:.85rem 1.6rem;background:transparent}
-  #overture .cta.in{opacity:.85}
-  #overture .cta:hover{background:#e8dfcf;color:#0c0a08;border-color:#e8dfcf}
-  #welcomeBack{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.45em;text-transform:uppercase;color:#9a8e72;margin-top:2rem;opacity:0;transition:opacity 2s ease}
-  #welcomeBack.in{opacity:.7}
-  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;padding:1.6rem 2rem;display:flex;flex-direction:column;justify-content:space-between;color:#e8dfcf;mix-blend-mode:difference}
-  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;width:100%}
-  .ttl{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.15rem;font-weight:300;font-style:italic;letter-spacing:.02em}
-  .num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
-  .meta{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;opacity:.6;line-height:1.9;max-width:320px}
-  .tags{display:flex;gap:.6rem}
-  .tag{border:1px solid currentColor;padding:.1rem .6rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.55}
-  #reticle{position:fixed;left:50%;top:50%;width:18px;height:18px;border:1px solid #d6c89a;transform:translate(-50%,-50%) rotate(45deg);z-index:8;pointer-events:none;mix-blend-mode:difference;opacity:.7}
-  #reticle::before,#reticle::after{content:"";position:absolute;background:#d6c89a}
-  #reticle::before{left:50%;top:-6px;width:1px;height:6px;transform:translateX(-50%)}
-  #reticle::after{left:50%;top:18px;width:1px;height:6px;transform:translateX(-50%)}
-  #plate{position:fixed;left:50%;bottom:6%;transform:translateX(-50%);max-width:560px;text-align:center;color:#e8dfcf;z-index:12;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
-  #plate.in{opacity:.92}
-  #plate .artist{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.5em;text-transform:uppercase;opacity:.7;margin-bottom:.55rem}
-  #plate .title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-style:italic;font-weight:300;letter-spacing:.005em;line-height:1.25}
-  #plate .meta-line{font-family:'EB Garamond',Georgia,serif;font-size:.95rem;font-style:italic;opacity:.75;margin-top:.6rem}
-  #plate .curatorial{font-family:'EB Garamond',Georgia,serif;font-size:.9rem;line-height:1.55;opacity:.7;margin-top:1.1rem;max-width:42em;text-align:left}
-  #analysis{position:fixed;inset:0;pointer-events:none;z-index:14;opacity:0;transition:opacity .8s ease}
-  #analysis.in{opacity:1}
-  #analysis svg{width:100%;height:100%;display:block}
-  #analysis .lbl{fill:#f0e3b8;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;opacity:.9}
-  #toolbar{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);display:flex;gap:.5rem;z-index:18;opacity:0;transition:opacity .8s ease}
-  #toolbar.in{opacity:1}
-  .btn{pointer-events:auto;background:rgba(0,0,0,.5);border:1px solid #6a5a3c;color:#d6c89a;padding:.5rem .85rem;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(6px);transition:all .3s}
-  .btn:hover{border-color:#e8dfcf;color:#fff}
-  .btn.active{background:#d6c89a;color:#0c0a08;border-color:#d6c89a}
-  #hint{position:fixed;left:50%;top:1.4rem;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.5em;text-transform:uppercase;color:#d6c89a;opacity:.45;z-index:11;mix-blend-mode:difference;pointer-events:none}
-  #loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.6em;text-transform:uppercase;color:#9a8e72;z-index:20;opacity:.7;animation:bl 1.6s ease-in-out infinite}
-  @keyframes bl{50%{opacity:.2}}
-  #whisper{position:fixed;left:6%;bottom:18%;max-width:380px;color:#e8dfcf;font-family:'EB Garamond',Georgia,serif;font-size:1rem;font-style:italic;line-height:1.6;opacity:0;z-index:13;pointer-events:none;transition:opacity 2.4s ease;text-shadow:0 1px 6px rgba(0,0,0,.95)}
-  #whisper.in{opacity:.85}
-  #whisper::before{content:"";display:block;width:30px;height:1px;background:#d6c89a;margin-bottom:.8rem;opacity:.5}
-  /* PROFILE PANEL */
-  #profilePanel{position:fixed;right:1.4rem;top:5rem;width:240px;background:rgba(8,6,4,.65);border:1px solid #6a5a3c;backdrop-filter:blur(8px);padding:1rem 1rem 1.1rem;z-index:15;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:#d6c89a;opacity:0;transition:opacity 1s ease;pointer-events:none}
-  #profilePanel.in{opacity:.9}
-  #profilePanel h3{font-family:'Cormorant Garamond',Georgia,serif;font-size:.9rem;font-style:italic;text-transform:none;letter-spacing:0;margin-bottom:.7rem;color:#e8dfcf}
-  #profilePanel .bar{margin:.4rem 0;height:3px;background:rgba(214,200,154,.15);position:relative}
-  #profilePanel .bar i{position:absolute;left:0;top:0;height:100%;background:#d6c89a;transition:width 1s ease}
-  #profilePanel .label{display:flex;justify-content:space-between;margin-bottom:.15rem;opacity:.75}
-  /* FORGERY HINT */
-  #forgery{position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.46rem;letter-spacing:.4em;color:#8a7a52;opacity:0;z-index:13;cursor:pointer;pointer-events:auto;text-transform:uppercase;padding:.4rem .9rem;border:1px dashed #6a5a3c;background:rgba(8,6,4,.5);backdrop-filter:blur(4px);transition:opacity 1.4s ease}
-  #forgery.in{opacity:.7}
-  #forgery:hover{opacity:1;border-color:#d6c89a;color:#d6c89a}
-  /* PHILOSOPHICAL OVERLAY */
-  #philo{position:fixed;inset:0;background:rgba(8,6,4,.85);backdrop-filter:blur(10px);z-index:50;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:2rem;opacity:0;pointer-events:none;transition:opacity 1.2s ease;text-align:center}
-  #philo.in{opacity:1;pointer-events:auto}
-  #philo h2{font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:clamp(1.5rem,3.5vw,2.4rem);color:#e8dfcf;font-weight:300;margin-bottom:1.4rem;max-width:24em;line-height:1.4}
-  #philo p{font-family:'EB Garamond',Georgia,serif;font-size:1rem;font-style:italic;color:#d6c89a;max-width:36em;line-height:1.7;opacity:.85}
-  #philo .closeBtn{margin-top:2.5rem;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.55em;text-transform:uppercase;color:#9a8e72;border:1px solid #9a8e72;padding:.7rem 1.4rem;background:transparent;cursor:pointer}
-  #philo .closeBtn:hover{background:#e8dfcf;color:#0c0a08;border-color:#e8dfcf}
-  #philo .forgeryHighlight{margin-top:2rem;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.35em;color:#c19a5e;opacity:.85}
+  #overture h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-style:italic;font-weight:300;margin-bottom:2rem;max-width:30em;line-height:1.5;text-align:center}
+  #enter{padding:.8rem 1.6rem;border:1px solid #9a8e72;background:transparent;color:#d6c89a;cursor:pointer;font-family:monospace;font-size:.6rem;letter-spacing:.55em;text-transform:uppercase;margin-top:3rem}
+  #enter:hover{background:#e8dfcf;color:#0c0a08}
+  #gallery{display:grid;grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));gap:2rem;padding:3rem;max-width:1400px;margin:0 auto}
+  .work{border:2px solid #6a5a3c;overflow:hidden;background:#1a1612;cursor:pointer;transition:transform .3s,box-shadow .3s}
+  .work:hover{transform:scale(1.02);box-shadow:0 0 20px rgba(214,200,154,.3)}
+  .work img{display:block;width:100%;height:auto;min-height:200px;object-fit:cover;background:#0c0a08}
+  .work-meta{padding:1.2rem;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;color:#d6c89a;border-top:1px solid #6a5a3c}
+  .work-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.1rem;font-style:italic;font-weight:400;color:#e8dfcf;margin-bottom:.5rem}
+  #modal{position:fixed;inset:0;background:rgba(12,10,8,.95);z-index:100;display:none;align-items:center;justify-content:center;padding:2rem}
+  #modal.show{display:flex}
+  #modal img{max-width:80vh;max-height:80vh;object-fit:contain}
+  #closeModal{position:fixed;top:2rem;right:2rem;background:transparent;border:1px solid #d6c89a;color:#d6c89a;padding:.5rem 1rem;cursor:pointer;font-family:monospace;font-size:.6rem;z-index:101}
+  #closeModal:hover{background:#d6c89a;color:#0c0a08}
 </style>
-<script type="importmap">
-{ "imports": {
-  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-}}
-</script>
 </head>
 <body>
 
 <div id="overture">
-  <div class="ln" id="ln1">Você está prestes a entrar em um museu<br>que não existe.</div>
-  <div class="ln" id="ln2">Cada sala foi feita para você.<br>Mesmo que você ainda não saiba.</div>
-  <button class="cta" id="enter">entrar</button>
-  <div id="welcomeBack"></div>
+  <h1>Você está prestes a entrar em um museu<br>que não existe.</h1>
+  <button id="enter">entrar</button>
 </div>
 
-<div id="hud">
-  <div class="row">
-    <div>
-      <div style="display:flex;gap:2rem;align-items:baseline">
-        <span class="ttl">Incunabula</span>
-        <span class="num">N°06 · v3</span>
-      </div>
-      <p class="meta">Curadoria adaptativa · corredor infinito<br>[F] fibonacci · [L] luz · [P] pirâmide · [C] paleta</p>
-    </div>
-    <div class="meta" id="hudRoom">Sala I/∞</div>
-  </div>
-  <div class="row">
-    <div class="tags">
-      <span class="tag">Three.js</span>
-      <span class="tag">PBR</span>
-      <span class="tag">D3.js</span>
-      <span class="tag">Adaptive</span>
-    </div>
-    <span class="meta">Claude × Ivan Lanna · 2026</span>
-  </div>
+<div id="stage"></div>
+
+<div id="modal">
+  <img id="modalImg" src="" alt="">
 </div>
+<button id="closeModal">fechar</button>
 
-<div id="reticle"></div>
-<div id="hint">[WASD] caminhar · [mouse] olhar · [F/L/P/C] análise</div>
+<script>
+const overture = document.getElementById('overture');
+const stage = document.getElementById('stage');
+const enter = document.getElementById('enter');
+const modal = document.getElementById('modal');
+const modalImg = document.getElementById('modalImg');
+const closeModal = document.getElementById('closeModal');
 
-<div id="analysis"><svg id="analysisSvg" preserveAspectRatio="none"></svg></div>
-
-<div id="toolbar">
-  <button class="btn" data-mode="F">[F] fibonacci</button>
-  <button class="btn" data-mode="L">[L] luz</button>
-  <button class="btn" data-mode="P">[P] pirâmide</button>
-  <button class="btn" data-mode="C">[C] paleta</button>
-</div>
-
-<div id="plate">
-  <div class="artist" id="plArtist">—</div>
-  <div class="title" id="plTitle">—</div>
-  <div class="meta-line" id="plMeta">—</div>
-  <div class="curatorial" id="plCur">—</div>
-</div>
-
-<div id="whisper"></div>
-
-<div id="profilePanel">
-  <h3>seu perfil</h3>
-  <div class="label"><span>contemplação</span><span id="pf-dwell">0s</span></div>
-  <div class="bar"><i id="pfb-dwell" style="width:0%"></i></div>
-  <div class="label"><span>análises</span><span id="pf-analysis">0</span></div>
-  <div class="bar"><i id="pfb-analysis" style="width:0%"></i></div>
-  <div class="label"><span>salas</span><span id="pf-rooms">1</span></div>
-  <div class="bar"><i id="pfb-rooms" style="width:14%"></i></div>
-</div>
-
-<div id="forgery">uma das obras desta sala não existe. consegue dizer qual?</div>
-
-<div id="philo">
-  <h2></h2>
-  <p></p>
-  <div class="forgeryHighlight"></div>
-  <button class="closeBtn">fechar</button>
-</div>
-
-<div id="loading">preparando a galeria…</div>
-
-<script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
-<script type="module">
-import * as THREE from 'three';
-import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
-
-/* ============================================================
-   INCUNABULA — V3 — curadoria adaptativa infinita
-   - Catalogo de obras com tags (palette, era, theme, comp)
-   - Algoritmo de similaridade puxa próximas 6 obras baseado em dwell + análises ativadas
-   - Corredor procedural: gera N salas sob demanda conforme avanço
-   - localStorage persiste "perfil do visitante" entre visitas
-   - Easter egg "falsificação": 1 obra a cada 5 salas é fake (com proveniência plausível)
-   - Após 7 salas: libera obra contemporânea (Hockney/Bacon) com contraste deliberado
-   ============================================================ */
-
-/* ─── CATÁLOGO ─── */
-const CATALOG = [
-  { artist:'Johannes Vermeer', title:'A Leiteira', year:'c. 1660',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg/800px-Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg',
-    ratio:0.892, palette:[0.55,0.42,0.25], era:1660, themes:['interior','quotidiano','feminino'],
-    curatorial:'A luz cai da janela esquerda. O leite caindo é tempo se derramando.',
-    whisper:'Vermeer constrói o quadro em duas zonas — silêncio e abundância. O leite costura.',
-    compPoints:'pyramid', lightDir:[-0.7,-0.6], paletteSwatches:['#8a6332','#c9a96e','#3a3027','#d4c4a0','#1b150e'] },
-  { artist:'Rembrandt', title:'Auto-retrato (1659)', year:'1659',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg/640px-Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg',
-    ratio:0.83, palette:[0.5,0.38,0.22], era:1659, themes:['retrato','introspecção'],
-    curatorial:'Aos 53, Rembrandt se pinta com tinta reduzida. O fundo desaparece.',
-    whisper:'Tinta espessa nas zonas iluminadas, glacis transparentes nas sombras.',
-    compPoints:'central', lightDir:[-0.6,-0.55], paletteSwatches:['#1c130b','#8a6b3a','#c19a5e','#3a2a1c','#0b0805'] },
-  { artist:'Botticelli', title:'O Nascimento de Vênus', year:'c. 1485',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1024px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg',
-    ratio:1.59, palette:[0.78,0.66,0.47], era:1485, themes:['mitologia','feminino','natureza'],
-    curatorial:'A deusa chega à praia em uma concha. Linha desafia anatomia.',
-    whisper:'Vênus flutua sobre a concha. É linha, não corpo.',
-    compPoints:'pyramid', lightDir:[-0.4,-0.7], paletteSwatches:['#c8a878','#7a9a8a','#d4c4a0','#3a4a3a','#e8dfcf'] },
-  { artist:'Leonardo da Vinci', title:'A Dama do Arminho', year:'c. 1490',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Cecilia_Gallerani_-_Lady_with_an_Ermine.jpg/800px-Cecilia_Gallerani_-_Lady_with_an_Ermine.jpg',
-    ratio:0.74, palette:[0.45,0.32,0.18], era:1490, themes:['retrato','feminino','animal'],
-    curatorial:'Cecília sustenta o arminho como uma ideia.',
-    whisper:'Contraposto que fundou o retrato europeu.',
-    compPoints:'diagonal', lightDir:[-0.65,-0.6], paletteSwatches:['#1a1208','#a07a4c','#d4c4a0','#5a3a1c','#0b0805'] },
-  { artist:'Caravaggio', title:'Narciso', year:'c. 1599',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Narcissus-Caravaggio_%281594-96%29_edited.jpg/800px-Narcissus-Caravaggio_%281594-96%29_edited.jpg',
-    ratio:0.85, palette:[0.3,0.22,0.13], era:1599, themes:['mitologia','escuridão','reflexo'],
-    curatorial:'O reflexo é mais negro que o original.',
-    whisper:'Pode ser virado de cabeça pra baixo e funciona.',
-    compPoints:'circle', lightDir:[-0.5,-0.7], paletteSwatches:['#0b0805','#6a4a26','#a07a4c','#1a1208','#c19a5e'] },
-  { artist:'Albrecht Dürer', title:'Liebre', year:'1502',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Albrecht_D%C3%BCrer_-_Hare%2C_1502_-_Google_Art_Project.jpg/640px-Albrecht_D%C3%BCrer_-_Hare%2C_1502_-_Google_Art_Project.jpg',
-    ratio:0.78, palette:[0.55,0.45,0.28], era:1502, themes:['animal','observação','natureza'],
-    curatorial:'Cada pelo. Memória disciplinada.',
-    whisper:'Pincel de um pelo só. Não pinta a liebre — pinta o ato de olhar.',
-    compPoints:'central', lightDir:[-0.7,-0.5], paletteSwatches:['#3a2a1a','#b09060','#d4c4a0','#7a5a3a','#e8dfcf'] },
-  { artist:'Jan van Eyck', title:'Retrato Arnolfini', year:'1434',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Van_Eyck_-_Arnolfini_Portrait.jpg/640px-Van_Eyck_-_Arnolfini_Portrait.jpg',
-    ratio:0.74, palette:[0.32,0.22,0.12], era:1434, themes:['interior','retrato','símbolo'],
-    curatorial:'Tudo é símbolo: cão, fruta, vela, espelho.',
-    whisper:'Van Eyck está no espelho convexo. A pintura é documento.',
-    compPoints:'central', lightDir:[-0.55,-0.55], paletteSwatches:['#1a1208','#5a3a1c','#a07a4c','#d4c4a0','#3a2a1a'] },
-  { artist:'Hieronymus Bosch', title:'O Jardim das Delícias', year:'c. 1500',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1024px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg',
-    ratio:1.78, palette:[0.4,0.5,0.45], era:1500, themes:['religião','onírico','multidão'],
-    curatorial:'Bosch pinta sem hierarquia narrativa.',
-    whisper:'Desproporção como argumento moral.',
-    compPoints:'distributed', lightDir:[0,-1], paletteSwatches:['#7a9a8a','#c8a878','#3a4a3a','#a07a4c','#d4c4a0'] },
-  { artist:'El Greco', title:'Vista de Toledo', year:'c. 1599',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/El_Greco_View_of_Toledo.jpg/640px-El_Greco_View_of_Toledo.jpg',
-    ratio:0.85, palette:[0.22,0.28,0.38], era:1599, themes:['paisagem','tempestade','expressão'],
-    curatorial:'A paisagem se eletrifica.',
-    whisper:'A catedral foi movida. Pensamento, não registro.',
-    compPoints:'vertical', lightDir:[-0.3,-0.9], paletteSwatches:['#1a2230','#3a4a5a','#7a8a9a','#0b0f15','#d4c4a0'] },
-  { artist:'Vermeer', title:'Moça com Brinco de Pérola', year:'c. 1665',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/640px-1665_Girl_with_a_Pearl_Earring.jpg',
-    ratio:0.85, palette:[0.5,0.4,0.3], era:1665, themes:['retrato','feminino','introspecção'],
-    curatorial:'Fundo negro absoluto. A pérola: dois traços.',
-    whisper:'Dois traços de tinta. A definição mais econômica de luz.',
-    compPoints:'central', lightDir:[-0.7,-0.5], paletteSwatches:['#0b0805','#c19a5e','#3a4a5a','#d4c4a0','#8a6332'] },
-  { artist:'Titian', title:'Vênus de Urbino', year:'1538',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg/800px-Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg',
-    ratio:1.54, palette:[0.5,0.35,0.25], era:1538, themes:['feminino','interior','mitologia'],
-    curatorial:'Vênus deitada — deusa virou mulher.',
-    whisper:'O olhar dela rompe a quarta parede em 1538.',
-    compPoints:'horizontal', lightDir:[-0.5,-0.5], paletteSwatches:['#3a1c14','#a07a4c','#d4c4a0','#5a3a1c','#e8dfcf'] },
-  { artist:'Raphael', title:'A Escola de Atenas', year:'1511',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg/1024px-%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg',
-    ratio:1.6, palette:[0.55,0.48,0.35], era:1511, themes:['filosofia','arquitetura','multidão'],
-    curatorial:'Platão para cima, Aristóteles para o chão.',
-    whisper:'O ponto de fuga está entre as duas mãos.',
-    compPoints:'pyramid', lightDir:[-0.4,-0.4], paletteSwatches:['#3a2a1a','#9a8e72','#d4c4a0','#1a1208','#c8a878'] },
-  { artist:'Pieter Bruegel', title:'Os Caçadores na Neve', year:'1565',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg/1024px-Pieter_Bruegel_the_Elder_-_Hunters_in_the_Snow_%28Winter%29_-_Google_Art_Project.jpg',
-    ratio:1.41, palette:[0.42,0.45,0.45], era:1565, themes:['paisagem','quotidiano','inverno'],
-    curatorial:'A neve organiza a perspectiva em três planos.',
-    whisper:'Pássaros como pontos pretos — o olho viaja em diagonal.',
-    compPoints:'diagonal', lightDir:[-0.3,-0.5], paletteSwatches:['#3a3a45','#7a8a9a','#d4d4dc','#1a1c22','#c8a878'] },
-  { artist:'Jan Vermeer', title:'Vista de Delft', year:'1660',
-    src:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Vermeer-view-of-delft.jpg/1024px-Vermeer-view-of-delft.jpg',
-    ratio:1.6, palette:[0.42,0.48,0.55], era:1660, themes:['paisagem','urbano','luz'],
-    curatorial:'O céu ocupa quase metade do quadro.',
-    whisper:'A reflexão na água tem mais detalhe que a cidade. Vermeer pinta a luz, não a arquitetura.',
-    compPoints:'horizontal', lightDir:[-0.2,-0.7], paletteSwatches:['#3a4a5a','#a8b8c8','#d4c4a0','#7a6a4a','#1a2230'] },
-  // —— OBRA CONTEMPORÂNEA (libera após 7 salas) ——
-  { artist:'David Hockney', title:'A Bigger Splash', year:'1967', contemporary: true,
-    src:'https://upload.wikimedia.org/wikipedia/en/9/91/Hockney-bigger-splash-1967.jpg',
-    ratio:1.0, palette:[0.65,0.78,0.85], era:1967, themes:['contemporâneo','água','geometria'],
-    curatorial:'O splash é o único momento de gesto numa pintura inteiramente geométrica.',
-    whisper:'Hockney levou dias para pintar o splash. Levou horas para pintar tudo o que está em volta.',
-    compPoints:'horizontal', lightDir:[0,-0.5], paletteSwatches:['#a8c8d8','#d4c4a0','#3a4a5a','#e8dfcf','#7a8a9a'] },
-  // —— FORGERY (gerada proceduralmente, marcada com forgery:true) ——
-  { artist:'Pieter de Hooch', title:'Pátio Interior em Delft (atribuído)', year:'c. 1663', forgery:true,
-    src:'data:image/svg+xml;utf8,'+encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" width="600" height="800" viewBox="0 0 600 800">
-        <defs>
-          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stop-color="#b8a878"/><stop offset="1" stop-color="#7a6a4a"/>
-          </linearGradient>
-        </defs>
-        <rect width="600" height="800" fill="#3a2a1a"/>
-        <rect x="80" y="60" width="440" height="320" fill="url(#sky)"/>
-        <rect x="80" y="380" width="440" height="380" fill="#5a3a1c"/>
-        <g stroke="#1a1208" stroke-width="2" fill="none">
-          <rect x="160" y="120" width="120" height="200" fill="#1a1208"/>
-          <rect x="340" y="160" width="80" height="160" fill="#1a1208"/>
-        </g>
-        <g fill="#d4c4a0">
-          <rect x="270" y="500" width="40" height="80" rx="4"/>
-          <circle cx="290" cy="490" r="14"/>
-        </g>
-        <g fill="#0b0805">
-          <rect x="280" y="540" width="20" height="40"/>
-        </g>
-      </svg>
-    `),
-    ratio:0.75, palette:[0.45,0.35,0.22], era:1663, themes:['interior','quotidiano','luz'],
-    curatorial:'Atribuída à escola de De Hooch. Proveniência incerta após 1820: coleção privada Antuérpia.',
-    whisper:'A perspectiva é levemente forçada. Ou talvez seja só Pieter sendo Pieter.',
-    compPoints:'central', lightDir:[-0.5,-0.5], paletteSwatches:['#3a2a1a','#5a3a1c','#a07a4c','#b8a878','#1a1208'] },
+// Obras de domínio público do Wikimedia Commons
+const works = [
+  {
+    title: 'A Leiteira',
+    artist: 'Johannes Vermeer',
+    year: '1660',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Johannes_Vermeer_-_The_Milkmaid_-_Google_Art_Project.jpg/640px-Johannes_Vermeer_-_The_Milkmaid_-_Google_Art_Project.jpg'
+  },
+  {
+    title: 'Autorretrato',
+    artist: 'Rembrandt van Rijn',
+    year: '1659',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Rembrandt_-_Self-portrait_-_Google_Art_Project.jpg/640px-Rembrandt_-_Self-portrait_-_Google_Art_Project.jpg'
+  },
+  {
+    title: 'A Caça de Diana',
+    artist: 'Peter Paul Rubens',
+    year: '1616',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Peter_Paul_Rubens_-_Diana_and_her_Nymphs_Returning_from_the_Hunt.JPG/800px-Peter_Paul_Rubens_-_Diana_and_her_Nymphs_Returning_from_the_Hunt.JPG'
+  },
+  {
+    title: 'Nascimento de Vênus',
+    artist: 'Sandro Botticelli',
+    year: '1484',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_Nascita_di_Venere.jpg/800px-Sandro_Botticelli_-_La_Nascita_di_Venere.jpg'
+  },
+  {
+    title: 'A Noite Estrelada',
+    artist: 'Vincent van Gogh',
+    year: '1889',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/757px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg'
+  },
+  {
+    title: 'O Grito',
+    artist: 'Edvard Munch',
+    year: '1893',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg/640px-Edvard_Munch%2C_1893%2C_The_Scream%2C_oil%2C_tempera_and_pastel_on_cardboard%2C_91_x_73_cm%2C_National_Gallery_of_Norway.jpg'
+  }
 ];
 
-/* ─── PROFILE STORE ─── */
-const Profile = (()=>{
-  const KEY = 'incunabula_profile_v3';
-  let data;
-  try { data = JSON.parse(localStorage.getItem(KEY)) || null; } catch(_){ data = null; }
-  if (!data){
-    data = {
-      visits: 0,
-      totalDwell: 0,
-      analysisCount: 0,
-      roomsVisited: 0,
-      seenIds: [],
-      affinities: { eraEarly:0, eraLate:0, dark:0, light:0, portrait:0, landscape:0, mythology:0, interior:0 },
-      contemporaryUnlocked: false,
-      lastVisit: 0
-    };
-  }
-  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(data)); }catch(_){} }
-  return {
-    bump(){
-      data.visits++; data.lastVisit = Date.now(); save();
-      return data.visits;
-    },
-    addDwell(ms){ data.totalDwell += ms; save(); },
-    addAnalysis(){ data.analysisCount++; save(); },
-    markSeen(id){ if (!data.seenIds.includes(id)) { data.seenIds.push(id); } save(); },
-    bumpRoom(){ data.roomsVisited++; if (data.roomsVisited >= 7) data.contemporaryUnlocked = true; save(); },
-    addAffinity(work, ms){
-      const seconds = ms / 1000;
-      if (work.era < 1500) data.affinities.eraEarly += seconds;
-      else data.affinities.eraLate += seconds;
-      const lum = (work.palette[0]+work.palette[1]+work.palette[2])/3;
-      if (lum < 0.4) data.affinities.dark += seconds; else data.affinities.light += seconds;
-      if (work.themes.includes('retrato')) data.affinities.portrait += seconds;
-      if (work.themes.includes('paisagem')) data.affinities.landscape += seconds;
-      if (work.themes.includes('mitologia')) data.affinities.mythology += seconds;
-      if (work.themes.includes('interior')) data.affinities.interior += seconds;
-      save();
-    },
-    data: ()=> data,
-    isReturning(){ return data.visits > 0; }
-  };
-})();
+function buildGallery(){
+  const gallery = document.createElement('div');
+  gallery.id = 'gallery';
 
-/* ─── CURATORIAL ENGINE ─── */
-function similarityScore(work, profile){
-  let s = 0;
-  // afinidade era
-  if (work.era < 1500) s += profile.affinities.eraEarly * 0.1;
-  else s += profile.affinities.eraLate * 0.1;
-  // luminosidade
-  const lum = (work.palette[0]+work.palette[1]+work.palette[2])/3;
-  if (lum < 0.4) s += profile.affinities.dark * 0.08;
-  else s += profile.affinities.light * 0.08;
-  // tema
-  if (work.themes.includes('retrato')) s += profile.affinities.portrait * 0.12;
-  if (work.themes.includes('paisagem')) s += profile.affinities.landscape * 0.12;
-  if (work.themes.includes('mitologia')) s += profile.affinities.mythology * 0.12;
-  if (work.themes.includes('interior')) s += profile.affinities.interior * 0.12;
-  return s;
-}
-function selectNextRoom(roomIdx){
-  const prof = Profile.data();
-  const pool = CATALOG.filter(c => !c.contemporary && !c.forgery);
-  // primeira sala: hardcoded variada
-  if (roomIdx === 0){
-    return pool.slice(0, 6).map(w => ({...w}));
-  }
-  // ordena por similaridade
-  pool.sort((a,b) => similarityScore(b, prof) - similarityScore(a, prof));
-  // pega 6 não vistas recentes preferencialmente, mas pool pode repetir após esgotar
-  const recent = new Set(prof.seenIds.slice(-12));
-  const pref = pool.filter(w => !recent.has(w.title + '|' + w.artist));
-  const filled = pref.concat(pool).slice(0, 6).map(w => ({...w}));
-  // forgery: a cada 5 salas, injeta 1 obra fake
-  if (roomIdx > 0 && roomIdx % 5 === 0){
-    const forgery = CATALOG.find(c => c.forgery);
-    if (forgery){
-      const slot = Math.floor(Math.random()*6);
-      filled[slot] = { ...forgery, _isForgery: true };
-    }
-  }
-  // contemporânea: se desbloqueada e ainda não inserida, ~20% chance
-  if (prof.contemporaryUnlocked && Math.random() < 0.25 && roomIdx > 0){
-    const cont = CATALOG.find(c => c.contemporary);
-    if (cont){
-      const slot = Math.floor(Math.random()*6);
-      filled[slot] = { ...cont };
-    }
-  }
-  return filled;
-}
-
-/* ─── THREE.JS SCENE ─── */
-const canvas = document.createElement('canvas');
-document.body.appendChild(canvas);
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.setSize(innerWidth, innerHeight);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.1;
-
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x07060a);
-scene.fog = new THREE.Fog(0x07060a, 16, 42);
-const camera = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.05, 200);
-camera.position.set(0, 1.65, 14);
-
-const css = new CSS2DRenderer();
-css.setSize(innerWidth, innerHeight);
-css.domElement.style.position = 'fixed';
-css.domElement.style.inset = '0';
-css.domElement.style.pointerEvents = 'none';
-css.domElement.style.zIndex = '5';
-document.body.appendChild(css.domElement);
-
-/* PISO procedural - tile longo */
-function makeFloorTex(){
-  const c = document.createElement('canvas'); c.width = c.height = 1024;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = '#3a2516'; ctx.fillRect(0,0,1024,1024);
-  for (let y=0; y<1024; y+=64){
-    const off = (y/64)%2 ? 0 : 256;
-    for (let x=-256; x<1024; x+=256){
-      const tone = 30 + Math.random()*40;
-      ctx.fillStyle = `rgb(${50+tone},${30+tone*0.5},${15+tone*0.3})`;
-      ctx.fillRect(x+off, y, 256, 64);
-      ctx.strokeStyle = `rgba(20,10,5,${0.18+Math.random()*0.15})`;
-      ctx.lineWidth = 0.6;
-      for (let k=0; k<6; k++){
-        const yy = y + Math.random()*64;
-        ctx.beginPath();
-        ctx.moveTo(x+off, yy);
-        ctx.bezierCurveTo(x+off+80, yy + (Math.random()-.5)*4, x+off+170, yy + (Math.random()-.5)*4, x+off+256, yy);
-        ctx.stroke();
-      }
-      ctx.fillStyle = 'rgba(0,0,0,.4)';
-      ctx.fillRect(x+off, y+62, 256, 2);
-      ctx.fillRect(x+off+254, y, 2, 64);
-    }
-  }
-  const tex = new THREE.CanvasTexture(c);
-  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  tex.repeat.set(8, 80);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
-}
-const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a1d10, roughness: 0.78, metalness: 0.05, map: makeFloorTex() });
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 400), floorMat);
-floor.rotation.x = -Math.PI/2; floor.position.set(0, 0, -180);
-scene.add(floor);
-
-const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.95, metalness: 0 });
-const wallL = new THREE.Mesh(new THREE.PlaneGeometry(400, 8), wallMat);
-wallL.position.set(-6, 4, -180); wallL.rotation.y = Math.PI/2; scene.add(wallL);
-const wallR = wallL.clone(); wallR.position.x = 6; wallR.rotation.y = -Math.PI/2; scene.add(wallR);
-const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 400), new THREE.MeshStandardMaterial({ color: 0x0a0806, roughness: 1 }));
-ceiling.rotation.x = Math.PI/2; ceiling.position.set(0, 8, -180); scene.add(ceiling);
-
-const ambient = new THREE.AmbientLight(0xfff0d0, 0.06); scene.add(ambient);
-const hemi = new THREE.HemisphereLight(0x3a2818, 0x0a0806, 0.05); scene.add(hemi);
-
-const loader = new THREE.TextureLoader();
-loader.setCrossOrigin('anonymous');
-const works3D = [];
-const rooms = []; // { idx, baseZ, dissolver?, works:[indices] }
-
-const txLoader = new THREE.TextureLoader();
-const txCache = {};
-function placeholderTexture(work){
-  if(!work || !work.imageUrl) {
-    const c = document.createElement('canvas'); c.width = c.height = 256;
-    const ctx = c.getContext('2d'); ctx.fillStyle = '#1a1408'; ctx.fillRect(0,0,256,256);
-    return new THREE.CanvasTexture(c);
-  }
-  if(!txCache[work.imageUrl]) {
-    txCache[work.imageUrl] = txLoader.load(work.imageUrl);
-  }
-  return txCache[work.imageUrl];
-}
-
-function buildRoom(roomIdx){
-  const baseZ = -2 - roomIdx * 26;
-  const worksList = selectNextRoom(roomIdx);
-  const idxs = [];
-  worksList.forEach((w, i)=>{
-    const side = i % 2 === 0 ? -1 : 1;
-    const z = baseZ - Math.floor(i/2) * 8;
-    const group = new THREE.Group();
-    group.position.set(side*5.85, 2.3, z);
-    group.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
-    scene.add(group);
-    const h = 2.4;
-    const wpx = h * w.ratio;
-    const frameMat = new THREE.MeshStandardMaterial({ color: 0x2a1c0e, roughness: 0.5, metalness: 0.15 });
-    const frame = new THREE.Mesh(new THREE.BoxGeometry(wpx + 0.16, h + 0.16, 0.12), frameMat);
-    group.add(frame);
-    const innerFrameMat = new THREE.MeshStandardMaterial({ color: 0xc9a460, roughness: 0.4, metalness: 0.8 });
-    const innerFrame = new THREE.Mesh(new THREE.BoxGeometry(wpx + 0.04, h + 0.04, 0.06), innerFrameMat);
-    innerFrame.position.z = 0.055;
-    group.add(innerFrame);
-    const painting = new THREE.Mesh(
-      new THREE.PlaneGeometry(wpx, h),
-      new THREE.MeshStandardMaterial({ map: placeholderTexture(w), roughness: 0.62, metalness: 0, emissive: 0x1a1408, emissiveIntensity: 0.05 })
-    );
-    painting.position.z = 0.061;
-    group.add(painting);
-    const lights = [];
-    for (let k=-1; k<=1; k++){
-      const sp = new THREE.SpotLight(0xffd9a8, 1.4, 7, Math.PI/7, 0.55, 1.4);
-      sp.position.set(k*0.8, 1.6, 1.6);
-      sp.target = painting;
-      group.add(sp); group.add(sp.target);
-      lights.push(sp);
-    }
-    const fill = new THREE.SpotLight(0x6e7a99, 0.45, 6, Math.PI/6, 0.7, 1.6);
-    fill.position.set(0, -1.5, 1.4);
-    fill.target = painting;
-    group.add(fill); group.add(fill.target);
-
-    const plateEl = document.createElement('div');
-    plateEl.style.cssText = `pointer-events:none;color:#e8dfcf;font-family:'EB Garamond',Georgia,serif;text-align:left;width:200px;opacity:0;transition:opacity 1.2s ease;transform:translate(0,-50%);text-shadow:0 1px 4px rgba(0,0,0,.9)`;
-    plateEl.innerHTML = `
-      <div style="font-family:'Space Mono',monospace;font-size:.48rem;letter-spacing:.5em;text-transform:uppercase;opacity:.7;margin-bottom:.4rem">${w.artist}</div>
-      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;line-height:1.25">${w.title}</div>
-      <div style="font-family:'EB Garamond',Georgia,serif;font-size:.8rem;font-style:italic;opacity:.7;margin-top:.25rem">${w.year}</div>
+  works.forEach(work => {
+    const card = document.createElement('div');
+    card.className = 'work';
+    card.innerHTML = `
+      <img src="${work.img}" alt="${work.title}" loading="lazy">
+      <div class="work-meta">
+        <div class="work-title">${work.title}</div>
+        <div style="font-size:.5rem;opacity:.7">${work.artist} · ${work.year}</div>
+      </div>
     `;
-    const plateObj = new CSS2DObject(plateEl);
-    plateObj.position.set(wpx*0.5 + 0.6, 0, 0);
-    group.add(plateObj);
-
-    const ref = { group, mesh: painting, lights, work: w, plateEl, idx: i, roomIdx };
-    works3D.push(ref); idxs.push(works3D.length-1);
-    if (w.src && !w.src.startsWith('data:')){
-      loader.load(w.src, tex => {
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        painting.material.map = tex;
-        painting.material.needsUpdate = true;
-      });
-    } else if (w.src && w.src.startsWith('data:')){
-      const img = new Image();
-      img.onload = ()=>{
-        const tex = new THREE.Texture(img);
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.needsUpdate = true;
-        painting.material.map = tex;
-        painting.material.needsUpdate = true;
-      };
-      img.src = w.src;
-    }
-  });
-  // parede dissolvedora no final desta sala
-  const dissolveMat = new THREE.ShaderMaterial({
-    uniforms: {
-      uTime: { value: 0 }, uDissolve: { value: 0 },
-      uColor: { value: new THREE.Color(0x1a1612) },
-      uEdgeColor: { value: new THREE.Color(0xc9a460) }
-    },
-    vertexShader: `
-      varying vec2 vUv; uniform float uTime; uniform float uDissolve;
-      void main(){
-        vUv = uv;
-        vec3 p = position;
-        p.z += sin(p.x*1.2 + uTime*0.5)*uDissolve*0.25;
-        p.x += cos(p.y*1.0 + uTime*0.4)*uDissolve*0.18;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
-      }`,
-    fragmentShader: `
-      precision highp float; varying vec2 vUv;
-      uniform float uTime, uDissolve; uniform vec3 uColor, uEdgeColor;
-      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
-      float noise(vec2 p){
-        vec2 i = floor(p); vec2 f = fract(p);
-        float a = hash(i), b = hash(i+vec2(1,0)), c = hash(i+vec2(0,1)), d = hash(i+vec2(1,1));
-        vec2 u = f*f*(3.0-2.0*f);
-        return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
-      }
-      void main(){
-        float n = noise(vUv*5.0 + uTime*0.1) * 0.6 + noise(vUv*15.0) * 0.4;
-        float threshold = 1.0 - uDissolve;
-        if (n < threshold - 0.04){ gl_FragColor = vec4(uColor, 1.0); }
-        else if (n < threshold){
-          float edge = (n - (threshold-0.04)) / 0.04;
-          gl_FragColor = vec4(mix(uColor, uEdgeColor, edge), 1.0);
-        } else { discard; }
-      }`,
-    side: THREE.DoubleSide
-  });
-  const dissolverGeo = new THREE.PlaneGeometry(12, 8, 60, 30);
-  const dissolver = new THREE.Mesh(dissolverGeo, dissolveMat);
-  dissolver.position.set(0, 4, baseZ - 23);
-  scene.add(dissolver);
-
-  rooms.push({ idx: roomIdx, baseZ, dissolver, dissolveStart: -1, worksIdxs: idxs });
-}
-
-buildRoom(0);
-setTimeout(()=>{ const l = document.getElementById('loading'); if (l) l.style.display = 'none'; }, 600);
-
-/* ─── CÂMERA ─── */
-const yaw = { v: 0, target: 0 };
-const pitch = { v: 0, target: 0 };
-const move = { f:0, b:0, l:0, r:0 };
-const targetPos = camera.position.clone();
-let mouseDown = false; let lastMouse = {x:0, y:0};
-
-addEventListener('keydown', e=>{
-  if (e.code==='KeyW'||e.code==='ArrowUp') move.f = 1;
-  if (e.code==='KeyS'||e.code==='ArrowDown') move.b = 1;
-  if (e.code==='KeyA'||e.code==='ArrowLeft') move.l = 1;
-  if (e.code==='KeyD'||e.code==='ArrowRight') move.r = 1;
-  if (e.code==='KeyF') toggleMode('F');
-  if (e.code==='KeyL') toggleMode('L');
-  if (e.code==='KeyP') toggleMode('P');
-  if (e.code==='KeyC') toggleMode('C');
-  if (e.code==='Escape') closePhilo();
-});
-addEventListener('keyup', e=>{
-  if (e.code==='KeyW'||e.code==='ArrowUp') move.f = 0;
-  if (e.code==='KeyS'||e.code==='ArrowDown') move.b = 0;
-  if (e.code==='KeyA'||e.code==='ArrowLeft') move.l = 0;
-  if (e.code==='KeyD'||e.code==='ArrowRight') move.r = 0;
-});
-canvas.addEventListener('mousedown', e=>{ mouseDown = true; lastMouse.x=e.clientX; lastMouse.y=e.clientY; });
-addEventListener('mouseup', ()=> mouseDown = false);
-addEventListener('mousemove', e=>{
-  if (!mouseDown) return;
-  yaw.target -= (e.clientX-lastMouse.x)*0.0024;
-  pitch.target -= (e.clientY-lastMouse.y)*0.0018;
-  pitch.target = Math.max(-0.6, Math.min(0.6, pitch.target));
-  lastMouse.x=e.clientX; lastMouse.y=e.clientY;
-});
-
-/* ─── ANALYSIS MODES ─── */
-const analysisModes = { F:false, L:false, P:false, C:false };
-const svgRoot = document.getElementById('analysisSvg');
-const analysisEl = document.getElementById('analysis');
-function toggleMode(k){
-  analysisModes[k] = !analysisModes[k];
-  document.querySelectorAll('#toolbar .btn').forEach(b=>{
-    if (b.dataset.mode === k) b.classList.toggle('active', analysisModes[k]);
-  });
-  if (analysisModes[k]) Profile.addAnalysis();
-  redrawAnalysis();
-  updateProfilePanel();
-}
-document.querySelectorAll('#toolbar .btn').forEach(b=>{
-  b.addEventListener('click', ()=> toggleMode(b.dataset.mode));
-});
-
-function getCurrentObraBox(){
-  if (currentNear < 0) return null;
-  const w = works3D[currentNear];
-  const wpx = 2.4 * w.work.ratio;
-  const local = [
-    new THREE.Vector3(-wpx/2,-1.2,0.07), new THREE.Vector3(wpx/2,-1.2,0.07),
-    new THREE.Vector3(wpx/2,1.2,0.07), new THREE.Vector3(-wpx/2,1.2,0.07)
-  ];
-  const pts = local.map(v=>{
-    const world = v.clone().applyMatrix4(w.group.matrixWorld);
-    const sp = world.project(camera);
-    return [(sp.x*0.5+0.5)*innerWidth, (1-(sp.y*0.5+0.5))*innerHeight, sp.z];
-  });
-  if (pts.every(p => p[2] > 1)) return null;
-  return pts;
-}
-function goldenSpiralPath(x,y,w,h){
-  const phi = 1.618;
-  let path = `M ${x+w-w} ${y+h} A ${Math.min(w,h)} ${Math.min(w,h)} 0 0 1 ${x+w} ${y+h-Math.min(w,h)}`;
-  let r = Math.min(w,h)/phi;
-  path += ` A ${r} ${r} 0 0 1 ${x+w-r} ${y+h-Math.min(w,h)}`;
-  let r2 = r/phi;
-  path += ` A ${r2} ${r2} 0 0 1 ${x+w-r} ${y+h-Math.min(w,h)+r2}`;
-  return path;
-}
-function redrawAnalysis(){
-  const any = Object.values(analysisModes).some(v=>v);
-  analysisEl.classList.toggle('in', any && currentNear >= 0);
-  if (!any || currentNear < 0){ svgRoot.innerHTML = ''; return; }
-  const box = getCurrentObraBox();
-  if (!box) { svgRoot.innerHTML=''; return; }
-  const xs = box.map(p=>p[0]), ys = box.map(p=>p[1]);
-  const minX = Math.min(...xs), maxX = Math.max(...xs);
-  const minY = Math.min(...ys), maxY = Math.max(...ys);
-  const W = maxX-minX, H = maxY-minY;
-  svgRoot.setAttribute('width', innerWidth);
-  svgRoot.setAttribute('height', innerHeight);
-  svgRoot.setAttribute('viewBox', `0 0 ${innerWidth} ${innerHeight}`);
-  const work = works3D[currentNear].work;
-  const o = [];
-  o.push(`<polygon points="${box.map(p=>p[0]+','+p[1]).join(' ')}" fill="none" stroke="rgba(214,200,154,.35)" stroke-width="1" stroke-dasharray="3 4"/>`);
-  if (analysisModes.F){
-    const phi=1.618;
-    const gx1 = minX+W/phi, gx2 = minX+W*(1-1/phi);
-    const gy1 = minY+H/phi, gy2 = minY+H*(1-1/phi);
-    o.push(`<line x1="${gx1}" y1="${minY}" x2="${gx1}" y2="${maxY}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
-    o.push(`<line x1="${gx2}" y1="${minY}" x2="${gx2}" y2="${maxY}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
-    o.push(`<line x1="${minX}" y1="${gy1}" x2="${maxX}" y2="${gy1}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
-    o.push(`<line x1="${minX}" y1="${gy2}" x2="${maxX}" y2="${gy2}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
-    o.push(`<path d="${goldenSpiralPath(minX, minY, W, H)}" fill="none" stroke="#f0e3b8" stroke-width="1.2" stroke-dasharray="4 3" opacity=".9"/>`);
-    o.push(`<text x="${minX+6}" y="${minY+14}" class="lbl">φ · 1.618</text>`);
-  }
-  if (analysisModes.L){
-    const [lx,ly] = work.lightDir;
-    const cx=(minX+maxX)/2, cy=(minY+maxY)/2;
-    const arrowLen = Math.min(W,H)*0.35;
-    for (let i=0;i<3;i++){
-      const sx = cx + (i-1)*Math.min(W,H)*0.22;
-      const sy = cy + (i-1)*Math.min(W,H)*0.16;
-      const ex = sx + lx*arrowLen, ey = sy + ly*arrowLen;
-      o.push(`<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="#ffd9a8" stroke-width="1.4" opacity=".85"/>`);
-      o.push(`<polygon points="${ex},${ey} ${ex-lx*8+ly*5},${ey-ly*8-lx*5} ${ex-lx*8-ly*5},${ey-ly*8+lx*5}" fill="#ffd9a8"/>`);
-    }
-    o.push(`<text x="${minX+6}" y="${minY+14}" class="lbl">DIREÇÃO DE LUZ</text>`);
-  }
-  if (analysisModes.P){
-    if (work.compPoints === 'pyramid'){
-      const apex=[(minX+maxX)/2, minY+H*0.18], left=[minX+W*0.15, maxY-H*0.10], right=[maxX-W*0.15, maxY-H*0.10];
-      o.push(`<polygon points="${apex[0]},${apex[1]} ${left[0]},${left[1]} ${right[0]},${right[1]}" fill="none" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
-    } else if (work.compPoints === 'circle'){
-      o.push(`<circle cx="${(minX+maxX)/2}" cy="${(minY+maxY)/2}" r="${Math.min(W,H)*0.35}" fill="none" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
-    } else if (work.compPoints === 'diagonal'){
-      o.push(`<line x1="${minX}" y1="${maxY}" x2="${maxX}" y2="${minY}" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
-      o.push(`<line x1="${minX}" y1="${minY}" x2="${maxX}" y2="${maxY}" stroke="rgba(255,217,168,.4)" stroke-width="1" stroke-dasharray="3 4"/>`);
-    } else if (work.compPoints === 'horizontal'){
-      o.push(`<line x1="${minX}" y1="${minY+H*0.6}" x2="${maxX}" y2="${minY+H*0.6}" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
-    } else if (work.compPoints === 'vertical'){
-      o.push(`<line x1="${minX+W*0.5}" y1="${minY}" x2="${minX+W*0.5}" y2="${maxY}" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
-    } else if (work.compPoints === 'distributed'){
-      for (let i=0;i<6;i++){
-        const x = minX + W*(0.15 + Math.random()*0.7);
-        const y = minY + H*(0.15 + Math.random()*0.7);
-        o.push(`<circle cx="${x}" cy="${y}" r="6" fill="none" stroke="rgba(255,217,168,.55)" stroke-width="1"/>`);
-      }
-    } else {
-      o.push(`<circle cx="${(minX+maxX)/2}" cy="${(minY+maxY)/2}" r="${Math.min(W,H)*0.18}" fill="none" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
-    }
-    o.push(`<text x="${minX+6}" y="${minY+14}" class="lbl">COMPOSIÇÃO</text>`);
-  }
-  if (analysisModes.C){
-    const sw=28, gap=6;
-    const totalW = sw*work.paletteSwatches.length + gap*(work.paletteSwatches.length-1);
-    const startX = (minX+maxX)/2 - totalW/2;
-    const y0 = maxY + 20;
-    work.paletteSwatches.forEach((c, i)=>{
-      const x = startX + i*(sw+gap);
-      o.push(`<rect x="${x}" y="${y0}" width="${sw}" height="${sw}" fill="${c}" stroke="rgba(232,223,207,.4)" stroke-width="1"/>`);
+    card.addEventListener('click', ()=>{
+      modalImg.src = work.img;
+      modal.classList.add('show');
     });
-    o.push(`<text x="${(minX+maxX)/2}" y="${y0+sw+18}" class="lbl" text-anchor="middle">PALETA DOMINANTE</text>`);
-  }
-  svgRoot.innerHTML = o.join('');
-}
-
-/* ─── PLATE / NEAR / DWELL ─── */
-const plate = document.getElementById('plate');
-const plArtist = document.getElementById('plArtist');
-const plTitle = document.getElementById('plTitle');
-const plMeta = document.getElementById('plMeta');
-const plCur = document.getElementById('plCur');
-const hudRoom = document.getElementById('hudRoom');
-const whisperEl = document.getElementById('whisper');
-const forgeryEl = document.getElementById('forgery');
-let currentNear = -1;
-let dwellStart = 0;
-let whisperShown = false;
-let lastDwellTracked = 0;
-let currentRoomShown = 0;
-let forgeryRevealed = false;
-
-function updateNear(){
-  let nearestIdx = -1, nearestDist = 6.0;
-  works3D.forEach((w, i)=>{
-    const dx = camera.position.x - w.group.position.x;
-    const dz = camera.position.z - w.group.position.z;
-    const d = Math.sqrt(dx*dx + dz*dz);
-    const targetInt = THREE.MathUtils.clamp(1.4 + (5 - d)*0.4, 0.6, 3.2);
-    w.lights.forEach(l => { if (l.color.r > 0.5) l.intensity += (targetInt - l.intensity)*0.05; });
-    w.plateEl.style.opacity = d < 5 ? '0.85' : '0';
-    if (d < nearestDist){ nearestDist = d; nearestIdx = i; }
+    gallery.appendChild(card);
   });
-  if (nearestIdx !== currentNear){
-    // commit dwell at previous
-    if (currentNear >= 0){
-      const ms = performance.now() - dwellStart;
-      Profile.addDwell(ms);
-      Profile.addAffinity(works3D[currentNear].work, ms);
-      Profile.markSeen(works3D[currentNear].work.title + '|' + works3D[currentNear].work.artist);
-    }
-    currentNear = nearestIdx;
-    dwellStart = performance.now();
-    whisperShown = false;
-    whisperEl.classList.remove('in');
-    if (nearestIdx >= 0){
-      const w = works3D[nearestIdx];
-      plArtist.textContent = w.work.artist;
-      plTitle.textContent = w.work.title;
-      plMeta.textContent = w.work.year;
-      plCur.textContent = w.work.curatorial;
-      plate.classList.add('in');
-      const roomLabel = romanize(w.roomIdx+1);
-      hudRoom.textContent = `Sala ${roomLabel}/∞ · obra ${w.idx+1}/6`;
-      // mostra hint forgery se sala tem forgery
-      const room = rooms[w.roomIdx];
-      const hasForgery = room && room.worksIdxs.some(i => works3D[i].work._isForgery);
-      if (hasForgery && !forgeryRevealed){
-        forgeryEl.classList.add('in');
-      } else {
-        forgeryEl.classList.remove('in');
-      }
-    } else {
-      plate.classList.remove('in');
-    }
-    updateProfilePanel();
-  }
-  redrawAnalysis();
-  if (currentNear >= 0 && !whisperShown && performance.now() - dwellStart > 10000){
-    const w = works3D[currentNear].work;
-    whisperEl.textContent = w.whisper;
-    whisperEl.classList.add('in');
-    whisperShown = true;
-  }
+
+  stage.appendChild(gallery);
 }
 
-function romanize(n){
-  const lookup=[['M',1000],['CM',900],['D',500],['CD',400],['C',100],['XC',90],['L',50],['XL',40],['X',10],['IX',9],['V',5],['IV',4],['I',1]];
-  let r=''; for (const [s,v] of lookup){ while(n>=v){ r+=s; n-=v; } }
-  return r;
-}
-
-/* ─── ROOM PROGRESSION + INFINITE BUILD ─── */
-function maybeBuildNextRoom(){
-  // se estamos em uma sala perto do fim do mapa, gera próxima
-  const lastRoom = rooms[rooms.length-1];
-  if (camera.position.z < lastRoom.baseZ - 14){
-    buildRoom(rooms.length);
-  }
-  // dissolver progress
-  rooms.forEach(r=>{
-    const wallZ = r.baseZ - 23;
-    const z = camera.position.z;
-    if (z < wallZ + 3 && r.dissolver.material.uniforms.uDissolve.value < 1){
-      if (r.dissolveStart < 0) r.dissolveStart = performance.now();
-      const t = (performance.now() - r.dissolveStart)/2200;
-      r.dissolver.material.uniforms.uDissolve.value = Math.min(1, t);
-    } else if (z > wallZ + 6 && r.dissolver.material.uniforms.uDissolve.value > 0){
-      r.dissolver.material.uniforms.uDissolve.value = Math.max(0, r.dissolver.material.uniforms.uDissolve.value - 0.01);
-    }
-    r.dissolver.material.uniforms.uTime.value = clock.elapsedTime;
-  });
-  // contagem de salas visitadas (heurística: estamos dentro da sala?)
-  let activeRoom = 0;
-  for (let i=0;i<rooms.length;i++){
-    if (camera.position.z < rooms[i].baseZ + 2 && camera.position.z > rooms[i].baseZ - 23){
-      activeRoom = i; break;
-    }
-  }
-  if (activeRoom !== currentRoomShown){
-    currentRoomShown = activeRoom;
-    Profile.bumpRoom();
-    forgeryRevealed = false;
-    updateProfilePanel();
-  }
-}
-
-/* ─── PROFILE PANEL ─── */
-function updateProfilePanel(){
-  const d = Profile.data();
-  const totalSec = Math.floor(d.totalDwell/1000);
-  document.getElementById('pf-dwell').textContent = totalSec + 's';
-  document.getElementById('pf-analysis').textContent = d.analysisCount;
-  document.getElementById('pf-rooms').textContent = d.roomsVisited;
-  document.getElementById('pfb-dwell').style.width = Math.min(100, totalSec/2) + '%';
-  document.getElementById('pfb-analysis').style.width = Math.min(100, d.analysisCount*8) + '%';
-  document.getElementById('pfb-rooms').style.width = Math.min(100, d.roomsVisited*14) + '%';
-}
-setTimeout(()=>{
-  document.getElementById('profilePanel').classList.add('in');
-  updateProfilePanel();
-}, 4000);
-
-/* ─── FORGERY REVEAL ─── */
-forgeryEl.addEventListener('click', ()=>{
-  forgeryRevealed = true;
-  // encontra a forgery na sala atual
-  const room = rooms[currentRoomShown];
-  let fakeWork = null;
-  if (room){
-    for (const idx of room.worksIdxs){
-      if (works3D[idx].work._isForgery){ fakeWork = works3D[idx].work; break; }
-    }
-  }
-  const philo = document.getElementById('philo');
-  philo.querySelector('h2').textContent = 'O que é uma obra autêntica\nquando uma máquina pode pintar como Vermeer?';
-  philo.querySelector('p').textContent = 'Esta sala continha uma obra que não existe. A proveniência era plausível. A pincelada, convincente. Você sentiu algo diante dela? Foi diferente? A IA generativa não força uma resposta — apenas pergunta.';
-  if (fakeWork){
-    philo.querySelector('.forgeryHighlight').textContent = `— a obra era: "${fakeWork.title}", supostamente atribuída a ${fakeWork.artist}.`;
-  } else {
-    philo.querySelector('.forgeryHighlight').textContent = '— por hora, nenhuma falsificação detectada nesta sala.';
-  }
-  philo.classList.add('in');
-  forgeryEl.classList.remove('in');
-});
-document.querySelector('#philo .closeBtn').addEventListener('click', closePhilo);
-function closePhilo(){ document.getElementById('philo').classList.remove('in'); }
-
-/* ─── LOOP ─── */
-const clock = new THREE.Clock();
-function loop(){
-  const dt = Math.min(clock.getDelta(), 0.033);
-  yaw.v += (yaw.target - yaw.v)*0.10;
-  pitch.v += (pitch.target - pitch.v)*0.10;
-  camera.rotation.set(0,0,0,'YXZ');
-  camera.rotation.y = yaw.v;
-  camera.rotation.x = pitch.v;
-  const speed = 2.4;
-  const fwd = (move.f - move.b);
-  const side = (move.r - move.l);
-  const dx = (Math.sin(yaw.v)*-fwd + Math.cos(yaw.v)*side)*speed*dt;
-  const dz = (Math.cos(yaw.v)*-fwd - Math.sin(yaw.v)*side)*speed*dt;
-  targetPos.x += dx; targetPos.z += dz;
-  targetPos.x = Math.max(-5.4, Math.min(5.4, targetPos.x));
-  // limite Z: nada além da última sala + 20
-  const farLimit = rooms[rooms.length-1].baseZ - 23;
-  targetPos.z = Math.max(farLimit, Math.min(13.6, targetPos.z));
-  camera.position.x += (targetPos.x - camera.position.x)*0.12;
-  camera.position.z += (targetPos.z - camera.position.z)*0.12;
-  const t = clock.elapsedTime;
-  const isMoving = (fwd!==0||side!==0);
-  camera.position.y = 1.65 + (isMoving ? Math.sin(t*7)*0.025 : Math.sin(t*1.2)*0.005);
-
-  maybeBuildNextRoom();
-  updateNear();
-  // commit dwell periodicamente
-  if (currentNear >= 0 && performance.now() - lastDwellTracked > 1000){
-    lastDwellTracked = performance.now();
-    Profile.addDwell(1000);
-    Profile.addAffinity(works3D[currentNear].work, 1000);
-    updateProfilePanel();
-  }
-  renderer.render(scene, camera);
-  css.render(scene, camera);
-  requestAnimationFrame(loop);
-}
-loop();
-
-addEventListener('resize', ()=>{
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  css.setSize(innerWidth, innerHeight);
-  redrawAnalysis();
+enter.addEventListener('click', ()=>{
+  overture.classList.add('gone');
+  buildGallery();
 });
 
-/* ─── OVERTURE / WELCOME BACK ─── */
-const ln1 = document.getElementById('ln1');
-const ln2 = document.getElementById('ln2');
-const enterBtn = document.getElementById('enter');
-const wbEl = document.getElementById('welcomeBack');
-const isReturning = Profile.isReturning();
-Profile.bump();
-setTimeout(()=> ln1.classList.add('in'), 600);
-setTimeout(()=> ln2.classList.add('in'), 3800);
-setTimeout(()=> enterBtn.classList.add('in'), 6600);
-if (isReturning){
-  const d = Profile.data();
-  wbEl.textContent = `bem-vindo de volta. ${d.roomsVisited} salas atrás · ${Math.floor(d.totalDwell/60000)} min de contemplação`;
-  setTimeout(()=> wbEl.classList.add('in'), 7200);
-}
-enterBtn.addEventListener('click', ()=>{
-  document.getElementById('overture').classList.add('gone');
-  setTimeout(()=> document.getElementById('toolbar').classList.add('in'), 1400);
+closeModal.addEventListener('click', ()=>{
+  modal.classList.remove('show');
+});
+
+modal.addEventListener('click', (e)=>{
+  if(e.target === modal) modal.classList.remove('show');
+});
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape') modal.classList.remove('show');
 });
 </script>
 </body>

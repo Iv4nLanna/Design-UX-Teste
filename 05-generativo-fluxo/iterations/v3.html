@@ -3,784 +3,184 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CONFLUÊNCIA — v3 — N°05</title>
+<title>CONFLUÊNCIA — v3</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;overflow:hidden;background:#0a0a12;color:#e8e2d4;font-family:'Cormorant Garamond','EB Garamond',Georgia,serif;cursor:crosshair}
-  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-  canvas{display:block;position:absolute;inset:0;width:100%!important;height:100%!important}
-  /* OVERTURE */
-  #overture{position:fixed;inset:0;z-index:50;background:#f6f1e6;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.6s cubic-bezier(.4,0,.1,1)}
+  html,body{height:100%;width:100%;background:#0a0a12;color:#e8e2d4;font-family:'Cormorant Garamond',Georgia,serif;overflow:hidden}
+  canvas{display:block;width:100%;height:100%}
+  #overture{position:fixed;inset:0;z-index:50;background:#f6f1e6;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.6s;padding:2rem}
   #overture.gone{opacity:0;pointer-events:none}
-  #count{font-size:clamp(3rem,9vw,7rem);font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
-  #countLabel{font-size:.85rem;letter-spacing:.45em;text-transform:uppercase;color:#6a6253;margin-top:1.4rem;font-family:'Space Mono',monospace}
-  #youAre{font-style:italic;font-size:1.4rem;color:#3a342a;margin-top:2.4rem;letter-spacing:.02em;opacity:0;transition:opacity 1.8s ease 1.2s}
-  #youAre.in{opacity:1}
-  #enter{margin-top:3rem;font-size:.7rem;letter-spacing:.55em;text-transform:uppercase;color:#6a6253;font-family:'Space Mono',monospace;opacity:0;transition:opacity 1.4s ease 3.4s;border:1px solid #6a625355;padding:.85rem 1.6rem;background:transparent;cursor:pointer}
-  #enter.in{opacity:1}
-  #enter:hover{background:#1a1a1a;color:#f6f1e6;border-color:#1a1a1a}
-  /* HUD */
-  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;padding:1.6rem 2rem;display:flex;flex-direction:column;justify-content:space-between;color:#e8e2d4;mix-blend-mode:difference}
-  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;width:100%}
-  .ttl{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.1rem;font-style:italic}
-  .num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
-  .meta{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;opacity:.55;line-height:1.9;max-width:300px}
-  .tags{display:flex;gap:.6rem}
-  .tag{border:1px solid currentColor;padding:.1rem .6rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.6}
-  .palette{display:flex;gap:6px;margin-top:.6rem}
-  .sw{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.3)}
-  /* MINIMAP MUNDIAL */
-  #minimap{position:fixed;right:1.4rem;bottom:1.4rem;width:240px;height:120px;z-index:11;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.35);backdrop-filter:blur(6px);overflow:hidden;pointer-events:none}
-  #minimap svg{width:100%;height:100%;display:block}
-  #minimap .lbl{position:absolute;left:.6rem;top:.45rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;color:#f6f1e6;opacity:.6;text-transform:uppercase}
-  #toast{position:fixed;left:50%;bottom:5%;transform:translateX(-50%);z-index:30;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;color:#f6f1e6;background:rgba(0,0,0,.55);padding:.6rem 1.2rem;border:1px solid rgba(255,255,255,.18);opacity:0;transition:opacity .9s ease;pointer-events:none;backdrop-filter:blur(8px);max-width:80vw;text-align:center}
+  #count{font-size:5rem;font-weight:300;line-height:1}
+  #enter{margin-top:3rem;padding:.8rem 1.6rem;border:1px solid #6a6253;background:transparent;cursor:pointer;font-family:monospace;font-size:.7rem;letter-spacing:.5em;text-transform:uppercase}
+  #enter:hover{background:#1a1a1a;color:#f6f1e6}
+  #hud{position:fixed;top:1.6rem;left:1.6rem;z-index:10;color:#e8e2d4;font-family:monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
+  #toast{position:fixed;bottom:5%;left:50%;transform:translateX(-50%);z-index:20;background:rgba(0,0,0,.6);padding:.8rem 1.6rem;border:1px solid rgba(255,255,255,.2);color:#f6f1e6;font-style:italic;opacity:0;transition:opacity .8s}
   #toast.in{opacity:1}
-  #statusDot{position:fixed;left:1.5rem;bottom:1.5rem;z-index:11;display:flex;align-items:center;gap:.55rem;color:#e8e2d4;mix-blend-mode:difference;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.7}
-  #statusDot .d{width:8px;height:8px;border-radius:50%;background:#7adb9e;box-shadow:0 0 6px #7adb9e;animation:pulse 2.2s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-  /* CONTROLES V3 */
-  .ctl{position:fixed;z-index:12;display:flex;gap:.5rem}
-  #ctlTop{right:1.4rem;top:1.4rem}
-  .btn{pointer-events:auto;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.25);color:#e8e2d4;padding:.55rem .9rem;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(8px);transition:all .35s}
-  .btn:hover{border-color:#f6f1e6;color:#fff;background:rgba(255,255,255,.08)}
-  #seasonTag{position:fixed;left:1.5rem;top:1.5rem;z-index:11;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.45em;color:#e8e2d4;opacity:.45;text-transform:uppercase;mix-blend-mode:difference}
-  /* OBRA DORME */
-  body.asleep #hud, body.asleep #minimap, body.asleep #ctlTop{opacity:.35;transition:opacity 2s}
-  body.asleep #seasonTag::after{content:" · obra dorme"}
-  /* SILENT CONTEMPLATION HINT */
-  #silent{position:fixed;left:50%;top:42%;transform:translateX(-50%);font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;color:#f6f1e6;font-size:1.4rem;letter-spacing:.02em;text-align:center;max-width:80vw;opacity:0;pointer-events:none;z-index:25;transition:opacity 3s ease;mix-blend-mode:difference;line-height:1.4}
-  #silent.in{opacity:.95}
+  .btn{position:fixed;z-index:15;padding:.5rem .9rem;background:rgba(0,0,0,.5);border:1px solid #6a6253;color:#d6c89a;cursor:pointer;font-family:monospace;font-size:.55rem;letter-spacing:.35em;text-transform:uppercase}
+  .btn:hover{border-color:#e8e2d4}
+  #btnSouvenir{right:1.6rem;top:1.6rem}
 </style>
 </head>
 <body>
 
+<canvas id="canvas"></canvas>
+
 <div id="overture">
   <div id="count">0</div>
-  <div id="countLabel">almas pintaram antes de você</div>
-  <div id="youAre">Você é a <span id="yourNum">1ª</span>.</div>
-  <button id="enter" type="button">entrar na obra</button>
+  <div style="font-size:.85rem;letter-spacing:.45em;text-transform:uppercase;color:#6a6253;margin-top:1.4rem">almas pintaram antes de você</div>
+  <button id="enter" style="margin-top:3rem">Entrar</button>
 </div>
 
-<div id="stage"></div>
+<div id="hud">Confluência · pinceladas globais</div>
+<div id="toast">sua pincelada foi adicionada</div>
+<button class="btn" id="btnSouvenir">Souvenir</button>
 
-<div id="seasonTag">— · —</div>
-
-<div id="hud">
-  <div class="row">
-    <div>
-      <div style="display:flex;gap:2rem;align-items:baseline">
-        <span class="ttl">Confluência</span>
-        <span class="num">N°05 · v3</span>
-      </div>
-      <p class="meta">vida própria · sonora reativa<br>cada visita deixa marca</p>
-      <div class="palette" id="paletteHud"></div>
-    </div>
-    <div class="meta" id="hudHour">— : — &nbsp;·&nbsp; — </div>
-  </div>
-  <div class="row">
-    <div class="tags">
-      <span class="tag">p5.js</span>
-      <span class="tag">GLSL</span>
-      <span class="tag">Howler</span>
-      <span class="tag">Persist</span>
-    </div>
-    <span class="meta">Claude × Ivan Lanna · 2026</span>
-  </div>
-</div>
-
-<div id="ctlTop" class="ctl">
-  <button id="btnSound" class="btn" type="button">▸ som off</button>
-  <button id="btnSouvenir" class="btn" type="button">▸ souvenir</button>
-</div>
-
-<div id="minimap">
-  <span class="lbl">100 últimas almas</span>
-  <svg viewBox="0 0 480 240" preserveAspectRatio="none">
-    <path d="M30,90 L60,75 L100,80 L150,70 L200,90 L240,95 L270,100 L300,90 L340,95 L380,110 L420,115 L450,130
-             L450,160 L420,170 L380,175 L340,165 L300,170 L260,180 L220,170 L180,175 L140,165 L100,170 L70,160 L40,150 Z"
-          fill="rgba(232,226,212,.06)" stroke="rgba(232,226,212,.25)" stroke-width=".6"/>
-    <g id="mapDots"></g>
-  </svg>
-</div>
-
-<div id="statusDot">
-  <span class="d"></span>
-  <span id="statusText">global · persistente</span>
-</div>
-
-<div id="silent">você não precisa pintar.<br>olhar também é arte.</div>
-
-<div id="toast">sua pincelada foi adicionada. ela ficará.</div>
-
-<script src="https://unpkg.com/p5@1.9.0/lib/p5.min.js"></script>
 <script>
-/* ============================================================
-   CONFLUÊNCIA — V3 — vida própria + sonora
-   - Howler.js ambient stems sintetizados em runtime (WebAudio)
-   - Replay "fantasma" das últimas pinceladas em loop tênue
-   - Souvenir PNG com pincelada destacada
-   - Estação influencia textura (grão cristalino no inverno, etc)
-   - Easter egg "alma silenciosa" — 90s sem pintar
-   - Easter egg meia-noite local: obra dorme (slow + dessaturada)
-   ============================================================ */
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const overture = document.getElementById('overture');
+const enter = document.getElementById('enter');
+const toast = document.getElementById('toast');
+const countEl = document.getElementById('count');
 
-/* ─────── STORE ADAPTER (compatível com v2) ─────── */
-const Store = (()=>{
-  const KEY_META = 'confluencia_meta_v2';
-  const KEY_SNAP = 'confluencia_snap_v2';
-  const KEY_BRUSHSTROKES = 'confluencia_strokes_v3';
-  function loadMeta(){ try{ return JSON.parse(localStorage.getItem(KEY_META))||null; }catch(_){ return null; } }
-  function saveMeta(m){ try{ localStorage.setItem(KEY_META, JSON.stringify(m)); }catch(_){} }
-  function loadSnap(){ try{ return localStorage.getItem(KEY_SNAP); }catch(_){ return null; } }
-  function saveSnap(d){ try{ localStorage.setItem(KEY_SNAP, d); }catch(_){} }
-  function loadStrokes(){ try{ return JSON.parse(localStorage.getItem(KEY_BRUSHSTROKES))||[]; }catch(_){ return []; } }
-  function saveStrokes(s){ try{ localStorage.setItem(KEY_BRUSHSTROKES, JSON.stringify(s.slice(-50))); }catch(_){} }
+let painting = null;
+let isDrawing = false;
+let lastX = 0, lastY = 0;
+let soulCount = Math.floor(Math.random()*50000) + 10000;
+let myStrokes = [];
 
-  let meta = loadMeta();
-  if (!meta){
-    const cities = [
-      [-23.55,-46.63],[40.71,-74.01],[48.86,2.35],[35.68,139.69],
-      [-33.86,151.21],[51.51,-0.13],[55.75,37.62],[19.43,-99.13],
-      [-34.61,-58.38],[1.35,103.82],[28.61,77.21],[30.04,31.24],
-      [-22.91,-43.17],[37.77,-122.42],[41.90,12.49],[34.05,-118.24],
-      [52.52,13.41],[-26.20,28.04],[39.90,116.40],[-6.21,106.85]
-    ];
-    const brushes = [];
-    for (let i=0;i<100;i++){
-      const [lat,lng] = cities[Math.floor(Math.random()*cities.length)];
-      brushes.push({
-        lat: lat + (Math.random()-.5)*2,
-        lng: lng + (Math.random()-.5)*2,
-        t: Date.now() - Math.floor(Math.random()*86400000*30)
-      });
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  if(!painting) initPainting();
+  draw();
+}
+
+function initPainting(){
+  painting = ctx.createImageData(canvas.width, canvas.height);
+  const data = painting.data;
+  const palette = [
+    [30, 20, 15],    // dark brown
+    [90, 70, 50],    // mid brown
+    [180, 120, 80],  // light brown
+    [220, 180, 140]  // tan
+  ];
+
+  for(let i=0; i<data.length; i+=4){
+    const c = palette[Math.floor(Math.random()*palette.length)];
+    data[i] = c[0];
+    data[i+1] = c[1];
+    data[i+2] = c[2];
+    data[i+3] = Math.random() > 0.3 ? 255 : 200;
+  }
+}
+
+function draw(){
+  if(!painting) return;
+  ctx.putImageData(painting, 0, 0);
+}
+
+function paintStroke(x0, y0, x1, y1, color){
+  const dist = Math.hypot(x1-x0, y1-y0);
+  const steps = Math.ceil(dist * 2);
+  for(let i=0; i<=steps; i++){
+    const t = steps > 0 ? i/steps : 0;
+    const x = Math.round(x0 + (x1-x0)*t);
+    const y = Math.round(y0 + (y1-y0)*t);
+    const r = 8;
+
+    for(let dy=-r; dy<=r; dy++){
+      for(let dx=-r; dx<=r; dx++){
+        if(dx*dx + dy*dy > r*r) continue;
+        const px = x + dx, py = y + dy;
+        if(px<0 || px>=canvas.width || py<0 || py>=canvas.height) continue;
+        const idx = (py*canvas.width + px)*4;
+        painting.data[idx] = color[0];
+        painting.data[idx+1] = color[1];
+        painting.data[idx+2] = color[2];
+        painting.data[idx+3] = 255;
+      }
     }
-    meta = { souls: 24832 + Math.floor(Math.random()*220), lastSnap: 0, silentSouls: 318, brushes: brushes.sort((a,b)=>a.t-b.t) };
-    saveMeta(meta);
   }
-  if (typeof meta.silentSouls !== 'number') meta.silentSouls = 318;
-
-  return {
-    getSouls(){ return meta.souls; },
-    getSilentSouls(){ return meta.silentSouls; },
-    addBrush(b){ meta.souls++; meta.brushes.push(b); if (meta.brushes.length>100) meta.brushes.shift(); saveMeta(meta); },
-    addSilentSoul(){ meta.silentSouls++; meta.souls++; saveMeta(meta); },
-    getRecentBrushes(){ return meta.brushes.slice(); },
-    saveSnapshot(d){ meta.lastSnap = Date.now(); saveMeta(meta); saveSnap(d); },
-    getSnapshot(){ return loadSnap(); },
-    pushStroke(s){ const arr = loadStrokes(); arr.push(s); saveStrokes(arr); },
-    getStrokes(){ return loadStrokes(); }
-  };
-})();
-
-/* ─────── PALETA POR HORA ─────── */
-function pickPalette(){
-  const h = new Date().getHours();
-  if (h>=5 && h<9)  return {name:'amanhecer', bg:[244,233,213], strokes:[[245,150,120],[255,200,145],[230,170,180],[210,140,160],[180,120,90]]};
-  if (h>=9 && h<17) return {name:'dia',        bg:[252,247,238], strokes:[[210,80,60],[60,110,180],[230,180,60],[120,160,80],[180,90,140]]};
-  if (h>=17 && h<20)return {name:'crepúsculo', bg:[34,18,46],    strokes:[[255,90,140],[255,170,80],[200,80,180],[140,60,200],[255,200,140]]};
-  if (h===0)        return {name:'meia-noite', bg:[14,12,18],    strokes:[[120,120,140],[150,140,160],[100,110,130],[90,100,120],[170,160,180]]};
-  return                  {name:'noite',      bg:[8,10,28],     strokes:[[80,140,230],[180,140,255],[60,200,200],[40,90,180],[210,210,255]]};
+  draw();
 }
-function pickSeason(){
-  const m = new Date().getMonth();
-  // hemisfério sul (default): mar-mai=outono, jun-ago=inverno, set-nov=primavera, dez-fev=verão
-  if (m>=2 && m<=4) return {name:'outono', grain:0.05, viscosity:0.07, crystal:0.0};
-  if (m>=5 && m<=7) return {name:'inverno', grain:0.08, viscosity:0.04, crystal:0.6};
-  if (m>=8 && m<=10) return {name:'primavera', grain:0.025, viscosity:0.08, crystal:0.0};
-  return {name:'verão', grain:0.02, viscosity:0.10, crystal:0.0};
-}
-
-/* ─────── SHADERS ─────── */
-const VERT = `
-precision highp float;
-attribute vec3 aPosition;
-attribute vec2 aTexCoord;
-varying vec2 vUv;
-void main(){ vUv = aTexCoord; vec4 p = vec4(aPosition,1.0); p.xy = p.xy*2.0-1.0; gl_Position = p; }`;
-const ADVECT_FRAG = `
-precision highp float;
-varying vec2 vUv;
-uniform sampler2D uField, uVel;
-uniform float uDt, uDissipation;
-uniform vec2 uTexel;
-void main(){
-  vec2 vel = texture2D(uVel, vUv).rg * 2.0 - 1.0;
-  vec2 coord = vUv - vel * uDt * uTexel;
-  vec4 v = texture2D(uField, coord);
-  v.rgb *= uDissipation;
-  gl_FragColor = v;
-}`;
-const SPLAT_FRAG = `
-precision highp float;
-varying vec2 vUv;
-uniform sampler2D uField;
-uniform vec2 uPoint, uVelocity;
-uniform vec3 uColor;
-uniform float uRadius, uMode;
-void main(){
-  vec4 base = texture2D(uField, vUv);
-  vec2 d = vUv - uPoint;
-  float falloff = exp(-dot(d,d)/(uRadius*uRadius));
-  if (uMode < 0.5){
-    base.rgb += uColor * falloff;
-    base.rgb = min(base.rgb, vec3(1.4));
-  } else {
-    vec2 v = (base.rg - 0.5) + uVelocity * falloff;
-    v = clamp(v, vec2(-0.5), vec2(0.5));
-    base.rg = v + 0.5;
-  }
-  gl_FragColor = base;
-}`;
-const DIFFUSE_FRAG = `
-precision highp float;
-varying vec2 vUv;
-uniform sampler2D uField;
-uniform vec2 uTexel;
-uniform float uViscosity;
-void main(){
-  vec4 c = texture2D(uField, vUv);
-  vec4 n = texture2D(uField, vUv + vec2(0.0,  uTexel.y));
-  vec4 s = texture2D(uField, vUv - vec2(0.0,  uTexel.y));
-  vec4 e = texture2D(uField, vUv + vec2(uTexel.x, 0.0));
-  vec4 w = texture2D(uField, vUv - vec2(uTexel.x, 0.0));
-  vec4 blur = (n+s+e+w) * 0.25;
-  gl_FragColor = mix(c, blur, uViscosity);
-}`;
-const RESTORE_FRAG = `
-precision highp float;
-varying vec2 vUv;
-uniform sampler2D uSnap;
-uniform vec3 uBg;
-void main(){
-  vec4 c = texture2D(uSnap, vUv);
-  vec3 bg = uBg / 255.0;
-  vec3 paint = max(c.rgb - bg, vec3(0.0)) * 1.2;
-  gl_FragColor = vec4(paint, 1.0);
-}`;
-const DISPLAY_FRAG = `
-precision highp float;
-varying vec2 vUv;
-uniform sampler2D uDens;
-uniform vec3 uBg;
-uniform float uTime, uGrain, uCrystal, uAsleep;
-float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
-void main(){
-  vec2 uv = vUv;
-  vec2 q = uv;
-  q.x += sin(uv.y*8.0 + uTime*0.18) * 0.0015;
-  q.y += cos(uv.x*10.0 + uTime*0.22) * 0.0015;
-  vec3 paint = texture2D(uDens, q).rgb;
-  // crystallization (inverno): quantiza espacialmente
-  if (uCrystal > 0.001){
-    vec2 cell = floor(uv * mix(220.0, 70.0, uCrystal)) / mix(220.0, 70.0, uCrystal);
-    vec3 quant = texture2D(uDens, cell).rgb;
-    paint = mix(paint, quant, uCrystal*0.55);
-  }
-  vec3 col = uBg / 255.0;
-  col = mix(col, paint, clamp(length(paint), 0.0, 1.0));
-  float g = hash(gl_FragCoord.xy + uTime*0.0001) * uGrain;
-  col += g - uGrain*0.5;
-  vec2 v = uv - 0.5;
-  col *= 1.0 - dot(v,v)*0.55;
-  // asleep: dessatura
-  if (uAsleep > 0.01){
-    float lum = dot(col, vec3(0.299,0.587,0.114));
-    col = mix(col, vec3(lum), uAsleep*0.7);
-    col *= 1.0 - uAsleep*0.25;
-  }
-  gl_FragColor = vec4(col, 1.0);
-}`;
-
-const SIM_W = 256, SIM_H = 256;
-let densBuf, densBufB, velBuf, velBufB, snapImg;
-let advectShader, splatShader, diffuseShader, restoreShader, displayShader;
-let palette, season;
-let lastMouse = {x:0, y:0, down:false};
-let lastSnap = 0;
-let currentStroke = null;
-let lastPaintTs = 0;
-let silentTriggered = false;
-let pointerIdleStart = 0;
-let asleep = 0;
-let myStrokeRecord = null; // pra souvenir
-
-/* ─────── SETUP ─────── */
-function setup(){
-  pixelDensity(1);
-  const c = createCanvas(windowWidth, windowHeight, WEBGL);
-  c.parent('stage');
-  noStroke();
-
-  densBuf  = createGraphics(SIM_W, SIM_H, WEBGL); densBuf.pixelDensity(1); densBuf.noStroke();
-  densBufB = createGraphics(SIM_W, SIM_H, WEBGL); densBufB.pixelDensity(1); densBufB.noStroke();
-  velBuf   = createGraphics(SIM_W, SIM_H, WEBGL); velBuf.pixelDensity(1);   velBuf.noStroke();
-  velBufB  = createGraphics(SIM_W, SIM_H, WEBGL); velBufB.pixelDensity(1);  velBufB.noStroke();
-  velBuf.background(127,127,0); velBufB.background(127,127,0);
-  densBuf.clear(); densBufB.clear();
-
-  advectShader  = densBuf.createShader(VERT, ADVECT_FRAG);
-  splatShader   = densBuf.createShader(VERT, SPLAT_FRAG);
-  diffuseShader = densBuf.createShader(VERT, DIFFUSE_FRAG);
-  restoreShader = densBuf.createShader(VERT, RESTORE_FRAG);
-  displayShader = createShader(VERT, DISPLAY_FRAG);
-
-  palette = pickPalette();
-  season = pickSeason();
-  document.body.style.background = `rgb(${palette.bg.join(',')})`;
-  document.getElementById('seasonTag').textContent = `${season.name} · ${palette.name}`;
-  paintHudPalette();
-  paintMinimap();
-  updateHourLabel();
-
-  // restore last snapshot
-  const snap = Store.getSnapshot();
-  if (snap){
-    snapImg = new Image();
-    snapImg.onload = ()=>{
-      const tex = createGraphics(SIM_W, SIM_H); tex.pixelDensity(1);
-      tex.image(snapImg, 0, 0, SIM_W, SIM_H);
-      densBufB.shader(restoreShader);
-      restoreShader.setUniform('uSnap', tex);
-      restoreShader.setUniform('uBg', palette.bg);
-      densBufB.rect(-1,-1,2,2);
-      [densBuf, densBufB] = [densBufB, densBuf];
-    };
-    snapImg.src = snap;
-  }
-
-  // overture
-  const souls = Store.getSouls();
-  const overture = document.getElementById('overture');
-  const countEl = document.getElementById('count');
-  const yourNumEl = document.getElementById('yourNum');
-  const youAre = document.getElementById('youAre');
-  const enter = document.getElementById('enter');
-  yourNumEl.textContent = (souls+1).toLocaleString('pt-BR') + 'ª';
-  const dur = 2200, t0 = performance.now();
-  function tick(){
-    const k = Math.min(1, (performance.now()-t0)/dur);
-    const e = 1 - Math.pow(1-k, 3);
-    countEl.textContent = Math.floor(souls * e).toLocaleString('pt-BR');
-    if (k<1) requestAnimationFrame(tick);
-    else { youAre.classList.add('in'); enter.classList.add('in'); }
-  }
-  requestAnimationFrame(tick);
-  enter.addEventListener('click', ()=>{
-    overture.classList.add('gone');
-    pointerIdleStart = performance.now();
-    Audio.init(); // user gesture
-  });
-
-  // controls
-  document.getElementById('btnSound').addEventListener('click', ()=>{
-    Audio.toggle();
-    document.getElementById('btnSound').textContent = Audio.muted ? '▸ som off' : '▸ som on';
-  });
-  document.getElementById('btnSouvenir').addEventListener('click', generateSouvenir);
-
-  document.getElementById('statusText').textContent = 'global · persistente · v3';
-}
-
-function paintHudPalette(){
-  const el = document.getElementById('paletteHud');
-  el.innerHTML = '';
-  palette.strokes.forEach(c=>{
-    const sw = document.createElement('span');
-    sw.className = 'sw';
-    sw.style.background = `rgb(${c.join(',')})`;
-    el.appendChild(sw);
-  });
-}
-function paintMinimap(){
-  const g = document.getElementById('mapDots');
-  const brushes = Store.getRecentBrushes();
-  let html = '';
-  brushes.forEach(b=>{
-    const x = ((b.lng+180)/360) * 480;
-    const y = ((90-b.lat)/180) * 240;
-    const age = (Date.now()-b.t)/(86400000*30);
-    const op = Math.max(0.15, 1 - age);
-    html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.4 + (1-age)*1.4).toFixed(2)}" fill="rgba(255,255,255,${op.toFixed(2)})"/>`;
-  });
-  g.innerHTML = html;
-}
-function updateHourLabel(){
-  const d = new Date();
-  document.getElementById('hudHour').textContent =
-    `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} · ${palette.name}`;
-}
-
-/* ─────── AUDIO (Howler-less synth ambient via WebAudio) ─────── */
-const Audio = {
-  ctx: null, master: null, muted: true, started: false, nodes: [],
-  init(){
-    if (this.started) return; this.started = true;
-    try{
-      const AC = window.AudioContext || window.webkitAudioContext;
-      this.ctx = new AC();
-      this.master = this.ctx.createGain();
-      this.master.gain.value = 0; // start muted
-      this.master.connect(this.ctx.destination);
-      // reverb-ish: feedback delay network
-      const conv = this.ctx.createConvolver();
-      conv.buffer = this._makeIR(this.ctx, 3.4, 2.2);
-      const wet = this.ctx.createGain(); wet.gain.value = 0.4;
-      const dry = this.ctx.createGain(); dry.gain.value = 0.9;
-      this.master.connect(dry).connect(this.ctx.destination);
-      const send = this.ctx.createGain(); send.gain.value = 0.55;
-      this.master.connect(send).connect(conv).connect(wet).connect(this.ctx.destination);
-      // 4 stems: drone bass, mid harmonic, high pad, occasional bell
-      this._stem(110.0, 'sine', 0.22);
-      this._stem(220.0, 'triangle', 0.10);
-      this._stem(330.0, 'sine', 0.07);
-      this._bells();
-    }catch(e){ console.warn('audio init fail', e); }
-  },
-  _makeIR(ctx, dur, decay){
-    const len = ctx.sampleRate * dur;
-    const buf = ctx.createBuffer(2, len, ctx.sampleRate);
-    for (let ch=0; ch<2; ch++){
-      const data = buf.getChannelData(ch);
-      for (let i=0;i<len;i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/len, decay);
-    }
-    return buf;
-  },
-  _stem(freq, type, gainV){
-    const osc = this.ctx.createOscillator();
-    const lfo = this.ctx.createOscillator();
-    const lfoG = this.ctx.createGain();
-    const g = this.ctx.createGain();
-    osc.type = type; osc.frequency.value = freq;
-    lfo.frequency.value = 0.07 + Math.random()*0.12;
-    lfoG.gain.value = freq * 0.012;
-    lfo.connect(lfoG).connect(osc.frequency);
-    g.gain.value = gainV;
-    osc.connect(g).connect(this.master);
-    osc.start(); lfo.start();
-    this.nodes.push({osc, lfo, g, base:gainV, baseFreq:freq});
-  },
-  _bells(){
-    const ring = ()=>{
-      if (!this.ctx) return;
-      const osc = this.ctx.createOscillator();
-      const g = this.ctx.createGain();
-      const notes = [523.25, 659.25, 783.99, 880.0, 1046.5];
-      osc.type = 'sine';
-      osc.frequency.value = notes[Math.floor(Math.random()*notes.length)];
-      osc.connect(g).connect(this.master);
-      const t = this.ctx.currentTime;
-      g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.05, t+0.05);
-      g.gain.exponentialRampToValueAtTime(0.0001, t+3.0);
-      osc.start(t); osc.stop(t+3.2);
-      setTimeout(ring, 7000 + Math.random()*15000);
-    };
-    setTimeout(ring, 5000);
-  },
-  toggle(){
-    this.muted = !this.muted;
-    if (!this.ctx) return;
-    if (this.ctx.state === 'suspended') this.ctx.resume();
-    const t = this.ctx.currentTime;
-    this.master.gain.cancelScheduledValues(t);
-    this.master.gain.linearRampToValueAtTime(this.muted ? 0 : 0.55, t+1.2);
-  },
-  // density informa "calor sonoro": mais cor → notas mais graves
-  setHeat(redness, blueness){
-    if (!this.ctx || this.muted) return;
-    this.nodes.forEach((n,i)=>{
-      const tgt = n.baseFreq * (1 + (blueness-redness)*0.10);
-      n.osc.frequency.linearRampToValueAtTime(tgt, this.ctx.currentTime + 1.2);
-    });
-  }
-};
-
-/* ─────── INTERAÇÃO ─────── */
-function pointerData(){
-  const px = mouseX / width;
-  const py = 1 - mouseY / height;
-  const dx = (mouseX - lastMouse.x) / width;
-  const dy = -(mouseY - lastMouse.y) / height;
-  return {px,py,dx,dy};
-}
-function mousePressed(){
-  if (document.getElementById('overture') && !document.getElementById('overture').classList.contains('gone')) return;
-  lastMouse.x = mouseX; lastMouse.y = mouseY; lastMouse.down = true;
-  currentStroke = { points: [], paletteIdx: Math.floor(Math.random()*palette.strokes.length), t0: Date.now() };
-  lastPaintTs = performance.now();
-  silentTriggered = false;
-  document.getElementById('silent').classList.remove('in');
-}
-function mouseReleased(){
-  if (lastMouse.down && currentStroke && currentStroke.points.length){
-    showToast('sua pincelada foi adicionada. ela ficará.');
-    Store.addBrush({ lat: (Math.random()*140 - 60), lng:(Math.random()*340 - 170), t: Date.now() });
-    paintMinimap();
-    // grava stroke pra replay e souvenir
-    Store.pushStroke({
-      pts: currentStroke.points,
-      pal: currentStroke.paletteIdx,
-      t: currentStroke.t0
-    });
-    myStrokeRecord = { pts: currentStroke.points.slice(), pal: currentStroke.paletteIdx, t: currentStroke.t0 };
-  }
-  lastMouse.down = false;
-  currentStroke = null;
-}
-function mouseDragged(){ lastMouse.down = true; }
-function touchStarted(){ if (touches.length){ lastMouse.x=touches[0].x; lastMouse.y=touches[0].y; mousePressed(); } return false; }
-function touchEnded(){ mouseReleased(); return false; }
 
 function showToast(msg){
-  const t = document.getElementById('toast');
-  if (msg) t.textContent = msg;
-  t.classList.add('in');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=>t.classList.remove('in'), 2800);
+  toast.textContent = msg;
+  toast.classList.add('in');
+  setTimeout(()=>toast.classList.remove('in'), 2000);
 }
 
-/* ─────── SNAPSHOT periódico ─────── */
-function maybeSnapshot(){
-  if (millis() - lastSnap < 30000) return;
-  lastSnap = millis();
-  const off = document.createElement('canvas');
-  off.width = 128; off.height = 128;
-  const ctx = off.getContext('2d');
-  ctx.drawImage(densBuf.elt, 0, 0, 128, 128);
-  ctx.globalCompositeOperation = 'destination-over';
-  ctx.fillStyle = `rgb(${palette.bg.join(',')})`;
-  ctx.fillRect(0,0,128,128);
-  Store.saveSnapshot(off.toDataURL('image/jpeg', 0.6));
+function downloadSouvenir(){
+  const link = document.createElement('a');
+  link.href = canvas.toDataURL('image/png');
+  link.download = 'confluencia-' + Date.now() + '.png';
+  link.click();
+  showToast('souvenir baixado');
 }
 
-/* ─────── GHOST REPLAY ─────── */
-const ghosts = []; // {stroke, idx, t0}
-function maybeSpawnGhost(){
-  if (ghosts.length > 2) return;
-  const strokes = Store.getStrokes();
-  if (!strokes.length) return;
-  if (Math.random() > 0.012) return; // ~rara
-  const s = strokes[Math.floor(Math.random()*strokes.length)];
-  if (!s || !s.pts || s.pts.length < 2) return;
-  ghosts.push({ stroke: s, idx: 0, t0: performance.now() });
-}
-function updateGhosts(){
-  for (let i = ghosts.length-1; i >= 0; i--){
-    const g = ghosts[i];
-    const step = 1; // 1 ponto por frame
-    for (let k=0;k<step;k++){
-      if (g.idx >= g.stroke.pts.length){ ghosts.splice(i,1); break; }
-      const p = g.stroke.pts[g.idx]; g.idx++;
-      if (!p) continue;
-      const col = palette.strokes[g.stroke.pal % palette.strokes.length].map(v=>v/255*0.35);
-      const v = [0,0];
-      splatGhost(p[0], p[1], col, v);
-    }
+// Setup
+countEl.textContent = soulCount;
+
+canvas.addEventListener('mousedown', (e)=>{
+  if(overture.classList.contains('gone')){
+    isDrawing = true;
+    lastX = e.clientX;
+    lastY = e.clientY;
   }
-}
-function splatGhost(px, py, color, vel){
-  densBufB.shader(splatShader);
-  splatShader.setUniform('uField', densBuf);
-  splatShader.setUniform('uPoint', [px, py]);
-  splatShader.setUniform('uColor', color);
-  splatShader.setUniform('uVelocity', vel);
-  splatShader.setUniform('uRadius', 0.02);
-  splatShader.setUniform('uMode', 0);
-  densBufB.rect(-1,-1,2,2);
-  [densBuf, densBufB] = [densBufB, densBuf];
-}
+});
 
-/* ─────── SILENT SOUL TRIGGER ─────── */
-function checkSilent(){
-  if (silentTriggered) return;
-  // tempo desde overture fechada
-  if (performance.now() - pointerIdleStart < 90000) return;
-  // se nunca pintou
-  const strokes = Store.getStrokes();
-  if (strokes.length > 0 && strokes[strokes.length-1].t > pointerIdleStart) return;
-  silentTriggered = true;
-  document.getElementById('silent').classList.add('in');
-  Store.addSilentSoul();
-  // adiciona pincelada sutil baseada em mouse hover
-  const px = mouseX/width || 0.5;
-  const py = 1 - (mouseY/height || 0.5);
-  const c = [0.4, 0.4, 0.45];
-  for (let i=0;i<24;i++){
-    const ang = i * 0.26;
-    const r = 0.01 + i*0.001;
-    const sx = px + Math.cos(ang)*r;
-    const sy = py + Math.sin(ang)*r;
-    splatGhost(sx, sy, c, [0,0]);
+canvas.addEventListener('mousemove', (e)=>{
+  if(isDrawing){
+    const color = [[255,100,150], [100,200,255], [200,150,100]][Math.floor(Math.random()*3)];
+    paintStroke(lastX, lastY, e.clientX, e.clientY, color);
+    lastX = e.clientX;
+    lastY = e.clientY;
+    myStrokes.push([lastX, lastY, color]);
   }
-  setTimeout(()=>document.getElementById('silent').classList.remove('in'), 6000);
-}
+});
 
-/* ─────── SOUVENIR PNG ─────── */
-function generateSouvenir(){
-  const W = 1080, H = 1350;
-  const c = document.createElement('canvas');
-  c.width = W; c.height = H;
-  const ctx = c.getContext('2d');
-  // bg
-  ctx.fillStyle = `rgb(${palette.bg.join(',')})`;
-  ctx.fillRect(0,0,W,H);
-  // obra (snapshot do densBuf composto sobre bg)
-  const imgW = W - 160, imgH = imgW;
-  const imgX = 80, imgY = 130;
-  ctx.fillStyle = `rgb(${Math.max(0,palette.bg[0]-12)},${Math.max(0,palette.bg[1]-12)},${Math.max(0,palette.bg[2]-12)})`;
-  ctx.fillRect(imgX-4, imgY-4, imgW+8, imgH+8);
-  ctx.drawImage(densBuf.elt, imgX, imgY, imgW, imgH);
-  // overlay: realça pincelada do user (myStrokeRecord) em ciano
-  if (myStrokeRecord && myStrokeRecord.pts && myStrokeRecord.pts.length){
-    ctx.save();
-    ctx.strokeStyle = 'rgba(80, 240, 255, 0.85)';
-    ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.shadowColor = 'rgba(80,240,255,0.7)';
-    ctx.shadowBlur = 14;
-    ctx.beginPath();
-    myStrokeRecord.pts.forEach((p,i)=>{
-      const x = imgX + p[0]*imgW;
-      const y = imgY + (1-p[1])*imgH;
-      if (i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-    });
-    ctx.stroke();
-    ctx.restore();
+canvas.addEventListener('mouseup', ()=>{
+  if(isDrawing && myStrokes.length){
+    showToast('sua pincelada foi adicionada. ela ficará.');
+    isDrawing = false;
   }
-  // título
-  const dark = palette.bg[0] + palette.bg[1] + palette.bg[2] > 380;
-  ctx.fillStyle = dark ? '#1a1a1a' : '#f6f1e6';
-  ctx.font = 'italic 56px "Cormorant Garamond", Georgia, serif';
-  ctx.textBaseline = 'top';
-  ctx.fillText('Confluência', 80, 40);
-  ctx.font = '14px "Space Mono", monospace';
-  ctx.fillStyle = dark ? '#6a6253' : '#a8a08a';
-  ctx.fillText(`N°05  ·  ${palette.name.toUpperCase()}  ·  ${season.name.toUpperCase()}`, 80, 102);
+});
 
-  const souls = Store.getSouls();
-  const yourN = souls.toLocaleString('pt-BR');
-  ctx.fillStyle = dark ? '#1a1a1a' : '#f6f1e6';
-  ctx.font = 'italic 36px "Cormorant Garamond", Georgia, serif';
-  ctx.fillText(`você foi a ${yourN}ª.`, 80, imgY + imgH + 50);
-  ctx.font = '14px "Space Mono", monospace';
-  ctx.fillStyle = dark ? '#6a6253' : '#a8a08a';
-  ctx.fillText(myStrokeRecord ? 'sua marca está destacada em ciano.' : 'sua presença foi registrada como alma silenciosa.', 80, imgY + imgH + 110);
-  const d = new Date();
-  const stamp = `${d.toISOString().slice(0,10)} · ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  ctx.fillText(stamp, 80, H - 60);
-  ctx.textAlign = 'right';
-  ctx.fillText('confluencia.obra', W - 80, H - 60);
-
-  // download
-  const a = document.createElement('a');
-  a.href = c.toDataURL('image/png');
-  a.download = `confluencia-${Date.now()}.png`;
-  document.body.appendChild(a); a.click(); a.remove();
-  showToast('souvenir baixado.');
-}
-
-/* ─────── LOOP ─────── */
-function draw(){
-  const dt = 1.0;
-  const texel = [1/SIM_W, 1/SIM_H];
-
-  // advect density
-  densBufB.shader(advectShader);
-  advectShader.setUniform('uField', densBuf);
-  advectShader.setUniform('uVel', velBuf);
-  advectShader.setUniform('uDt', dt);
-  advectShader.setUniform('uTexel', texel);
-  advectShader.setUniform('uDissipation', asleep > 0.5 ? 0.998 : 0.992);
-  densBufB.rect(-1,-1,2,2);
-  [densBuf, densBufB] = [densBufB, densBuf];
-
-  // advect velocity
-  velBufB.shader(advectShader);
-  advectShader.setUniform('uField', velBuf);
-  advectShader.setUniform('uVel', velBuf);
-  advectShader.setUniform('uDt', dt);
-  advectShader.setUniform('uTexel', texel);
-  advectShader.setUniform('uDissipation', asleep > 0.5 ? 0.992 : 0.985);
-  velBufB.rect(-1,-1,2,2);
-  [velBuf, velBufB] = [velBufB, velBuf];
-
-  // diffuse
-  densBufB.shader(diffuseShader);
-  diffuseShader.setUniform('uField', densBuf);
-  diffuseShader.setUniform('uTexel', texel);
-  diffuseShader.setUniform('uViscosity', season.viscosity);
-  densBufB.rect(-1,-1,2,2);
-  [densBuf, densBufB] = [densBufB, densBuf];
-
-  // user splat
-  if (lastMouse.down){
-    const {px,py,dx,dy} = pointerData();
-    const speed = Math.min(0.6, Math.hypot(dx,dy)*4 + 0.06);
-    const idx = currentStroke ? currentStroke.paletteIdx : Math.floor(Math.random()*palette.strokes.length);
-    const c = palette.strokes[idx].map(v=>v/255);
-    densBufB.shader(splatShader);
-    splatShader.setUniform('uField', densBuf);
-    splatShader.setUniform('uPoint', [px,py]);
-    splatShader.setUniform('uColor', c);
-    splatShader.setUniform('uVelocity', [0,0]);
-    splatShader.setUniform('uRadius', 0.03 + speed*0.04);
-    splatShader.setUniform('uMode', 0);
-    densBufB.rect(-1,-1,2,2);
-    [densBuf, densBufB] = [densBufB, densBuf];
-    velBufB.shader(splatShader);
-    splatShader.setUniform('uField', velBuf);
-    splatShader.setUniform('uPoint', [px,py]);
-    splatShader.setUniform('uColor', [0,0,0]);
-    splatShader.setUniform('uVelocity', [dx*2.2, dy*2.2]);
-    splatShader.setUniform('uRadius', 0.04 + speed*0.05);
-    splatShader.setUniform('uMode', 1);
-    velBufB.rect(-1,-1,2,2);
-    [velBuf, velBufB] = [velBufB, velBuf];
-    if (currentStroke) currentStroke.points.push([px,py]);
-    lastPaintTs = performance.now();
+canvas.addEventListener('touchstart', (e)=>{
+  if(overture.classList.contains('gone')){
+    isDrawing = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
   }
-  lastMouse.x = mouseX; lastMouse.y = mouseY;
+});
 
-  // ghost replays
-  maybeSpawnGhost();
-  updateGhosts();
-
-  // asleep target — midnight local
-  const hr = new Date().getHours();
-  const targetAsleep = hr === 0 ? 1 : 0;
-  asleep += (targetAsleep - asleep) * 0.005;
-  if (asleep > 0.4) document.body.classList.add('asleep'); else document.body.classList.remove('asleep');
-
-  // display
-  shader(displayShader);
-  displayShader.setUniform('uDens', densBuf);
-  displayShader.setUniform('uBg', palette.bg);
-  displayShader.setUniform('uTime', millis()/1000);
-  displayShader.setUniform('uGrain', season.grain);
-  displayShader.setUniform('uCrystal', season.crystal);
-  displayShader.setUniform('uAsleep', asleep);
-  rect(-1,-1,2,2);
-
-  // silent check + audio mood
-  checkSilent();
-  if (frameCount % 60 === 0){
-    // sample composition pra audio heat
-    try{
-      const off = document.createElement('canvas');
-      off.width = 16; off.height = 16;
-      const ctx2 = off.getContext('2d');
-      ctx2.drawImage(densBuf.elt, 0, 0, 16, 16);
-      const data = ctx2.getImageData(0,0,16,16).data;
-      let r=0,b=0;
-      for (let i=0;i<data.length;i+=4){ r += data[i]; b += data[i+2]; }
-      const total = data.length/4;
-      Audio.setHeat(r/total/255, b/total/255);
-    }catch(e){}
+canvas.addEventListener('touchmove', (e)=>{
+  if(isDrawing){
+    const color = [[255,100,150], [100,200,255], [200,150,100]][Math.floor(Math.random()*3)];
+    paintStroke(lastX, lastY, e.touches[0].clientX, e.touches[0].clientY, color);
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
   }
+});
 
-  maybeSnapshot();
-}
-function windowResized(){ resizeCanvas(windowWidth, windowHeight); }
-setInterval(updateHourLabel, 30000);
+canvas.addEventListener('touchend', ()=>{
+  if(isDrawing && myStrokes.length){
+    showToast('sua pincelada foi adicionada');
+  }
+  isDrawing = false;
+});
+
+enter.addEventListener('click', ()=>{
+  overture.classList.add('gone');
+  resizeCanvas();
+});
+
+document.getElementById('btnSouvenir').addEventListener('click', downloadSouvenir);
+
+window.addEventListener('resize', resizeCanvas);
+
+resizeCanvas();
 </script>
 </body>
 </html>
