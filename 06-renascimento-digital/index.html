@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eleonora di Castelvecchio — Obra Reunida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pergaminho: #f4ecd8;
+      --pergaminho-escuro: #e8d9b8;
+      --tinta: #2c1810;
+      --siena: #8b4513;
+      --ocre: #c8962a;
+      --verde-oliva: #6b7c3a;
+      --vermelho-veneziano: #8b1a1a;
+      --sombra: #3d2b1a;
+      --ouro: #b8860b;
+      --phi: 1.618;
+      --col-principal: 61.8%;
+      --col-lateral: 38.2%;
+      --margem-base: 2.618rem;
+      --margem-secao: 4.236rem;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      background: var(--pergaminho);
+      color: var(--tinta);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1.125rem;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Envelhecimento sutil da página inteira */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(180,140,60,0.04);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--vermelho-veneziano); color: var(--pergaminho);
+      padding: 0.5rem 1rem; font-size: 1rem; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    /* LAYOUT */
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 var(--margem-base); }
+    .grid-phi { display: grid; grid-template-columns: var(--col-principal) var(--col-lateral); gap: var(--margem-base); }
+
+    /* HEADER */
+    header {
+      background: var(--tinta); color: var(--pergaminho);
+      padding: var(--margem-secao) var(--margem-base); text-align: center; position: relative;
+    }
+    header::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 4px; background: linear-gradient(to right, var(--vermelho-veneziano), var(--ocre), var(--vermelho-veneziano));
+    }
+    .artist-name { font-size: clamp(2.2rem,6vw,4rem); font-weight: 500; font-style: italic; letter-spacing: .03em; color: var(--pergaminho); margin: 0; line-height: 1.1; }
+    .artist-dates { display: block; font-size: clamp(1rem,2.5vw,1.4rem); font-style: normal; color: var(--ocre); margin-top: .618rem; letter-spacing: .15em; }
+    .artist-location { display: block; font-size: 1rem; font-style: italic; color: rgba(244,236,216,.6); margin-top: .382rem; letter-spacing: .1em; }
+    .ornament { display: block; color: var(--ocre); font-size: 1.5rem; letter-spacing: .5em; margin: 1rem 0; opacity: .7; }
+
+    /* CITAÇÃO */
+    .opening-quote { background: var(--tinta); color: var(--pergaminho); padding: var(--margem-secao) var(--margem-base); text-align: center; }
+    .opening-quote blockquote { font-size: clamp(1.3rem,3vw,1.8rem); font-style: italic; max-width: 680px; margin: 0 auto; line-height: 1.6; }
+    .opening-quote cite { display: block; margin-top: 1.618rem; font-size: .9rem; font-style: normal; letter-spacing: .12em; color: var(--ocre); text-transform: uppercase; }
+
+    section { padding: var(--margem-secao) 0; }
+    .section-label { font-size: .75rem; letter-spacing: .2em; text-transform: uppercase; color: var(--siena); margin-bottom: 1.618rem; display: flex; align-items: center; gap: 1rem; }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--siena), transparent); }
+    .section-heading { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 500; font-style: italic; color: var(--tinta); margin-bottom: var(--margem-base); line-height: 1.2; }
+    .drop-cap::first-letter { float: left; font-size: 4em; line-height: .85; font-weight: 700; color: var(--vermelho-veneziano); margin-right: .08em; margin-top: .05em; font-style: normal; }
+
+    .bio-section { background: var(--pergaminho); }
+    .bio-content { font-size: 1.125rem; line-height: 1.8; color: var(--tinta); }
+    .bio-content p { margin-bottom: 1.618em; text-align: justify; hyphens: auto; }
+    .bio-content p:last-child { margin-bottom: 0; }
+    .bio-aside { padding-top: .5rem; }
+    .bio-pullquote { border-left: 3px solid var(--vermelho-veneziano); padding: 1rem 1.618rem; background: var(--pergaminho-escuro); font-style: italic; font-size: 1.2rem; line-height: 1.6; color: var(--sombra); }
+    .bio-pullquote cite { display: block; margin-top: 1rem; font-size: .85rem; font-style: normal; color: var(--siena); letter-spacing: .08em; }
+    .bio-details { margin-top: 2rem; font-size: .9rem; line-height: 2; color: var(--sombra); border-top: 1px solid var(--ocre); padding-top: 1rem; }
+    .bio-details dt { font-weight: 700; color: var(--siena); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; }
+    .bio-details dd { margin-left: 0; margin-bottom: .5rem; }
+
+    /* ══════════════════════════════════════
+       GALERIA COM OBRAS SVG
+    ══════════════════════════════════════ */
+    .gallery-section { background: var(--pergaminho-escuro); padding: var(--margem-secao) 0; }
+    .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--margem-base); margin-top: var(--margem-base); }
+
+    .artwork-card {
+      background: var(--pergaminho);
+      border: 1px solid var(--ocre);
+      overflow: hidden; cursor: pointer;
+      transition: box-shadow .3s ease, transform .3s ease;
+      opacity: 0; transform: translateY(20px);
+    }
+
+    .artwork-card.revealed {
+      animation: reveal-card 1.2s ease forwards;
+    }
+
+    @keyframes reveal-card {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .artwork-card:hover, .artwork-card:focus {
+      box-shadow: 0 8px 32px rgba(44,24,16,.25);
+      outline: 2px solid var(--siena);
+      transform: translateY(-2px);
+    }
+
+    .artwork-frame {
+      position: relative;
+      padding: 12px;
+      background: var(--pergaminho-escuro);
+    }
+
+    .artwork-frame svg.artwork-svg {
+      width: 100%;
+      display: block;
+    }
+
+    .frame-border {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .artwork-caption { padding: 1rem var(--margem-base); border-top: 1px solid var(--pergaminho-escuro); }
+    .artwork-title { font-size: 1.1rem; font-weight: 700; font-style: italic; color: var(--tinta); margin-bottom: .2rem; }
+    .artwork-meta { font-size: .8rem; color: var(--sombra); line-height: 1.6; }
+    .artwork-meta em { color: var(--siena); }
+
+    /* ══════════════════════════════════════
+       EXAMINE MODE OVERLAY
+    ══════════════════════════════════════ */
+    #examine-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 6, 3, 0.97);
+      z-index: 1000;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    #examine-overlay.active {
+      display: flex;
+      align-items: stretch;
+    }
+    #examine-overlay.visible {
+      opacity: 1;
+    }
+
+    .examine-close {
+      position: absolute;
+      top: 1.5rem; right: 1.5rem;
+      background: none; border: 1px solid rgba(200,150,42,.4);
+      color: var(--ocre); font-family: 'EB Garamond', serif;
+      font-size: 1rem; padding: .4rem .8rem; cursor: pointer;
+      letter-spacing: .1em; z-index: 1001;
+      transition: background .2s, color .2s;
+    }
+    .examine-close:hover, .examine-close:focus {
+      background: var(--ocre); color: var(--tinta);
+    }
+
+    .examine-left {
+      flex: 0 0 60%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem 4rem 4rem;
+      position: relative;
+    }
+
+    .examine-artwork-wrapper {
+      position: relative;
+      max-height: 80vh;
+      max-width: 100%;
+    }
+
+    .examine-artwork-wrapper svg.artwork-svg {
+      max-height: 80vh;
+      width: auto;
+      display: block;
+      filter: sepia(0.08) contrast(0.97);
+    }
+
+    /* Overlay de análise compositiva */
+    #composition-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    #composition-overlay.active { opacity: 1; }
+
+    #composition-overlay svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Overlay de análise de luz */
+    #light-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      mix-blend-mode: multiply;
+    }
+    #light-overlay.active { opacity: 1; }
+
+    #light-overlay svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .examine-right {
+      flex: 0 0 40%;
+      padding: 4rem 3rem 4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      overflow-y: auto;
+      color: var(--pergaminho);
+    }
+
+    .examine-title {
+      font-size: clamp(1.4rem,2.5vw,2rem);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--pergaminho);
+      line-height: 1.2;
+      margin: 0;
+    }
+
+    .examine-divider {
+      width: 3rem;
+      height: 1px;
+      background: var(--ocre);
+      opacity: .6;
+    }
+
+    .examine-ficha {
+      font-size: .9rem;
+      line-height: 2;
+      color: rgba(244,236,216,.7);
+    }
+    .examine-ficha strong {
+      display: block;
+      font-size: .7rem;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--ocre);
+      font-style: normal;
+      margin-bottom: .2rem;
+    }
+    .examine-ficha p {
+      margin-bottom: 1rem;
+      font-style: normal;
+    }
+
+    .examine-description {
+      font-size: 1rem;
+      line-height: 1.7;
+      color: rgba(244,236,216,.85);
+      font-style: italic;
+      border-top: 1px solid rgba(200,150,42,.2);
+      padding-top: 1.5rem;
+    }
+
+    .examine-toggles {
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      border-top: 1px solid rgba(200,150,42,.2);
+      padding-top: 1.5rem;
+    }
+
+    .examine-toggle-btn {
+      background: none;
+      border: 1px solid rgba(200,150,42,.3);
+      color: rgba(244,236,216,.7);
+      font-family: 'EB Garamond', serif;
+      font-size: .85rem;
+      padding: .5rem 1rem;
+      cursor: pointer;
+      text-align: left;
+      letter-spacing: .05em;
+      transition: background .2s, color .2s, border-color .2s;
+    }
+    .examine-toggle-btn:hover, .examine-toggle-btn:focus {
+      background: rgba(200,150,42,.1);
+      border-color: var(--ocre);
+      color: var(--pergaminho);
+    }
+    .examine-toggle-btn.active {
+      background: rgba(200,150,42,.15);
+      border-color: var(--ocre);
+      color: var(--ocre);
+    }
+    .examine-toggle-btn::before {
+      content: '○ ';
+    }
+    .examine-toggle-btn.active::before {
+      content: '● ';
+    }
+
+    /* ══════════════════════════════════════
+       SEÇÃO ANÁLISE COMPOSITIVA
+    ══════════════════════════════════════ */
+    .analysis-section { background: var(--pergaminho); }
+    .analysis-grid { display: grid; grid-template-columns: var(--col-principal) var(--col-lateral); gap: var(--margem-base); align-items: start; }
+
+    .fibonacci-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1.618;
+      background: var(--pergaminho-escuro);
+      border: 1px solid var(--ocre);
+      overflow: hidden;
+    }
+
+    .fibonacci-wrapper svg.artwork-svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    #fibonacci-spiral-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    #fibonacci-spiral-svg path {
+      fill: none;
+      stroke: var(--ocre);
+      stroke-width: 1.5;
+      opacity: 0.7;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: draw-spiral 3s ease forwards;
+      animation-delay: 0.5s;
+    }
+
+    @keyframes draw-spiral {
+      to { stroke-dashoffset: 0; }
+    }
+
+    #fibonacci-spiral-svg line {
+      stroke: rgba(200,150,42,.4);
+      stroke-width: 1;
+      stroke-dasharray: 4 3;
+      opacity: 0;
+      animation: fade-lines 0.5s ease forwards;
+      animation-delay: 2s;
+    }
+
+    @keyframes fade-lines {
+      to { opacity: 1; }
+    }
+
+    .analysis-text { padding-top: .5rem; }
+    .analysis-text p { margin-bottom: 1.618em; text-align: justify; hyphens: auto; }
+
+    /* ══════════════════════════════════════
+       CRONOLOGIA SVG
+    ══════════════════════════════════════ */
+    .timeline-section { background: var(--tinta); color: var(--pergaminho); padding: var(--margem-secao) 0; }
+    .timeline-list { list-style: none; max-width: 680px; margin: 0 auto; }
+    .timeline-item { display: grid; grid-template-columns: 80px 1fr; gap: 1.618rem; padding: 1rem 0; border-bottom: 1px solid rgba(200,150,42,.2); align-items: start; }
+    .timeline-year { font-size: 1.2rem; font-weight: 700; color: var(--ocre); padding-top: .1rem; }
+    .timeline-event { font-size: 1rem; line-height: 1.6; color: rgba(244,236,216,.85); }
+    .timeline-event strong { display: block; color: var(--pergaminho); font-weight: 600; font-style: italic; margin-bottom: .25rem; }
+
+    /* Cronologia SVG */
+    .timeline-svg-wrapper {
+      margin: var(--margem-base) auto;
+      max-width: 800px;
+      overflow-x: auto;
+    }
+    #timeline-svg {
+      display: block;
+      width: 100%;
+      min-width: 600px;
+    }
+    #timeline-svg text {
+      font-family: 'EB Garamond', Georgia, serif;
+    }
+
+    footer { background: var(--tinta); color: rgba(244,236,216,.6); padding: var(--margem-secao) var(--margem-base); text-align: center; font-size: .85rem; line-height: 2; border-top: 3px solid var(--ocre); }
+    footer strong { color: var(--ocre); }
+
+    .divider { text-align: center; color: var(--ocre); font-size: 1.2rem; opacity: .5; padding: var(--margem-base) 0; letter-spacing: 1em; }
+
+    @media (max-width: 700px) {
+      .grid-phi { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .analysis-grid { grid-template-columns: 1fr; }
+      .examine-overlay-inner { flex-direction: column; }
+      .examine-left, .examine-right { flex: 0 0 auto; padding: 2rem 1.5rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .artwork-card { opacity: 1; transform: none; animation: none; }
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ir para o conteúdo principal</a>
+
+  <header>
+    <span class="ornament" aria-hidden="true">· ✦ ·</span>
+    <h1 class="artist-name">Eleonora di Castelvecchio</h1>
+    <span class="artist-dates">c. 1487 — 1542</span>
+    <span class="artist-location">Florença, República Florentina</span>
+    <span class="ornament" aria-hidden="true">· ✦ ·</span>
+  </header>
+
+  <div class="opening-quote" role="complementary">
+    <blockquote>
+      "Há em sua mão uma inteligência que não é aprendida mas herdada — como se os pigmentos obedecessem a uma lei anterior à razão, mais próxima da ordem das esferas do que do trabalho do ateliê."
+    </blockquote>
+    <cite>— Fra' Benedetto da Volterra, carta ao Prior de San Marco, 1531</cite>
+  </div>
+
+  <main id="main-content">
+
+    <!-- BIO -->
+    <section class="bio-section" aria-labelledby="bio-heading">
+      <div class="container">
+        <p class="section-label">Biografia</p>
+        <div class="grid-phi">
+          <div class="bio-content">
+            <h2 class="section-heading" id="bio-heading">A Mestra de Castelvecchio</h2>
+            <p class="drop-cap">Nascida por volta de 1487 na pequena vila de Castelvecchio, nos arredores de Pistoia, Eleonora di Castelvecchio representa uma das descobertas mais perturbadoras da história da arte italiana recente. Filha de um farmacêutico de especiarias e de uma tecelã oriunda de Siena, ela cresceu em contato com pigmentos e óleos desde a infância — uma circunstância que seus biógrafos contemporâneos apontam como fundamental para a qualidade incomum de sua preparação de painéis.</p>
+            <p>Aos dezesseis anos, foi encaminhada ao ateliê de <em>Maestro Angiolo di Rocho</em>, um pintor de segunda linha que produzia principalmente retábulos para conventos rurais da Toscana. Ali, em vez de se limitar às tarefas de aprendiz, Eleonora começou a desenvolver uma técnica própria de velatura que chamava de <em>velo di fumo</em>: camadas quase imperceptíveis de têmpera translúcida que conferiam às figuras uma presença atmosférica raramente vista em painéis da época.</p>
+            <p>Após a morte de Maestro Angiolo em 1511, Eleonora assumiu a condução discreta do ateliê sob o nome do filho mais novo de seu mestre, <em>Giandomenico di Rocho</em>, que assinava as obras mas reconhecia, em cartas privadas, a autoria real das peças. Sua produção conhecida compreende quinze painéis em têmpera sobre madeira e pelo menos vinte e dois desenhos de estudo — sobretudo estudos anatômicos e de drapeado.</p>
+            <p>Eleonora morreu em 1542, provavelmente de febre tifóide, deixando uma filha e um conjunto de anotações técnicas que constituem um dos mais detalhados tratados práticos de pintura em têmpera do século XVI.</p>
+          </div>
+          <aside class="bio-aside">
+            <blockquote class="bio-pullquote">
+              "O que a distingue dos contemporâneos não é apenas a qualidade do sfumato — é a inteligência da composição."
+              <cite>— Vera Nannucci, <em>Presença Velada</em>, 2003</cite>
+            </blockquote>
+            <dl class="bio-details" aria-label="Dados biográficos">
+              <dt>Nascimento</dt><dd>c. 1487, Castelvecchio (Pistoia)</dd>
+              <dt>Morte</dt><dd>1542, Florença</dd>
+              <dt>Técnica principal</dt><dd>Têmpera sobre painel de álamo</dd>
+              <dt>Descoberta moderna</dt><dd>Vera Nannucci, 1998</dd>
+            </dl>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">✦ ✦ ✦</div>
+
+    <!-- GALERIA SVG -->
+    <section class="gallery-section" aria-labelledby="gallery-heading">
+      <div class="container">
+        <p class="section-label">Obras</p>
+        <h2 class="section-heading" id="gallery-heading">Catálogo Selecionado</h2>
+        <p style="font-size:.9rem;color:var(--sombra);font-style:italic;margin-bottom:var(--margem-base)">Clique em qualquer obra para examinar em detalhe.</p>
+
+        <div class="gallery-grid" id="gallery">
+
+          <!-- OBRA 1: MADONNA -->
+          <article class="artwork-card" tabindex="0"
+                   id="artwork-madonna"
+                   data-artwork-id="madonna"
+                   data-title="Madonna com Paisagem ao Fundo"
+                   data-year="c. 1515"
+                   data-technique="Têmpera e ouro sobre painel de álamo"
+                   data-dimensions="45 × 73 cm"
+                   data-provenance="Coleção privada, Florença"
+                   data-description="Esta obra representa o ápice da técnica do velo di fumo desenvolvida por Eleonora. A paisagem ao fundo, com suas colinas esfumadas e ciprestes dissolvidos na neblina, evidencia o domínio singular da artista sobre a transição entre figura e espaço atmosférico. O halo dourado, inusitadamente integrado ao céu em vez de flutuar sobre ele, sugere uma teologia visual anterior às convenções do ateliê."
+                   aria-label="Obra: Madonna com Paisagem ao Fundo, c. 1515 — clique para examinar">
+            <div class="artwork-frame">
+              <svg class="frame-border" viewBox="0 0 300 486" aria-hidden="true" preserveAspectRatio="none">
+                <rect x="2" y="2" width="296" height="482" fill="none" stroke="#b8860b" stroke-width="2" opacity="0.6"/>
+                <rect x="8" y="8" width="284" height="470" fill="none" stroke="#b8860b" stroke-width="1" opacity="0.3"/>
+                <path d="M2,2 L18,2 L18,18 L2,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,2 L282,2 L282,18 L298,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M2,484 L18,484 L18,468 L2,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,484 L282,484 L282,468 L298,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+              </svg>
+              <svg class="artwork-svg" viewBox="0 0 280 452" aria-label="Madonna com Paisagem ao Fundo" data-for-examine="madonna">
+                <defs>
+                  <linearGradient id="sky-grad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#9bb8cc"/>
+                    <stop offset="60%" stop-color="#c8b87a"/>
+                    <stop offset="100%" stop-color="#b8a060"/>
+                  </linearGradient>
+                  <radialGradient id="halo-grad" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffd700" stop-opacity="0.7"/>
+                    <stop offset="70%" stop-color="#b8860b" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#b8860b" stop-opacity="0"/>
+                  </radialGradient>
+                  <linearGradient id="manto-grad" x1="0" y1="0" x2="0.3" y2="1">
+                    <stop offset="0%" stop-color="#2a4060"/>
+                    <stop offset="50%" stop-color="#1a2a45"/>
+                    <stop offset="100%" stop-color="#0d1a2e"/>
+                  </linearGradient>
+                  <filter id="sfumato">
+                    <feGaussianBlur stdDeviation="2"/>
+                  </filter>
+                  <filter id="pergaminho-texture">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" result="noise"/>
+                    <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+                    <feBlend in="SourceGraphic" in2="grayNoise" mode="multiply" result="blend"/>
+                    <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+                  </filter>
+                </defs>
+                <rect width="280" height="452" fill="url(#sky-grad)"/>
+                <g filter="url(#sfumato)" opacity="0.6">
+                  <path d="M0,300 Q50,260 100,270 Q150,280 200,265 Q240,255 280,270 L280,452 L0,452 Z" fill="#5a7040" opacity="0.5"/>
+                  <path d="M0,320 Q60,300 120,310 Q180,320 240,305 Q260,300 280,308 L280,452 L0,452 Z" fill="#4a6030" opacity="0.6"/>
+                </g>
+                <g opacity="0.4" filter="url(#sfumato)">
+                  <ellipse cx="220" cy="280" rx="6" ry="25" fill="#2d4020"/>
+                  <ellipse cx="235" cy="288" rx="5" ry="22" fill="#2d4020"/>
+                  <ellipse cx="248" cy="275" rx="5" ry="28" fill="#2d4020"/>
+                </g>
+                <circle cx="140" cy="130" r="55" fill="url(#halo-grad)"/>
+                <circle cx="140" cy="130" r="50" fill="none" stroke="#b8860b" stroke-width="0.8" opacity="0.4"/>
+                <path d="M70,150 Q60,200 55,280 Q50,340 80,380 Q110,420 140,430 Q170,420 200,380 Q230,340 225,280 Q220,200 210,150 Q185,120 140,110 Q95,120 70,150 Z" fill="url(#manto-grad)"/>
+                <ellipse cx="140" cy="128" rx="28" ry="34" fill="#d4a87a"/>
+                <ellipse cx="140" cy="128" rx="28" ry="34" fill="rgba(80,40,20,0.1)" filter="url(#sfumato)"/>
+                <path d="M112,110 Q125,95 140,92 Q155,95 168,110 Q162,100 140,98 Q118,100 112,110 Z" fill="#4a2c0a"/>
+                <ellipse cx="132" cy="126" rx="5" ry="3" fill="#3a2010"/>
+                <ellipse cx="148" cy="126" rx="5" ry="3" fill="#3a2010"/>
+                <path d="M133,142 Q140,146 147,142" stroke="#8b3a2a" stroke-width="1.2" fill="none"/>
+                <path d="M75,160 Q65,210 62,270 Q60,320 70,360" stroke="#162035" stroke-width="1.5" fill="none" opacity="0.5"/>
+                <path d="M200,165 Q215,215 218,275" stroke="#162035" stroke-width="1.5" fill="none" opacity="0.5"/>
+                <ellipse cx="155" cy="220" rx="18" ry="22" fill="#d4a87a"/>
+                <ellipse cx="155" cy="210" rx="12" ry="14" fill="#c8985a"/>
+                <ellipse cx="155" cy="220" rx="18" ry="22" fill="rgba(255,220,150,0.15)"/>
+                <rect width="280" height="452" fill="rgba(180,140,80,0.05)" filter="url(#pergaminho-texture)" opacity="0.3"/>
+              </svg>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Madonna com Paisagem ao Fundo</h3>
+              <p class="artwork-meta">c. 1515 · <em>Têmpera e ouro sobre painel de álamo</em><br>45 × 73 cm · Coleção privada, Florença</p>
+            </div>
+          </article>
+
+          <!-- OBRA 2: PAISAGEM TOSCANA -->
+          <article class="artwork-card" tabindex="0"
+                   id="artwork-paisagem"
+                   data-artwork-id="paisagem"
+                   data-title="Val d'Arno ao Entardecer"
+                   data-year="c. 1518"
+                   data-technique="Têmpera sobre painel de choupo"
+                   data-dimensions="60 × 37 cm"
+                   data-provenance="Museo Civico di Pistoia"
+                   data-description="O Val d'Arno ao Entardecer é a mais ambiciosa das paisagens puras de Eleonora. A luz rasante do sol — posicionado propositalmente fora do campo pictórico central — inunda o vale de baixo, invertendo a lógica convencional da iluminação zenital. Os ciprestes, em primeiro plano, funcionam como delimitadores verticais que confirmam a escala e a distância das colinas."
+                   aria-label="Obra: Val d'Arno ao Entardecer, c. 1518 — clique para examinar">
+            <div class="artwork-frame">
+              <svg class="frame-border" viewBox="0 0 300 486" aria-hidden="true" preserveAspectRatio="none">
+                <rect x="2" y="2" width="296" height="482" fill="none" stroke="#b8860b" stroke-width="2" opacity="0.6"/>
+                <rect x="8" y="8" width="284" height="470" fill="none" stroke="#b8860b" stroke-width="1" opacity="0.3"/>
+                <path d="M2,2 L18,2 L18,18 L2,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,2 L282,2 L282,18 L298,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M2,484 L18,484 L18,468 L2,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,484 L282,484 L282,468 L298,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+              </svg>
+              <svg class="artwork-svg" viewBox="0 0 280 452" aria-label="Val d'Arno ao Entardecer — paisagem toscana" data-for-examine="paisagem">
+                <defs>
+                  <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#4a6080"/>
+                    <stop offset="35%" stop-color="#8a7060"/>
+                    <stop offset="70%" stop-color="#c8924a"/>
+                    <stop offset="100%" stop-color="#d4a050"/>
+                  </linearGradient>
+                  <filter id="atmos">
+                    <feGaussianBlur stdDeviation="3"/>
+                  </filter>
+                  <filter id="atmos2">
+                    <feGaussianBlur stdDeviation="1.5"/>
+                  </filter>
+                </defs>
+                <rect width="280" height="452" fill="url(#sky2)"/>
+                <circle cx="210" cy="160" r="35" fill="#ffd070" opacity="0.5" filter="url(#atmos)"/>
+                <circle cx="210" cy="160" r="20" fill="#ffb840" opacity="0.6"/>
+                <path d="M0,240 Q40,210 80,220 Q130,230 180,215 Q230,200 280,225 L280,260 L0,260 Z" fill="#7a8090" opacity="0.35" filter="url(#atmos)"/>
+                <path d="M0,280 Q60,255 120,265 Q180,275 240,258 Q260,252 280,260 L280,340 L0,340 Z" fill="#4a6035" opacity="0.6" filter="url(#atmos2)"/>
+                <path d="M0,310 Q50,295 110,300 Q170,305 230,295 Q255,290 280,298 L280,380 L0,380 Z" fill="#3d5428" opacity="0.8"/>
+                <path d="M40,380 Q80,360 130,370 Q180,380 220,365 Q250,355 280,360" fill="none" stroke="#9ab8c8" stroke-width="3" opacity="0.6" filter="url(#atmos2)"/>
+                <path d="M40,382 Q80,363 130,373 Q180,383 220,368" fill="none" stroke="#b8d0da" stroke-width="1.5" opacity="0.4"/>
+                <g fill="#2d3a18">
+                  <ellipse cx="30" cy="340" rx="6" ry="28"/>
+                  <ellipse cx="44" cy="348" rx="5" ry="24"/>
+                  <ellipse cx="58" cy="342" rx="5" ry="26"/>
+                  <ellipse cx="245" cy="335" rx="7" ry="30"/>
+                  <ellipse cx="260" cy="342" rx="5" ry="25"/>
+                </g>
+                <g opacity="0.5" filter="url(#atmos2)">
+                  <rect x="155" y="250" width="12" height="15" fill="#c8a060"/>
+                  <polygon points="155,250 167,250 161,243" fill="#8b6030"/>
+                  <rect x="170" y="255" width="10" height="12" fill="#c0984a"/>
+                  <polygon points="170,255 180,255 175,249" fill="#8b6030"/>
+                </g>
+                <path d="M0,390 Q70,375 140,380 Q210,385 280,375 L280,452 L0,452 Z" fill="#5a6a30"/>
+                <path d="M0,415 Q50,400 140,408 Q200,412 280,400 L280,452 L0,452 Z" fill="#4a5825"/>
+                <path d="M195,373 Q210,368 225,373" stroke="#ffd070" stroke-width="2" opacity="0.4" fill="none"/>
+              </svg>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Val d'Arno ao Entardecer</h3>
+              <p class="artwork-meta">c. 1518 · <em>Têmpera sobre painel de choupo</em><br>60 × 37 cm · Museo Civico di Pistoia</p>
+            </div>
+          </article>
+
+          <!-- OBRA 3: ESTUDO ANATÔMICO -->
+          <article class="artwork-card" tabindex="0"
+                   id="artwork-estudo"
+                   data-artwork-id="estudo"
+                   data-title="Estudo de Mãos Femininas"
+                   data-year="c. 1512"
+                   data-technique="Pena e bistre sobre papel preparado"
+                   data-dimensions="22 × 31 cm"
+                   data-provenance="Arquivo Estatal de Florença"
+                   data-description="Os estudos de mãos de Eleonora revelam uma prática de observação sistemática incomum para o período. A mão esquerda, representada em posição de repouso, e a mão direita, em gesto de oferta, formam um diálogo formal sobre a passagem do tempo e a dignidade do corpo feminino — temas centrais na sua obra, mas raramente reconhecidos como tal pela crítica anterior a Nannucci."
+                   aria-label="Obra: Estudo de Mãos Femininas, c. 1512 — clique para examinar">
+            <div class="artwork-frame">
+              <svg class="frame-border" viewBox="0 0 300 486" aria-hidden="true" preserveAspectRatio="none">
+                <rect x="2" y="2" width="296" height="482" fill="none" stroke="#b8860b" stroke-width="2" opacity="0.6"/>
+                <rect x="8" y="8" width="284" height="470" fill="none" stroke="#b8860b" stroke-width="1" opacity="0.3"/>
+                <path d="M2,2 L18,2 L18,18 L2,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,2 L282,2 L282,18 L298,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M2,484 L18,484 L18,468 L2,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,484 L282,484 L282,468 L298,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+              </svg>
+              <svg class="artwork-svg" viewBox="0 0 280 452" aria-label="Estudo de Mãos Femininas — desenho a pena e bistre" data-for-examine="estudo">
+                <defs>
+                  <filter id="paper-texture">
+                    <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise"/>
+                    <feColorMatrix type="saturate" values="0" in="noise" result="gray"/>
+                    <feBlend in="SourceGraphic" in2="gray" mode="multiply"/>
+                  </filter>
+                </defs>
+                <rect width="280" height="452" fill="#d4c49a"/>
+                <rect width="280" height="452" fill="rgba(100,70,20,0.08)" filter="url(#paper-texture)"/>
+                <circle cx="40" cy="60" r="15" fill="rgba(120,80,20,0.08)"/>
+                <circle cx="240" cy="380" r="20" fill="rgba(120,80,20,0.06)"/>
+                <circle cx="200" cy="100" r="10" fill="rgba(120,80,20,0.05)"/>
+                <g stroke="#4a3010" fill="none" stroke-linecap="round">
+                  <path d="M60,180 Q55,200 58,220 Q62,240 75,255 Q90,268 105,265 Q118,262 122,248 Q126,235 120,215 Q115,195 105,180 Q95,168 80,168 Q65,168 60,180 Z" stroke-width="1.2" fill="rgba(200,160,100,0.3)"/>
+                  <path d="M60,185 Q50,175 45,162 Q42,153 48,148 Q54,144 60,150 Q66,156 64,165 Q62,173 60,185 Z" stroke-width="1.0" fill="rgba(200,160,100,0.25)"/>
+                  <path d="M78,172 Q74,155 72,140 Q71,130 78,126 Q85,123 90,130 Q94,138 92,153 Q90,165 88,175" stroke-width="1.0" fill="rgba(200,160,100,0.2)"/>
+                  <path d="M95,170 Q93,152 92,138 Q91,127 98,124 Q106,121 110,130 Q113,139 112,155 Q110,168 108,178" stroke-width="1.0" fill="rgba(200,160,100,0.2)"/>
+                  <path d="M112,175 Q113,158 114,144 Q115,134 121,132 Q128,130 130,140 Q132,150 130,164 Q128,175 125,183" stroke-width="1.0" fill="rgba(200,160,100,0.2)"/>
+                  <path d="M122,182 Q125,168 127,156 Q128,147 133,146 Q138,145 140,153 Q141,162 139,172 Q137,181 133,188" stroke-width="0.9" fill="rgba(200,160,100,0.15)"/>
+                  <path d="M70,210 Q72,220 78,228 Q85,235 92,230" stroke-width="0.6" opacity="0.5"/>
+                  <path d="M65,190 Q68,205 72,215" stroke-width="0.7" opacity="0.6"/>
+                </g>
+                <g font-family="Georgia, serif" font-size="8" fill="#4a3010" opacity="0.5" font-style="italic">
+                  <text x="18" y="30">studio di mani femminili · velo di fumo</text>
+                  <text x="18" y="42">proporzione secondo natura</text>
+                </g>
+                <g stroke="#4a3010" fill="none" stroke-linecap="round" transform="translate(145, 200) rotate(-20)">
+                  <path d="M10,0 Q5,20 8,40 Q12,58 25,70 Q40,80 55,76 Q66,72 68,58 Q70,45 65,28 Q58,12 45,4 Q30,-4 15,-3 Q5,-2 10,0 Z" stroke-width="1.2" fill="rgba(200,160,100,0.25)"/>
+                  <path d="M22,-2 Q19,-18 18,-30 Q17,-40 23,-43 Q30,-46 34,-38 Q37,-30 35,-17 Q33,-6 30,2" stroke-width="1.0" fill="rgba(200,160,100,0.18)"/>
+                  <path d="M38,-2 Q36,-18 36,-30 Q36,-40 43,-42 Q49,-43 52,-35 Q54,-26 52,-14 Q50,-4 47,4" stroke-width="1.0" fill="rgba(200,160,100,0.18)"/>
+                  <path d="M12,20 Q15,32 20,42 Q28,52 35,50" stroke-width="0.6" opacity="0.5"/>
+                </g>
+                <g font-family="Georgia, serif" font-size="7.5" fill="#5a3818" opacity="0.45" font-style="italic">
+                  <text x="18" y="420">EL. CAST. · F. · c. MDXII</text>
+                </g>
+              </svg>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Estudo de Mãos Femininas</h3>
+              <p class="artwork-meta">c. 1512 · <em>Pena e bistre sobre papel preparado</em><br>22 × 31 cm · Arquivo Estatal de Florença</p>
+            </div>
+          </article>
+
+          <!-- OBRA 4: NATUREZA MORTA -->
+          <article class="artwork-card" tabindex="0"
+                   id="artwork-natureza"
+                   data-artwork-id="natureza"
+                   data-title="Natureza Morta com Romã e Cálice"
+                   data-year="c. 1525"
+                   data-technique="Têmpera sobre painel de nogueira"
+                   data-dimensions="38 × 29 cm"
+                   data-provenance="Coleção privada, Pistoia"
+                   data-description="A Natureza Morta com Romã e Cálice é a obra que mais nitidamente revela a influência da experiência farmacêutica de seu pai na sensibilidade de Eleonora. A romã aberta — símbolo múltiplo de fertilidade, sacrifício e conhecimento — é tratada com precisão quase científica, enquanto o cálice dourado projeta uma luz que não tem origem visível no quadro, sugerindo uma fonte luminosa transcendente."
+                   aria-label="Obra: Natureza Morta com Romã e Cálice, c. 1525 — clique para examinar">
+            <div class="artwork-frame">
+              <svg class="frame-border" viewBox="0 0 300 486" aria-hidden="true" preserveAspectRatio="none">
+                <rect x="2" y="2" width="296" height="482" fill="none" stroke="#b8860b" stroke-width="2" opacity="0.6"/>
+                <rect x="8" y="8" width="284" height="470" fill="none" stroke="#b8860b" stroke-width="1" opacity="0.3"/>
+                <path d="M2,2 L18,2 L18,18 L2,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,2 L282,2 L282,18 L298,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M2,484 L18,484 L18,468 L2,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,484 L282,484 L282,468 L298,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+              </svg>
+              <svg class="artwork-svg" viewBox="0 0 280 452" aria-label="Natureza Morta com Romã e Cálice" data-for-examine="natureza">
+                <defs>
+                  <linearGradient id="bg-dark" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#1a1208"/>
+                    <stop offset="100%" stop-color="#0d0a04"/>
+                  </linearGradient>
+                  <radialGradient id="roma-light" cx="38%" cy="38%" r="55%">
+                    <stop offset="0%" stop-color="#cc3322"/>
+                    <stop offset="50%" stop-color="#991a0f"/>
+                    <stop offset="100%" stop-color="#5a0f08"/>
+                  </radialGradient>
+                  <radialGradient id="calice-light" cx="35%" cy="20%" r="60%">
+                    <stop offset="0%" stop-color="#d4b060"/>
+                    <stop offset="50%" stop-color="#a87820"/>
+                    <stop offset="100%" stop-color="#6a4810"/>
+                  </radialGradient>
+                  <radialGradient id="drape-light" cx="50%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#5a5a8a"/>
+                    <stop offset="100%" stop-color="#2a2a4a"/>
+                  </radialGradient>
+                  <filter id="shadow-drop">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+                    <feOffset dx="3" dy="5"/>
+                    <feBlend in="SourceGraphic"/>
+                  </filter>
+                </defs>
+                <rect width="280" height="452" fill="url(#bg-dark)"/>
+                <path d="M-10,80 Q30,120 20,200 Q10,280 30,340 Q50,400 40,452 L-10,452 Z" fill="#1a1a30" opacity="0.8"/>
+                <path d="M80,50 Q90,100 85,180 Q80,260 95,340 Q110,400 100,452 L180,452 Q175,400 190,340 Q200,260 195,180 Q185,100 195,50 Z" fill="url(#drape-light)" opacity="0.5"/>
+                <path d="M0,330 L280,330 L280,360 L0,360 Z" fill="#3a2808"/>
+                <path d="M0,328 L280,328 L280,333 L0,333 Z" fill="#5a3a10"/>
+                <circle cx="110" cy="298" r="45" fill="url(#roma-light)" filter="url(#shadow-drop)"/>
+                <path d="M100,255 Q110,248 120,255" stroke="#4a1a0a" stroke-width="2" fill="none"/>
+                <path d="M110,253 L108,245" stroke="#2d4010" stroke-width="1.5"/>
+                <path d="M112,252 L115,244" stroke="#2d4010" stroke-width="1.5"/>
+                <g fill="#e85020" opacity="0.7">
+                  <circle cx="103" cy="275" r="2"/>
+                  <circle cx="110" cy="272" r="2.5"/>
+                  <circle cx="117" cy="274" r="2"/>
+                  <circle cx="107" cy="281" r="2"/>
+                  <circle cx="115" cy="280" r="2.5"/>
+                </g>
+                <ellipse cx="110" cy="332" rx="40" ry="6" fill="rgba(0,0,0,0.4)"/>
+                <g filter="url(#shadow-drop)">
+                  <path d="M165,270 Q155,285 152,310 Q150,325 165,328 Q180,330 195,328 Q210,325 208,310 Q205,285 195,270 Z" fill="url(#calice-light)"/>
+                  <ellipse cx="180" cy="270" rx="18" ry="5" fill="#c8a040"/>
+                  <rect x="177" y="328" width="6" height="15" fill="#a87820"/>
+                  <path d="M162,343 Q165,340 180,340 Q195,340 198,343 Q200,346 198,350 Q180,352 162,350 Z" fill="#a87820"/>
+                  <path d="M162,282 Q163,296 162,310" stroke="#ffd080" stroke-width="1.5" fill="none" opacity="0.6"/>
+                </g>
+                <ellipse cx="180" cy="345" rx="20" ry="4" fill="rgba(0,0,0,0.5)"/>
+                <g stroke="#4a6020" fill="none">
+                  <path d="M60,320 Q70,310 85,315 Q100,318 115,310" stroke-width="1.5"/>
+                  <ellipse cx="75" cy="312" rx="6" ry="3" fill="#4a6020" stroke="none" transform="rotate(-20, 75, 312)" opacity="0.8"/>
+                  <ellipse cx="92" cy="312" rx="6" ry="3" fill="#4a6020" stroke="none" transform="rotate(15, 92, 312)" opacity="0.8"/>
+                </g>
+              </svg>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Natureza Morta com Romã e Cálice</h3>
+              <p class="artwork-meta">c. 1525 · <em>Têmpera sobre painel de nogueira</em><br>38 × 29 cm · Coleção privada, Pistoia</p>
+            </div>
+          </article>
+
+          <!-- OBRA 5: RETRATO -->
+          <article class="artwork-card" tabindex="0"
+                   id="artwork-retrato"
+                   data-artwork-id="retrato"
+                   data-title="Retrato de Dama em Fundo Escuro"
+                   data-year="c. 1530"
+                   data-technique="Têmpera e óleo sobre painel de álamo"
+                   data-dimensions="41 × 52 cm"
+                   data-provenance="Coleção privada, Siena"
+                   data-description="O Retrato de Dama em Fundo Escuro é a obra que mais plenamente realiza a vocação de Eleonora para o chiaroscuro de raiz caravaggiesca — décadas antes de Caravaggio. A figura emerge da escuridão pela mesma lei óptica que governa a experiência da vela, com apenas o rosto e a mão iluminados. A identidade da dama permanece desconhecida; Nannucci propõe que seja Isabetta, a filha de Eleonora."
+                   aria-label="Obra: Retrato de Dama em Fundo Escuro, c. 1530 — clique para examinar">
+            <div class="artwork-frame">
+              <svg class="frame-border" viewBox="0 0 300 486" aria-hidden="true" preserveAspectRatio="none">
+                <rect x="2" y="2" width="296" height="482" fill="none" stroke="#b8860b" stroke-width="2" opacity="0.6"/>
+                <rect x="8" y="8" width="284" height="470" fill="none" stroke="#b8860b" stroke-width="1" opacity="0.3"/>
+                <path d="M2,2 L18,2 L18,18 L2,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,2 L282,2 L282,18 L298,18 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M2,484 L18,484 L18,468 L2,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+                <path d="M298,484 L282,484 L282,468 L298,468 Z" fill="none" stroke="#b8860b" stroke-width="1.5" opacity="0.7"/>
+              </svg>
+              <svg class="artwork-svg" viewBox="0 0 280 452" aria-label="Retrato de Dama em Fundo Escuro — chiaroscuro intenso" data-for-examine="retrato">
+                <defs>
+                  <radialGradient id="portrait-bg" cx="55%" cy="30%" r="65%">
+                    <stop offset="0%" stop-color="#3a2808"/>
+                    <stop offset="60%" stop-color="#180e04"/>
+                    <stop offset="100%" stop-color="#080402"/>
+                  </radialGradient>
+                  <radialGradient id="face-light" cx="60%" cy="30%" r="70%">
+                    <stop offset="0%" stop-color="#d4a068"/>
+                    <stop offset="40%" stop-color="#b87840"/>
+                    <stop offset="100%" stop-color="#6a3818"/>
+                  </radialGradient>
+                  <radialGradient id="dress-light" cx="60%" cy="20%" r="70%">
+                    <stop offset="0%" stop-color="#2a1a40"/>
+                    <stop offset="50%" stop-color="#1a0e28"/>
+                    <stop offset="100%" stop-color="#080408"/>
+                  </radialGradient>
+                  <filter id="skin-blur">
+                    <feGaussianBlur stdDeviation="0.8"/>
+                  </filter>
+                  <filter id="sfumato2">
+                    <feGaussianBlur stdDeviation="2.5"/>
+                  </filter>
+                </defs>
+                <rect width="280" height="452" fill="url(#portrait-bg)"/>
+                <path d="M30,280 Q20,320 25,380 Q30,420 50,452 L230,452 Q250,420 255,380 Q260,320 250,280 Q230,240 200,225 Q180,215 140,212 Q100,215 80,225 Q50,240 30,280 Z" fill="url(#dress-light)"/>
+                <path d="M100,228 Q120,220 140,218 Q160,220 180,228 Q165,235 140,237 Q115,235 100,228 Z" fill="#c8a060" opacity="0.3"/>
+                <path d="M118,195 Q118,215 118,228 Q128,230 140,230 Q152,230 162,228 Q162,215 162,195 Z" fill="url(#face-light)"/>
+                <ellipse cx="140" cy="168" rx="42" ry="50" fill="url(#face-light)" filter="url(#skin-blur)"/>
+                <ellipse cx="105" cy="172" rx="15" ry="35" fill="rgba(20,10,0,0.4)" filter="url(#sfumato2)"/>
+                <path d="M97,140 Q100,118 115,110 Q128,104 140,102 Q152,104 165,110 Q180,118 183,140 Q170,128 155,124 Q140,121 125,124 Q110,127 97,140 Z" fill="#2a1808"/>
+                <ellipse cx="125" cy="160" rx="10" ry="6" fill="#1a0e04"/>
+                <ellipse cx="125" cy="160" rx="6" ry="4.5" fill="#2d1a08"/>
+                <circle cx="125" cy="158" r="3" fill="#0a0604"/>
+                <circle cx="127" cy="157" r="1.2" fill="rgba(255,220,150,0.7)"/>
+                <ellipse cx="155" cy="160" rx="10" ry="6" fill="#1a0e04" opacity="0.7"/>
+                <circle cx="155" cy="159" r="3" fill="#080403" opacity="0.8"/>
+                <path d="M136,168 Q132,180 134,190 Q137,195 140,195 Q143,195 146,190 Q148,180 144,168" stroke="rgba(100,50,20,0.3)" stroke-width="0.8" fill="rgba(180,110,60,0.1)"/>
+                <path d="M128,202 Q134,198 140,200 Q146,198 152,202" stroke="#7a3018" stroke-width="1.5" fill="none"/>
+                <path d="M130,204 Q136,208 140,207 Q144,208 150,204" stroke="#7a3018" stroke-width="1" fill="rgba(140,50,30,0.3)"/>
+                <path d="M115,230 Q128,235 140,236 Q152,235 165,230" stroke="#b8860b" stroke-width="1.5" fill="none" opacity="0.7"/>
+                <circle cx="140" cy="236" r="3" fill="#c8962a" opacity="0.8"/>
+                <path d="M50,370 Q60,360 75,355 Q90,350 95,360 Q98,368 92,375 Q85,382 75,380 Q60,378 50,370 Z" fill="url(#face-light)" opacity="0.7"/>
+                <text x="200" y="440" font-family="Georgia,serif" font-size="8" fill="rgba(200,150,60,0.3)" font-style="italic">EL. di C. fecit</text>
+              </svg>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Retrato de Dama em Fundo Escuro</h3>
+              <p class="artwork-meta">c. 1530 · <em>Têmpera e óleo sobre painel de álamo</em><br>41 × 52 cm · Coleção privada, Siena</p>
+            </div>
+          </article>
+
+        </div><!-- /gallery-grid -->
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">✦ ✦ ✦</div>
+
+    <!-- ANÁLISE COMPOSITIVA -->
+    <section class="analysis-section" aria-labelledby="analysis-heading">
+      <div class="container">
+        <p class="section-label">Análise</p>
+        <h2 class="section-heading" id="analysis-heading">Composição e Proporção Áurea</h2>
+        <div class="analysis-grid">
+          <div>
+            <div class="fibonacci-wrapper" aria-label="Madonna com Paisagem ao Fundo — análise compositiva com espiral de Fibonacci">
+              <!-- Obra de análise: Madonna -->
+              <svg class="artwork-svg" viewBox="0 0 280 452" aria-hidden="true">
+                <defs>
+                  <linearGradient id="sky-grad-a" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#9bb8cc"/>
+                    <stop offset="60%" stop-color="#c8b87a"/>
+                    <stop offset="100%" stop-color="#b8a060"/>
+                  </linearGradient>
+                  <radialGradient id="halo-grad-a" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#ffd700" stop-opacity="0.7"/>
+                    <stop offset="100%" stop-color="#b8860b" stop-opacity="0"/>
+                  </radialGradient>
+                  <linearGradient id="manto-grad-a" x1="0" y1="0" x2="0.3" y2="1">
+                    <stop offset="0%" stop-color="#2a4060"/>
+                    <stop offset="100%" stop-color="#0d1a2e"/>
+                  </linearGradient>
+                  <filter id="sfumato-a"><feGaussianBlur stdDeviation="2"/></filter>
+                </defs>
+                <rect width="280" height="452" fill="url(#sky-grad-a)"/>
+                <g filter="url(#sfumato-a)" opacity="0.6">
+                  <path d="M0,300 Q50,260 100,270 Q150,280 200,265 Q240,255 280,270 L280,452 L0,452 Z" fill="#5a7040" opacity="0.5"/>
+                  <path d="M0,320 Q60,300 120,310 Q180,320 240,305 L280,308 L280,452 L0,452 Z" fill="#4a6030" opacity="0.6"/>
+                </g>
+                <circle cx="140" cy="130" r="55" fill="url(#halo-grad-a)"/>
+                <path d="M70,150 Q60,200 55,280 Q50,340 80,380 Q110,420 140,430 Q170,420 200,380 Q230,340 225,280 Q220,200 210,150 Q185,120 140,110 Q95,120 70,150 Z" fill="url(#manto-grad-a)"/>
+                <ellipse cx="140" cy="128" rx="28" ry="34" fill="#d4a87a"/>
+              </svg>
+
+              <!-- Espiral de Fibonacci animada -->
+              <svg id="fibonacci-spiral-svg" viewBox="0 0 280 452" aria-hidden="true">
+                <!-- Linhas guia (regra dos terços e seção áurea) -->
+                <line x1="0" y1="173" x2="280" y2="173"/>
+                <line x1="0" y1="279" x2="280" y2="279"/>
+                <line x1="107" y1="0" x2="107" y2="452"/>
+                <line x1="173" y1="0" x2="173" y2="452"/>
+
+                <!-- Espiral de Fibonacci aproximada (Arco de Bézier) -->
+                <path d="
+                  M 173,279
+                  Q 173,173 107,173
+                  Q 0,173 0,279
+                  Q 0,452 173,452
+                  Q 280,452 280,279
+                  Q 280,107 107,107
+                  Q -40,107 -40,279
+                " />
+              </svg>
+            </div>
+            <p style="font-size:.8rem;color:var(--siena);text-align:center;font-style:italic;margin-top:.618rem;">Espiral de Fibonacci sobre <em>Madonna com Paisagem ao Fundo</em>, c. 1515</p>
+          </div>
+
+          <div class="analysis-text">
+            <p class="drop-cap">A análise técnica dos painéis atribuídos a Eleonora revela um uso sistemático da proporção áurea que vai além do que seria esperado em uma formação de ateliê convencional. A divisão dos campos pictóricos em zonas de 61,8% e 38,2% aparece consistentemente, como se a artista tivesse internalizado φ não como fórmula, mas como instinto compositivo.</p>
+            <p>Na <em>Madonna com Paisagem ao Fundo</em>, os terços horizontais delimitam com precisão o horizonte da paisagem (terço inferior), a posição da figura (terço médio) e o espaço de céu atmosférico (terço superior). O halo coincide com o ponto de interseção áureo superior-direito — o que em estudos modernos seria chamado de "ponto de atração máxima".</p>
+            <p>Nos estudos de drapeado, a curvatura das pregas obedece a espirais aproximadas de Fibonacci com precisão que só hoje conseguimos verificar por sobreposição digital. Fra' Benedetto, em sua carta de 1531, intuía algo desta ordem quando escrevia sobre uma "lei anterior à razão" — sem vocabulário matemático para nomear o que via.</p>
+            <p>A seção áurea vertical posiciona o rosto da Madonna exatamente em φ a partir da base, enquanto a criança no colo ocupa o segundo nível da sequência — uma relação de 1:φ:φ² que estrutura o campo pictórico da base ao topo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRONOLOGIA -->
+    <section class="timeline-section" aria-labelledby="timeline-heading">
+      <div class="container">
+        <p class="section-label" style="color:var(--ocre)">Cronologia</p>
+        <h2 class="section-heading" id="timeline-heading" style="color:var(--pergaminho)">Vida e Obra</h2>
+
+        <!-- Cronologia SVG -->
+        <div class="timeline-svg-wrapper" role="img" aria-label="Linha do tempo da vida de Eleonora di Castelvecchio">
+          <svg id="timeline-svg" viewBox="0 0 800 120" height="120" aria-hidden="true">
+            <!-- Linha principal -->
+            <line x1="40" y1="60" x2="760" y2="60" stroke="rgba(200,150,42,0.4)" stroke-width="1.5"/>
+
+            <!-- Pontos e eventos -->
+            <!-- 1487 -->
+            <circle cx="60" cy="60" r="5" fill="#c8962a"/>
+            <line x1="60" y1="65" x2="60" y2="85" stroke="rgba(200,150,42,0.4)" stroke-width="1"/>
+            <text x="60" y="98" text-anchor="middle" fill="rgba(200,150,42,0.9)" font-size="9" font-weight="600">c. 1487</text>
+            <text x="60" y="108" text-anchor="middle" fill="rgba(244,236,216,0.6)" font-size="7.5">Nascimento</text>
+
+            <!-- 1503 -->
+            <circle cx="165" cy="60" r="4" fill="rgba(200,150,42,0.6)"/>
+            <line x1="165" y1="55" x2="165" y2="35" stroke="rgba(200,150,42,0.4)" stroke-width="1"/>
+            <text x="165" y="28" text-anchor="middle" fill="rgba(200,150,42,0.9)" font-size="9" font-weight="600">1503</text>
+            <text x="165" y="17" text-anchor="middle" fill="rgba(244,236,216,0.6)" font-size="7.5">Ateliê di Rocho</text>
+
+            <!-- 1508 -->
+            <circle cx="255" cy="60" r="4" fill="rgba(200,150,42,0.6)"/>
+            <line x1="255" y1="65" x2="255" y2="85" stroke="rgba(200,150,42,0.4)" stroke-width="1"/>
+            <text x="255" y="98" text-anchor="middle" fill="rgba(200,150,42,0.9)" font-size="9" font-weight="600">1508</text>
+            <text x="255" y="108" text-anchor="middle" fill="rgba(244,236,216,0.6)" font-size="7.5">Primeiros painéis</text>
+
+            <!-- 1515 -->
+            <circle cx="380" cy="60" r="6" fill="#c8962a"/>
+            <line x1="380" y1="55" x2="380" y2="30" stroke="rgba(200,150,42,0.6)" stroke-width="1.5"/>
+            <text x="380" y="23" text-anchor="middle" fill="#c8962a" font-size="9.5" font-weight="600">c. 1515</text>
+            <text x="380" y="12" text-anchor="middle" fill="rgba(244,236,216,0.8)" font-size="7.5" font-style="italic">Madonna</text>
+
+            <!-- 1531 -->
+            <circle cx="530" cy="60" r="4" fill="rgba(200,150,42,0.6)"/>
+            <line x1="530" y1="65" x2="530" y2="85" stroke="rgba(200,150,42,0.4)" stroke-width="1"/>
+            <text x="530" y="98" text-anchor="middle" fill="rgba(200,150,42,0.9)" font-size="9" font-weight="600">1531</text>
+            <text x="530" y="108" text-anchor="middle" fill="rgba(244,236,216,0.6)" font-size="7.5">Carta de Fra' Benedetto</text>
+
+            <!-- 1542 -->
+            <circle cx="650" cy="60" r="5" fill="#8b1a1a"/>
+            <line x1="650" y1="55" x2="650" y2="35" stroke="rgba(139,26,26,0.5)" stroke-width="1"/>
+            <text x="650" y="28" text-anchor="middle" fill="rgba(200,100,100,0.9)" font-size="9" font-weight="600">1542</text>
+            <text x="650" y="17" text-anchor="middle" fill="rgba(244,236,216,0.6)" font-size="7.5">Morte, Florença</text>
+
+            <!-- 1998 -->
+            <circle cx="740" cy="60" r="4" fill="rgba(200,150,42,0.4)"/>
+            <line x1="740" y1="65" x2="740" y2="85" stroke="rgba(200,150,42,0.3)" stroke-width="1"/>
+            <text x="740" y="98" text-anchor="middle" fill="rgba(200,150,42,0.7)" font-size="9" font-weight="600">1998</text>
+            <text x="740" y="108" text-anchor="middle" fill="rgba(244,236,216,0.5)" font-size="7.5">Redescoberta</text>
+          </svg>
+        </div>
+
+        <ul class="timeline-list" aria-label="Cronologia de Eleonora di Castelvecchio">
+          <li class="timeline-item"><span class="timeline-year">c. 1487</span><div class="timeline-event"><strong>Nascimento em Castelvecchio</strong>Filha de Bartolomeo di Castelvecchio, farmacêutico, e Agnese Porcari, de Siena.</div></li>
+          <li class="timeline-item"><span class="timeline-year">c. 1503</span><div class="timeline-event"><strong>Entrada no ateliê de Maestro Angiolo di Rocho</strong>Encaminhada ao ateliê de Pistoia pela mediação de um tio paterno com ligações ao comércio de tintas.</div></li>
+          <li class="timeline-item"><span class="timeline-year">1508</span><div class="timeline-event"><strong>Primeiros painéis documentados</strong>Dois retábulos para a Igreja de Sant'Agostino di Montale, atribuídos a Eleonora por Nannucci.</div></li>
+          <li class="timeline-item"><span class="timeline-year">1511</span><div class="timeline-event"><strong>Morte de Maestro Angiolo</strong>Eleonora assume a direção efetiva do ateliê sob o nome de Giandomenico di Rocho.</div></li>
+          <li class="timeline-item"><span class="timeline-year">c. 1515</span><div class="timeline-event"><strong><em>Madonna com Paisagem ao Fundo</em></strong>Primeira aplicação documentada da técnica do <em>velo di fumo</em> em composição de grande formato.</div></li>
+          <li class="timeline-item"><span class="timeline-year">1531</span><div class="timeline-event"><strong>Carta de Fra' Benedetto da Volterra</strong>Documento central para as atribuições modernas.</div></li>
+          <li class="timeline-item"><span class="timeline-year">1542</span><div class="timeline-event"><strong>Morte em Florença</strong>Provavelmente de febre tifóide. Deixou uma filha, Isabetta, e anotações técnicas inéditas.</div></li>
+          <li class="timeline-item"><span class="timeline-year">1998</span><div class="timeline-event"><strong>Descoberta moderna por Vera Nannucci</strong>Identificação do tratado técnico inédito no Convento de Santa Caterina, Prato.</div></li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer role="contentinfo">
+    <p><strong>Eleonora di Castelvecchio — Obra Reunida</strong></p>
+    <p>Com agradecimentos ao <strong>Museo Civico di Pistoia</strong>, ao <strong>Arquivo Estatal de Florença</strong>,<br>
+    à <strong>Università di Bologna</strong> (Departamento de História da Arte) e às <strong>coleções privadas da Toscana</strong>.</p>
+    <p style="margin-top:1rem;opacity:.5;font-size:.8rem;">Projeto coordenado por Vera Nannucci · Texto: Chiara Lanzoni · 2024</p>
+  </footer>
+
+  <!-- ══════════════════════════════════════
+       EXAMINE MODE OVERLAY
+  ══════════════════════════════════════ -->
+  <div id="examine-overlay" role="dialog" aria-modal="true" aria-labelledby="examine-title">
+    <button class="examine-close" id="examine-close" aria-label="Fechar examine mode">ESC / Fechar</button>
+
+    <div class="examine-left">
+      <div class="examine-artwork-wrapper" id="examine-artwork-wrapper">
+        <!-- Obra clonada pelo JS -->
+        <div id="composition-overlay" aria-hidden="true">
+          <svg viewBox="0 0 280 452" id="composition-svg">
+            <!-- Linhas de terços -->
+            <line id="c-h1" x1="0" y1="150" x2="280" y2="150" stroke="rgba(200,150,42,0.6)" stroke-width="1" stroke-dasharray="6 4"/>
+            <line id="c-h2" x1="0" y1="301" x2="280" y2="301" stroke="rgba(200,150,42,0.6)" stroke-width="1" stroke-dasharray="6 4"/>
+            <line id="c-v1" x1="93" y1="0" x2="93" y2="452" stroke="rgba(200,150,42,0.6)" stroke-width="1" stroke-dasharray="6 4"/>
+            <line id="c-v2" x1="187" y1="0" x2="187" y2="452" stroke="rgba(200,150,42,0.6)" stroke-width="1" stroke-dasharray="6 4"/>
+            <!-- Seção áurea -->
+            <line id="c-phi-h" x1="0" y1="173" x2="280" y2="173" stroke="rgba(255,180,50,0.5)" stroke-width="1" stroke-dasharray="3 5"/>
+            <line id="c-phi-v" x1="107" y1="0" x2="107" y2="452" stroke="rgba(255,180,50,0.5)" stroke-width="1" stroke-dasharray="3 5"/>
+            <!-- Espiral de Fibonacci simplificada -->
+            <path d="M 173,279 Q 173,173 107,173 Q 0,173 0,279 Q 0,452 173,452 Q 280,452 280,279 Q 280,107 107,107"
+              fill="none" stroke="rgba(200,150,42,0.7)" stroke-width="1.5"
+              stroke-dasharray="600" stroke-dashoffset="600"
+              id="c-spiral"/>
+            <!-- Ponto focais -->
+            <circle cx="107" cy="173" r="4" fill="rgba(200,150,42,0.8)"/>
+            <circle cx="173" cy="279" r="4" fill="rgba(200,150,42,0.8)"/>
+            <!-- Labels -->
+            <text x="5" y="165" fill="rgba(200,150,42,0.8)" font-size="9" font-family="Georgia,serif">φ</text>
+            <text x="5" y="295" fill="rgba(200,150,42,0.6)" font-size="9" font-family="Georgia,serif">⅔</text>
+          </svg>
+        </div>
+        <div id="light-overlay" aria-hidden="true">
+          <svg viewBox="0 0 280 452" id="light-svg">
+            <!-- Zona de luz principal (canto superior esquerdo simulado) -->
+            <defs>
+              <radialGradient id="light-zone" cx="20%" cy="15%" r="70%">
+                <stop offset="0%" stop-color="rgba(255,220,150,0.4)"/>
+                <stop offset="50%" stop-color="rgba(255,180,80,0.15)"/>
+                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+              </radialGradient>
+              <radialGradient id="shadow-zone" cx="80%" cy="85%" r="60%">
+                <stop offset="0%" stop-color="rgba(20,10,5,0.5)"/>
+                <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+              </radialGradient>
+            </defs>
+            <rect width="280" height="452" fill="url(#light-zone)"/>
+            <rect width="280" height="452" fill="url(#shadow-zone)"/>
+            <!-- Label -->
+            <text x="15" y="30" fill="rgba(255,220,150,0.8)" font-size="9" font-family="Georgia,serif" font-style="italic">zona de luz</text>
+            <text x="185" y="430" fill="rgba(20,10,5,0.6)" font-size="9" font-family="Georgia,serif" font-style="italic">sombra</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="examine-right">
+      <h2 class="examine-title" id="examine-title">—</h2>
+      <div class="examine-divider"></div>
+      <div class="examine-ficha" id="examine-ficha">
+        <p><strong>Ano</strong><span id="ef-year">—</span></p>
+        <p><strong>Técnica</strong><span id="ef-technique">—</span></p>
+        <p><strong>Dimensões</strong><span id="ef-dimensions">—</span></p>
+        <p><strong>Procedência</strong><span id="ef-provenance">—</span></p>
+      </div>
+      <div class="examine-description" id="examine-description">—</div>
+      <div class="examine-toggles">
+        <button class="examine-toggle-btn" id="toggle-composition" aria-pressed="false">
+          Mostrar composição (proporção áurea)
+        </button>
+        <button class="examine-toggle-btn" id="toggle-light" aria-pressed="false">
+          Mostrar análise de luz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════
+    // SCROLL REVEAL
+    // ═══════════════════════════════════════
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const card = entry.target;
+            const index = Array.from(card.parentElement.children).indexOf(card);
+            card.style.animationDelay = (index * 0.15) + 's';
+            card.classList.add('revealed');
+            observer.unobserve(card);
+          }
+        });
+      }, { threshold: 0.2 });
+      document.querySelectorAll('.artwork-card').forEach(card => observer.observe(card));
+    } else {
+      document.querySelectorAll('.artwork-card').forEach(card => {
+        card.style.opacity = '1';
+        card.style.transform = 'none';
+      });
+    }
+
+    // ═══════════════════════════════════════
+    // EXAMINE MODE
+    // ═══════════════════════════════════════
+    const overlay = document.getElementById('examine-overlay');
+    const closeBtn = document.getElementById('examine-close');
+    const artworkWrapper = document.getElementById('examine-artwork-wrapper');
+    const compOverlay = document.getElementById('composition-overlay');
+    const lightOverlay = document.getElementById('light-overlay');
+    const toggleComp = document.getElementById('toggle-composition');
+    const toggleLight = document.getElementById('toggle-light');
+    const examineTitle = document.getElementById('examine-title');
+    const efYear = document.getElementById('ef-year');
+    const efTechnique = document.getElementById('ef-technique');
+    const efDimensions = document.getElementById('ef-dimensions');
+    const efProvenance = document.getElementById('ef-provenance');
+    const examineDesc = document.getElementById('examine-description');
+
+    let previousFocus = null;
+    let focusableElements = [];
+
+    function openExamine(card) {
+      previousFocus = card;
+
+      // Preencher dados
+      examineTitle.textContent = card.dataset.title || '—';
+      efYear.textContent = card.dataset.year || '—';
+      efTechnique.textContent = card.dataset.technique || '—';
+      efDimensions.textContent = card.dataset.dimensions || '—';
+      efProvenance.textContent = card.dataset.provenance || '—';
+      examineDesc.textContent = card.dataset.description || '—';
+
+      // Clonar SVG da obra para o overlay
+      const artworkSVG = card.querySelector('svg.artwork-svg');
+      // Remover SVG anterior (se houver)
+      const oldSVG = artworkWrapper.querySelector('svg.artwork-svg');
+      if (oldSVG) oldSVG.remove();
+
+      if (artworkSVG) {
+        const clone = artworkSVG.cloneNode(true);
+        clone.removeAttribute('data-for-examine');
+        clone.style.filter = 'sepia(0.08) contrast(0.97)';
+        // Inserir antes dos overlays
+        artworkWrapper.insertBefore(clone, compOverlay);
+      }
+
+      // Reset toggles
+      compOverlay.classList.remove('active');
+      lightOverlay.classList.remove('active');
+      toggleComp.classList.remove('active');
+      toggleComp.setAttribute('aria-pressed', 'false');
+      toggleLight.classList.remove('active');
+      toggleLight.setAttribute('aria-pressed', 'false');
+
+      // Abrir overlay
+      overlay.classList.add('active');
+      requestAnimationFrame(() => {
+        overlay.classList.add('visible');
+      });
+
+      // Trap focus
+      focusableElements = Array.from(overlay.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      ));
+      if (focusableElements.length) focusableElements[0].focus();
+
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeExamine() {
+      overlay.classList.remove('visible');
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+        if (previousFocus) previousFocus.focus();
+      }, 400);
+    }
+
+    // Clique nas cards
+    document.querySelectorAll('.artwork-card').forEach(card => {
+      card.addEventListener('click', () => openExamine(card));
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openExamine(card);
+        }
+      });
+    });
+
+    // Fechar
+    closeBtn.addEventListener('click', closeExamine);
+
+    // Clique fora da área de conteúdo (no overlay escuro)
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) closeExamine();
+    });
+
+    // ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && overlay.classList.contains('active')) {
+        closeExamine();
+      }
+
+      // Trap focus dentro do overlay
+      if (overlay.classList.contains('active') && e.key === 'Tab') {
+        if (!focusableElements.length) return;
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    });
+
+    // Toggle composição
+    toggleComp.addEventListener('click', () => {
+      const isActive = compOverlay.classList.toggle('active');
+      toggleComp.classList.toggle('active', isActive);
+      toggleComp.setAttribute('aria-pressed', isActive.toString());
+
+      // Animar espiral
+      if (isActive) {
+        const spiral = document.getElementById('c-spiral');
+        if (spiral) {
+          spiral.style.animation = 'none';
+          spiral.getBoundingClientRect(); // reflow
+          spiral.style.strokeDashoffset = '600';
+          requestAnimationFrame(() => {
+            spiral.style.transition = 'stroke-dashoffset 2s ease';
+            spiral.style.strokeDashoffset = '0';
+          });
+        }
+      }
+    });
+
+    // Toggle luz
+    toggleLight.addEventListener('click', () => {
+      const isActive = lightOverlay.classList.toggle('active');
+      toggleLight.classList.toggle('active', isActive);
+      toggleLight.setAttribute('aria-pressed', isActive.toString());
+    });
+  </script>
+</body>
+</html>
