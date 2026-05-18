@@ -64,6 +64,20 @@ Organizado por tema, não por ordem cronológica.
 - Escala pentatônica como constraint de áudio: garante harmonia independente de ritmo,
   mesmo com notas aleatórias. (visto em 04-vaporwave-synthwave)
 
+## Sobre interação e modos especiais (V3 lessons)
+
+- Examine mode / overlay com trap focus: padrão dialog nativo (role="dialog", aria-modal)
+  + ESC + clique fora + gestão de foco anterior — implementado sem libs em ~80 linhas JS.
+  (visto em 06-renascimento-digital V3)
+- stroke-dashoffset para animar paths SVG: idioma mais limpo que transformar element ou
+  usar GSAP. Ideal para espirais, linhas de construção e trajetos técnicos. (visto em 06)
+- localStorage para persistência de arte generativa: transforma demo em "obra que envelhece"
+  — impacto emocional desproporcional ao esforço técnico. (visto em 05-generativo-fluxo V3)
+- Easter eggs condicionados a gestos repetidos (3x click): recompensar exploração sem
+  sinalização excessiva. Melhor que botões escondidos. (visto em 04-vaporwave-synthwave V3)
+- Boot screen estilo terminal como loading: barata de implementar (setTimeout + classList),
+  mas vende a fantasia do produto desde o primeiro frame. (visto em 04-vaporwave-synthwave V3)
+
 ---
 
 _Exemplos contribuídos: 01-brutalist-archive, 02-pixel-8bit, 03-low-poly-3d, 04-vaporwave-synthwave, 05-generativo-fluxo, 06-renascimento-digital._
