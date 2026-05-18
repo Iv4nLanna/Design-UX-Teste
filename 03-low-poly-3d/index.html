@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOW POLY 3D — N°03</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0c0c1a; overflow:hidden; }
+    canvas { display:block; position:fixed; inset:0; }
+    .overlay {
+      position:fixed; inset:0; pointer-events:none; z-index:10;
+      display:flex; flex-direction:column; justify-content:space-between; padding:2.5rem;
+      font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:rgba(255,255,255,.9);
+    }
+    .ov-top { display:flex; justify-content:space-between; align-items:flex-start; }
+    .ov-title { font-size:clamp(.7rem,1.8vw,1.1rem); font-weight:800; letter-spacing:.35em; text-transform:uppercase; }
+    .ov-num   { font-size:clamp(.7rem,1.8vw,1.1rem); font-weight:200; opacity:.45; letter-spacing:.2em; }
+    .ov-desc  { max-width:260px; font-size:.65rem; line-height:1.7; opacity:.35;
+                letter-spacing:.08em; margin-top:.75rem; }
+    .ov-bottom { display:flex; justify-content:space-between; font-size:.6rem; opacity:.35;
+                 letter-spacing:.25em; text-transform:uppercase; }
+    .tag { border:1px solid rgba(255,255,255,.2); padding:.15rem .5rem; border-radius:2px; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<div class="overlay">
+  <div class="ov-top">
+    <div>
+      <div style="display:flex;justify-content:space-between;gap:3rem;">
+        <span class="ov-title">Low-Poly 3D</span>
+        <span class="ov-num">N°03</span>
+      </div>
+      <p class="ov-desc">Icosaedro faceted com vertex colors aleatórios da paleta, flat shading e wireframe ghost. Rotação auto + OrbitControls.</p>
+    </div>
+  </div>
+  <div class="ov-bottom">
+    <div style="display:flex;gap:.75rem;">
+      <span class="tag">Three.js</span>
+      <span class="tag">Low-Poly</span>
+      <span class="tag">Flat Shading</span>
+    </div>
+    <span>Claude × Ivan Lanna · 2026</span>
+  </div>
+</div>
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  const palette = ['#FF6B6B','#4ECDC4','#45B7D1','#96E6A1','#DDA0DD',
+                   '#FFD93D','#6BCB77','#FF8B94','#A8DADC','#F4A261'];
+
+  const scene    = new THREE.Scene();
+  const camera   = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 7);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(devicePixelRatio);
+  renderer.setClearColor(0x0c0c1a, 1);
+  document.body.appendChild(renderer.domElement);
+
+  function buildGroup(radius, wireOpacity = .08) {
+    const geo  = new THREE.IcosahedronGeometry(radius, 1);
+    const pos  = geo.attributes.position;
+    const cols = [];
+    for (let i = 0; i < pos.count; i += 3) {
+      const c = new THREE.Color(palette[Math.floor(Math.random() * palette.length)]);
+      cols.push(c.r, c.g, c.b, c.r, c.g, c.b, c.r, c.g, c.b);
+    }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    const solid = new THREE.Mesh(geo, new THREE.MeshPhongMaterial({ vertexColors: true, flatShading: true }));
+    const wire  = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(radius * 1.015, 1),
+      new THREE.MeshBasicMaterial({ color: '#ffffff', wireframe: true, transparent: true, opacity: wireOpacity })
+    );
+    const g = new THREE.Group();
+    g.add(solid, wire);
+    return g;
+  }
+
+  // 3 meshes em posições diferentes
+  const main  = buildGroup(1.5, .08);
+  const left  = buildGroup(0.7, .12);
+  const right = buildGroup(0.55, .15);
+  left.position.set(-3.2, -0.5, -1);
+  right.position.set(3.0, 0.8, -0.5);
+  scene.add(main, left, right);
+
+  // Névoa sutil
+  scene.fog = new THREE.Fog('#0c0c1a', 8, 18);
+
+  scene.add(new THREE.AmbientLight('#334466', 1.0));
+  const dir = new THREE.DirectionalLight('#ffffff', 1.3);
+  dir.position.set(4, 6, 4);
+  scene.add(dir);
+
+  // Luz colorida secundária
+  const pointL = new THREE.PointLight('#4ECDC4', 1.2, 12);
+  pointL.position.set(-3, 2, 2);
+  scene.add(pointL);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping   = true;
+  controls.dampingFactor   = 0.05;
+  controls.enableZoom      = false;
+  controls.autoRotate      = true;
+  controls.autoRotateSpeed = 0.5;
+
+  // Hover pulse: raycaster no mesh principal
+  const raycaster = new THREE.Raycaster();
+  const mouse     = new THREE.Vector2();
+  let hovered     = false;
+  window.addEventListener('mousemove', e => {
+    mouse.x =  (e.clientX / innerWidth)  * 2 - 1;
+    mouse.y = -(e.clientY / innerHeight) * 2 + 1;
+  });
+
+  const clock = new THREE.Clock();
+  function animate() {
+    requestAnimationFrame(animate);
+    const t = clock.getElapsedTime();
+
+    // Órbitas independentes dos shapes secundários
+    left.rotation.y  = t * 0.4;
+    right.rotation.y = -t * 0.6;
+    right.rotation.x = t * 0.3;
+
+    // Raycaster hover pulse no main
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObject(main.children[0]);
+    hovered = hits.length > 0;
+    const targetScale = hovered ? 1.08 : 1.0;
+    main.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.08);
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+</script>
+</body>
+</html>

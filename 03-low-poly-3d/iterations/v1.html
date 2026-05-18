@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOW POLY 3D — N°03</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0c0c1a; overflow:hidden; }
+    canvas { display:block; }
+  </style>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+<script type="module">
+  import * as THREE from 'three';
+  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+  const palette = ['#FF6B6B','#4ECDC4','#45B7D1','#96E6A1','#DDA0DD',
+                   '#FFD93D','#6BCB77','#FF8B94','#A8DADC','#F4A261'];
+
+  const scene    = new THREE.Scene();
+  scene.background = new THREE.Color('#0c0c1a');
+  const camera   = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 5);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.setPixelRatio(devicePixelRatio);
+  document.body.appendChild(renderer.domElement);
+
+  function buildMesh(radius = 1.5) {
+    const geo  = new THREE.IcosahedronGeometry(radius, 1);
+    const pos  = geo.attributes.position;
+    const cols = [];
+    for (let i = 0; i < pos.count; i += 3) {
+      const c = new THREE.Color(palette[Math.floor(Math.random() * palette.length)]);
+      cols.push(c.r, c.g, c.b, c.r, c.g, c.b, c.r, c.g, c.b);
+    }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    const mat = new THREE.MeshPhongMaterial({ vertexColors: true, flatShading: true });
+    return new THREE.Mesh(geo, mat);
+  }
+
+  const mesh = buildMesh();
+  scene.add(mesh);
+  scene.add(new THREE.AmbientLight('#334466', 0.9));
+  const dir = new THREE.DirectionalLight('#ffffff', 1.4);
+  dir.position.set(4, 6, 4);
+  scene.add(dir);
+
+  const controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping    = true;
+  controls.dampingFactor    = 0.06;
+  controls.enableZoom       = false;
+  controls.autoRotate       = true;
+  controls.autoRotateSpeed  = 0.8;
+
+  function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+</script>
+</body>
+</html>
