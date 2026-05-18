@@ -712,7 +712,7 @@ function draw(){
   [densBuf, densBufB] = [densBufB, densBuf];
 
   // user splat
-  if (lastMouse.down && (mouseIsPressed || (typeof touches!=='undefined' && touches.length))){
+  if (lastMouse.down){
     const {px,py,dx,dy} = pointerData();
     const speed = Math.min(0.6, Math.hypot(dx,dy)*4 + 0.06);
     const idx = currentStroke ? currentStroke.paletteIdx : Math.floor(Math.random()*palette.strokes.length);
