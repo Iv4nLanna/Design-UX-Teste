@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DESIGN QUEST</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bk:#000; --wh:#fff; --rd:#cc0000; --bl:#0000fc; --gr:#00a800;
+      --yw:#fcbc04; --pu:#7c00fc; --cy:#00f8f8; --or:#fc7c00; --gy:#7c7c7c;
+    }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bk); color: var(--wh);
+      font-family: 'Press Start 2P', monospace;
+      image-rendering: pixelated; image-rendering: crisp-edges;
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    }
+    /* CRT scanlines */
+    body::after {
+      content:''; position:fixed; inset:0; pointer-events:none; z-index:100;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px,
+        rgba(0,0,0,.18) 2px, rgba(0,0,0,.18) 4px);
+    }
+    .screen {
+      width: min(680px, 96vw);
+      border: 4px solid var(--gy);
+      box-shadow: 0 0 0 2px #000, 0 0 28px rgba(0,252,0,.12);
+      padding: 2rem;
+    }
+    /* Title */
+    .title-area { text-align:center; border-bottom:4px solid var(--wh); padding-bottom:1.5rem; margin-bottom:1.5rem; }
+    .game-title { font-size:clamp(.9rem,5vw,1.8rem); color:var(--yw); text-shadow:4px 4px 0 var(--or); animation:blink-slow 2s steps(1) infinite; }
+    .subtitle { font-size:.45rem; color:var(--gy); letter-spacing:.15em; margin-top:.75rem; }
+    /* Menu */
+    .menu { list-style:none; margin-bottom:1.5rem; }
+    .menu li { font-size:.6rem; padding:.75rem .5rem; border-bottom:2px solid rgba(255,255,255,.08);
+               display:flex; gap:.75rem; align-items:center; cursor:pointer; }
+    .menu li.sel { color:var(--yw); }
+    .arr { color:var(--rd); opacity:0; }
+    .menu li.sel .arr { animation:blink .5s steps(1) infinite; opacity:1; }
+    /* Stats */
+    .stats { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem; }
+    .stat p { font-size:.45rem; color:var(--cy); margin-bottom:.35rem; }
+    .bar { height:10px; background:var(--gy); }
+    .bar-fill { height:100%; }
+    .hp .bar-fill  { width:75%; background:var(--gr); }
+    .xp .bar-fill  { width:40%; background:var(--bl); }
+    .cr .bar-fill  { width:90%; background:var(--yw); }
+    .it .bar-fill  { width:55%; background:var(--rd); }
+    /* Press start */
+    .ps { text-align:center; font-size:.5rem; animation:blink .9s steps(1) infinite; padding:1rem 0; }
+    /* Ticker */
+    .ticker { overflow:hidden; border-top:4px solid var(--wh); margin-top:1rem; padding:.5rem 0; }
+    .ticker-inner { display:inline-block; white-space:nowrap; font-size:.45rem;
+                    color:var(--yw); animation:scroll-t 18s linear infinite; }
+    @keyframes blink      { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+    @keyframes blink-slow { 0%,59%{opacity:1} 60%,100%{opacity:.6} }
+    @keyframes scroll-t   { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
+  </style>
+</head>
+<body>
+<div class="screen">
+  <div class="title-area">
+    <h1 class="game-title">DESIGN QUEST</h1>
+    <p class="subtitle">© 2026 IVAN LANNA LABS · VER 0.1.0</p>
+  </div>
+  <ul class="menu" id="menu">
+    <li class="sel"><span class="arr">▶</span>NEW GAME</li>
+    <li><span class="arr">▶</span>CONTINUE</li>
+    <li><span class="arr">▶</span>GALLERY</li>
+    <li><span class="arr">▶</span>SETTINGS</li>
+  </ul>
+  <div class="stats">
+    <div class="stat hp"><p>HP</p><div class="bar"><div class="bar-fill"></div></div></div>
+    <div class="stat xp"><p>XP</p><div class="bar"><div class="bar-fill"></div></div></div>
+    <div class="stat cr"><p>CREATIVITY</p><div class="bar"><div class="bar-fill"></div></div></div>
+    <div class="stat it"><p>ITERATIONS</p><div class="bar"><div class="bar-fill"></div></div></div>
+  </div>
+  <p class="ps">PRESS ENTER TO START</p>
+  <div class="ticker">
+    <span class="ticker-inner">★ DESIGN QUEST ★ PIXEL ART MODE ★ 8-BIT ENGINE ★ CLAUDE × IVAN LANNA ★ CREATIVE LVL MAX ★ PRESS START ★&nbsp;&nbsp;&nbsp;</span>
+  </div>
+</div>
+<script>
+  const items = Array.from(document.querySelectorAll('#menu li'));
+  let sel = 0;
+  function moveSel(d) {
+    items[sel].classList.remove('sel');
+    sel = (sel + d + items.length) % items.length;
+    items[sel].classList.add('sel');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSel(1); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); moveSel(-1); }
+  });
+  items.forEach((li, i) => li.addEventListener('click', () => {
+    items[sel].classList.remove('sel'); sel = i; li.classList.add('sel');
+  }));
+</script>
+</body>
+</html>

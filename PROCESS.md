@@ -27,12 +27,14 @@ _Nenhum aprendizado ainda._
 
 ## Sobre limites técnicos (CSS, WebGL, animações)
 
-_Nenhum aprendizado ainda._
+- Web Audio API: Claude gerencia bem, mas volumes precisam calibração manual
+  (ponto de equilíbrio: gain ~0.08 para UI sounds). (visto em 02-pixel-8bit)
 
 ## Sobre constraints estilísticos rígidos
 
-_Nenhum aprendizado ainda._
+- Paleta NES como variáveis CSS nomeadas: Claude respeitou 100%, sem inventar
+  cores fora da paleta. (visto em 02-pixel-8bit)
 
 ---
 
-_Exemplos contribuídos: 01-brutalist-archive._
+_Exemplos contribuídos: 01-brutalist-archive, 02-pixel-8bit._
