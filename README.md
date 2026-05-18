@@ -30,6 +30,9 @@ git add . && git commit -m "feat: add NN-novo-conceito"
 ## Sobre este laboratório
 
 - **Processo > artefato.** O index.html final é evidência; o README é o experimento.
+- **DeepSeek << Claude.** Ao executar estes designs com DeepSeek (vs Claude),
+  a qualidade do resultado foi muito inferior — menos precisão nas coordenadas
+  SVG, interações mais pobres, e necessidade de muito mais micro-gerenciamento.
 - **Zero atrito.** HTML/CSS/JS puro, CDN only. Abre clicando.
 - **Reprodutível.** Prompts completos preservados em `<details>` por iteração.
 - Spec: [docs/superpowers/specs/](docs/superpowers/specs/)
