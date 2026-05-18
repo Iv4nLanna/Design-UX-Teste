@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRUTALIST ARCHIVE — N°01</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root { --bk: #0a0a0a; --wh: #f0ede8; --ac: #ff2d00; }
+
+    body { background: var(--wh); color: var(--bk);
+           font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; cursor: none; }
+
+    #cur { position: fixed; width: 14px; height: 14px; background: var(--bk);
+           pointer-events: none; z-index: 9999; mix-blend-mode: difference;
+           transition: transform .15s; }
+
+    /* Hero */
+    .hero { min-height: 100vh; display: grid;
+            grid-template-columns: 5rem 1fr 5rem;
+            grid-template-rows: 1fr auto; border-bottom: 2px solid var(--bk); }
+    .sidebar { border-right: 2px solid var(--bk); padding: 2rem 1rem;
+               writing-mode: vertical-rl; font-size: .6rem;
+               letter-spacing: .3em; text-transform: uppercase; }
+    .title { padding: 3rem 2rem; font-size: clamp(5rem, 18vw, 16rem);
+             font-weight: 900; line-height: .85; text-transform: uppercase;
+             letter-spacing: -.04em; align-self: center; }
+    .title .ac { color: var(--ac); }
+    .num { border-left: 2px solid var(--bk); padding: 2rem 1rem;
+           font-size: .6rem; text-align: right; }
+    .bar { grid-column: 1 / 4; border-top: 2px solid var(--bk); padding: 1.5rem 2rem;
+           font-size: .7rem; letter-spacing: .25em; text-transform: uppercase;
+           display: flex; justify-content: space-between; }
+
+    /* Ticker */
+    .ticker { overflow: hidden; background: var(--ac); padding: .5rem 0; }
+    .ticker-inner { display: inline-block; white-space: nowrap;
+                    font-size: .65rem; letter-spacing: .2em; text-transform: uppercase;
+                    animation: tick 22s linear infinite; }
+    @keyframes tick { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+
+    /* Grid section */
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); }
+    .cell { border-right: 2px solid var(--bk); border-bottom: 2px solid var(--bk);
+            padding: 2rem 1.5rem; display: flex; flex-direction: column;
+            justify-content: flex-end; min-height: 28vh; }
+    .cell:nth-child(1) { grid-column: span 3; background: var(--bk); color: var(--wh); }
+    .cell:nth-child(2) { grid-column: span 1; background: var(--ac); }
+    .cell:nth-child(3) { grid-column: span 2; }
+    .cell:nth-child(4) { grid-column: span 2; }
+    .cell:nth-child(5) { grid-column: span 4; border-right: none; }
+    .ct { font-size: clamp(1.8rem, 4vw, 4rem); font-weight: 900;
+          line-height: .9; text-transform: uppercase; }
+    .cm { font-size: .6rem; letter-spacing: .3em; text-transform: uppercase;
+          margin-top: .75rem; opacity: .5; }
+
+    /* Grid hover */
+    .cell { transition: background .15s, color .15s; }
+    .cell:hover { background: var(--bk) !important; color: var(--wh) !important; cursor: none; }
+    .cell:nth-child(2):hover { background: var(--bk) !important; }
+
+    /* Cursor expand on headings */
+    #cur.big { transform: scale(3); }
+
+    /* ASCII section */
+    .ascii { background: var(--bk); color: var(--wh); padding: 4rem 2rem;
+             border-bottom: 2px solid var(--bk); overflow: hidden; }
+    .ascii pre { font-family: 'Courier New', monospace;
+                 font-size: clamp(.35rem, 1vw, .65rem); line-height: 1.2; white-space: pre;
+                 opacity: 0; transform: translateY(30px);
+                 transition: opacity .9s ease, transform .9s ease; }
+    .ascii pre.vis { opacity: 1; transform: none; }
+
+    /* Footer */
+    footer { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+    .fc { padding: 2rem; border-right: 2px solid var(--bk); }
+    .fc:last-child { border-right: none; }
+    .fl { font-size: .6rem; letter-spacing: .3em; text-transform: uppercase; opacity: .4; margin-bottom: .5rem; }
+    .fv { font-size: clamp(.9rem, 2vw, 1.5rem); font-weight: 800; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+<div id="cur"></div>
+
+<header class="hero">
+  <div class="sidebar">Design Archive · Vol. 01 · 2026</div>
+  <h1 class="title">BRU<br><span class="ac">TAL</span><br>ISM</h1>
+  <div class="num"><p>N°01</p><p>2026</p></div>
+  <div class="bar">
+    <span>Editorial Web Design Lab</span>
+    <span>Claude × Ivan Lanna</span>
+    <span>HTML/CSS/JS</span>
+  </div>
+</header>
+<div class="ticker"><span class="ticker-inner">★ BRUTALISM ★ EDITORIAL WEB DESIGN ★ CLAUDE × IVAN LANNA ★ DESIGN ARCHIVE VOL.01 ★ BREAK THE GRID ★ BRUTALISM ★ EDITORIAL WEB DESIGN ★</span></div>
+
+<section class="grid">
+  <div class="cell"><p class="ct">Type<br>over<br>image</p><p class="cm">§001 — Grid</p></div>
+  <div class="cell"><p class="ct">Acc</p><p class="cm">§002</p></div>
+  <div class="cell"><p class="ct">White<br>space<br>is a lie</p><p class="cm">§003 — Tension</p></div>
+  <div class="cell"><p class="ct">Sys<br>tem</p><p class="cm">§004 — Type</p></div>
+  <div class="cell"><p class="ct">Break the grid<br>on purpose</p><p class="cm">§005 — Intent</p></div>
+</section>
+
+<section class="ascii" id="ascii">
+  <pre id="apre">
+██████╗ ██████╗ ██╗   ██╗████████╗ █████╗ ██╗     ██╗███████╗███╗   ███╗
+██╔══██╗██╔══██╗██║   ██║╚══██╔══╝██╔══██╗██║     ██║██╔════╝████╗ ████║
+██████╔╝██████╔╝██║   ██║   ██║   ███████║██║     ██║███████╗██╔████╔██║
+██╔══██╗██╔══██╗██║   ██║   ██║   ██╔══██║██║     ██║╚════██║██║╚██╔╝██║
+██████╔╝██║  ██║╚██████╔╝   ██║   ██║  ██║███████╗██║███████║██║ ╚═╝ ██║
+╚═════╝ ╚═╝  ╚═╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝╚══════╝╚═╝     ╚═╝
+  </pre>
+</section>
+
+<footer>
+  <div class="fc"><p class="fl">Process</p><p class="fv">From Scratch</p></div>
+  <div class="fc"><p class="fl">AI Role</p><p class="fv">Co-Designer</p></div>
+  <div class="fc"><p class="fl">Iteration</p><p class="fv">V.02</p></div>
+</footer>
+
+<script>
+  const cur = document.getElementById('cur');
+  document.addEventListener('mousemove', e => {
+    cur.style.left = (e.clientX - 7) + 'px';
+    cur.style.top  = (e.clientY - 7) + 'px';
+  });
+  // Cursor expands over large elements
+  document.querySelectorAll('.ct, h1, .fv').forEach(el => {
+    el.addEventListener('mouseenter', () => cur.classList.add('big'));
+    el.addEventListener('mouseleave', () => cur.classList.remove('big'));
+  });
+  new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) document.getElementById('apre').classList.add('vis');
+  }, { threshold: .2 }).observe(document.getElementById('ascii'));
+</script>
+</body>
+</html>

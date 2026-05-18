@@ -5,7 +5,9 @@ Organizado por tema, não por ordem cronológica.
 
 ## Sobre briefing inicial
 
-_Nenhum aprendizado ainda. Será preenchido após os exemplos seed._
+- Briefings com constraints técnicos explícitos (paleta HEX, técnicas por nome,
+  dimensões numéricas) convergem mais rápido — v1 já 80% correto.
+  (visto em 01-brutalist-archive)
 
 ## Sobre referências visuais
 
@@ -13,7 +15,11 @@ _Nenhum aprendizado ainda._
 
 ## Sobre quando deixar o Claude liderar vs micro-gerenciar
 
-_Nenhum aprendizado ainda._
+- Grid layouts assimétricos: micro-gerenciar. O Claude tende pra grids regulares.
+  (visto em 01-brutalist-archive)
+- Implementações CSS de efeitos conhecidos (glitch, blend-mode): deixar o Claude
+  propor — tende a ser melhor do que uma spec manual.
+  (visto em 01-brutalist-archive)
 
 ## Sobre iteração e convergência
 
@@ -29,4 +35,4 @@ _Nenhum aprendizado ainda._
 
 ---
 
-_Exemplos contribuídos: nenhum ainda._
+_Exemplos contribuídos: 01-brutalist-archive._
