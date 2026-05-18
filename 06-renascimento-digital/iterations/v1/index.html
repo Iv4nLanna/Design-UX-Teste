@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eleonora di Castelvecchio — Obra Reunida</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════
+       VARIÁVEIS — PALETA RENASCENTISTA
+    ══════════════════════════════════════ */
+    :root {
+      --pergaminho: #f4ecd8;
+      --pergaminho-escuro: #e8d9b8;
+      --tinta: #2c1810;
+      --siena: #8b4513;
+      --ocre: #c8962a;
+      --verde-oliva: #6b7c3a;
+      --vermelho-veneziano: #8b1a1a;
+      --sombra: #3d2b1a;
+      --ouro: #b8860b;
+
+      /* Proporção áurea φ = 1.618 */
+      --phi: 1.618;
+      /* Colunas: principal 61.8% / lateral 38.2% */
+      --col-principal: 61.8%;
+      --col-lateral: 38.2%;
+      /* Margem base derivada de phi */
+      --margem-base: 2.618rem;   /* ~φ² × 1rem */
+      --margem-secao: 4.236rem; /* ~φ³ × 1rem */
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      background: var(--pergaminho);
+      color: var(--tinta);
+      font-family: 'EB Garamond', Georgia, serif;
+      font-size: 1.125rem;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* SKIP LINK */
+    .skip-link {
+      position: absolute; top: -100%; left: 1rem;
+      background: var(--vermelho-veneziano); color: var(--pergaminho);
+      padding: 0.5rem 1rem; font-family: 'EB Garamond', serif;
+      font-size: 1rem; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 1rem; }
+
+    /* ══════════════════════════════════════
+       LAYOUT BASE — PROPORÇÃO ÁUREA
+    ══════════════════════════════════════ */
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 var(--margem-base);
+    }
+
+    .grid-phi {
+      display: grid;
+      grid-template-columns: var(--col-principal) var(--col-lateral);
+      gap: var(--margem-base);
+    }
+
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    header {
+      background: var(--tinta);
+      color: var(--pergaminho);
+      padding: var(--margem-secao) var(--margem-base);
+      text-align: center;
+      position: relative;
+    }
+
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(to right, var(--vermelho-veneziano), var(--ocre), var(--vermelho-veneziano));
+    }
+
+    .artist-name {
+      font-size: clamp(2.2rem, 6vw, 4rem);
+      font-weight: 500;
+      font-style: italic;
+      letter-spacing: 0.03em;
+      color: var(--pergaminho);
+      margin: 0;
+      line-height: 1.1;
+    }
+
+    .artist-dates {
+      display: block;
+      font-size: clamp(1rem, 2.5vw, 1.4rem);
+      font-style: normal;
+      color: var(--ocre);
+      margin-top: 0.618rem;
+      letter-spacing: 0.15em;
+    }
+
+    .artist-location {
+      display: block;
+      font-size: 1rem;
+      font-style: italic;
+      color: rgba(244, 236, 216, 0.6);
+      margin-top: 0.382rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* Ornamento decorativo */
+    .ornament {
+      display: block;
+      color: var(--ocre);
+      font-size: 1.5rem;
+      letter-spacing: 0.5em;
+      margin: 1rem 0;
+      opacity: 0.7;
+    }
+
+    /* ══════════════════════════════════════
+       CITAÇÃO DE ABERTURA
+    ══════════════════════════════════════ */
+    .opening-quote {
+      background: var(--tinta);
+      color: var(--pergaminho);
+      padding: var(--margem-secao) var(--margem-base);
+      text-align: center;
+    }
+
+    .opening-quote blockquote {
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-style: italic;
+      font-weight: 400;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+      color: var(--pergaminho);
+    }
+
+    .opening-quote cite {
+      display: block;
+      margin-top: 1.618rem;
+      font-size: 0.9rem;
+      font-style: normal;
+      letter-spacing: 0.12em;
+      color: var(--ocre);
+      text-transform: uppercase;
+    }
+
+    /* ══════════════════════════════════════
+       SEÇÕES
+    ══════════════════════════════════════ */
+    section {
+      padding: var(--margem-secao) 0;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--siena);
+      margin-bottom: 1.618rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--siena), transparent);
+    }
+
+    .section-heading {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 500;
+      font-style: italic;
+      color: var(--tinta);
+      margin-bottom: var(--margem-base);
+      line-height: 1.2;
+    }
+
+    /* ══════════════════════════════════════
+       DROP CAPS — primeira letra de seção
+    ══════════════════════════════════════ */
+    .drop-cap::first-letter {
+      float: left;
+      font-size: 4em;
+      line-height: 0.85;
+      font-weight: 700;
+      color: var(--vermelho-veneziano);
+      margin-right: 0.08em;
+      margin-top: 0.05em;
+      font-style: normal;
+    }
+
+    /* ══════════════════════════════════════
+       BIO — LAYOUT EM GRID φ
+    ══════════════════════════════════════ */
+    .bio-section {
+      background: var(--pergaminho);
+    }
+
+    .bio-content {
+      font-size: 1.125rem;
+      line-height: 1.8;
+      color: var(--tinta);
+    }
+
+    .bio-content p {
+      margin-bottom: 1.618em;
+      text-align: justify;
+      hyphens: auto;
+    }
+
+    .bio-content p:last-child { margin-bottom: 0; }
+
+    .bio-aside {
+      padding-top: 0.5rem;
+    }
+
+    .bio-pullquote {
+      border-left: 3px solid var(--vermelho-veneziano);
+      padding: 1rem 1.618rem;
+      background: var(--pergaminho-escuro);
+      font-style: italic;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      color: var(--sombra);
+    }
+
+    .bio-pullquote cite {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.85rem;
+      font-style: normal;
+      color: var(--siena);
+      letter-spacing: 0.08em;
+    }
+
+    .bio-details {
+      margin-top: 2rem;
+      font-size: 0.9rem;
+      line-height: 2;
+      color: var(--sombra);
+      border-top: 1px solid var(--ocre);
+      padding-top: 1rem;
+    }
+
+    .bio-details dt {
+      font-weight: 700;
+      color: var(--siena);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .bio-details dd { margin-left: 0; margin-bottom: 0.5rem; }
+
+    /* ══════════════════════════════════════
+       GALERIA — PLACEHOLDERS ÁUREOS
+    ══════════════════════════════════════ */
+    .gallery-section {
+      background: var(--pergaminho-escuro);
+      padding: var(--margem-secao) 0;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--margem-base);
+      margin-top: var(--margem-base);
+    }
+
+    .artwork-card {
+      background: var(--pergaminho);
+      border: 1px solid var(--ocre);
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .artwork-card:hover,
+    .artwork-card:focus {
+      box-shadow: 0 8px 32px rgba(44, 24, 16, 0.2);
+      outline: 2px solid var(--siena);
+    }
+
+    /* Placeholder com proporção áurea 1:1.618 */
+    .artwork-placeholder {
+      width: 100%;
+      aspect-ratio: 1 / 1.618;
+      background: var(--pergaminho-escuro);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .artwork-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border: 1px solid var(--ocre);
+      opacity: 0.4;
+    }
+
+    .artwork-placeholder-text {
+      font-style: italic;
+      color: var(--siena);
+      opacity: 0.5;
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 1rem;
+      z-index: 1;
+    }
+
+    .artwork-caption {
+      padding: 1rem var(--margem-base);
+      border-top: 1px solid var(--pergaminho-escuro);
+    }
+
+    .artwork-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--tinta);
+      margin-bottom: 0.2rem;
+    }
+
+    .artwork-meta {
+      font-size: 0.8rem;
+      color: var(--sombra);
+      line-height: 1.6;
+    }
+
+    .artwork-meta em {
+      color: var(--siena);
+    }
+
+    /* ══════════════════════════════════════
+       ANÁLISE COMPOSITIVA (placeholder)
+    ══════════════════════════════════════ */
+    .analysis-section {
+      background: var(--pergaminho);
+    }
+
+    .analysis-placeholder {
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 1 / 1.618;
+      background: var(--pergaminho-escuro);
+      border: 1px solid var(--ocre);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--margem-base);
+    }
+
+    .analysis-placeholder-text {
+      font-style: italic;
+      color: var(--siena);
+      opacity: 0.5;
+      font-size: 0.9rem;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    /* ══════════════════════════════════════
+       CRONOLOGIA (placeholder)
+    ══════════════════════════════════════ */
+    .timeline-section {
+      background: var(--tinta);
+      color: var(--pergaminho);
+      padding: var(--margem-secao) 0;
+    }
+
+    .timeline-section .section-label { color: var(--ocre); }
+    .timeline-section .section-heading { color: var(--pergaminho); }
+
+    .timeline-list {
+      list-style: none;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 1.618rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid rgba(200, 150, 42, 0.2);
+      align-items: start;
+    }
+
+    .timeline-year {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--ocre);
+      padding-top: 0.1rem;
+    }
+
+    .timeline-event {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: rgba(244, 236, 216, 0.85);
+    }
+
+    .timeline-event strong {
+      display: block;
+      color: var(--pergaminho);
+      font-weight: 600;
+      font-style: italic;
+      margin-bottom: 0.25rem;
+    }
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    footer {
+      background: var(--tinta);
+      color: rgba(244, 236, 216, 0.6);
+      padding: var(--margem-secao) var(--margem-base);
+      text-align: center;
+      font-size: 0.85rem;
+      line-height: 2;
+      border-top: 3px solid var(--ocre);
+    }
+
+    footer strong {
+      color: var(--ocre);
+    }
+
+    /* ══════════════════════════════════════
+       UTILITÁRIOS
+    ══════════════════════════════════════ */
+    .divider {
+      text-align: center;
+      color: var(--ocre);
+      font-size: 1.2rem;
+      opacity: 0.5;
+      padding: var(--margem-base) 0;
+      letter-spacing: 1em;
+    }
+
+    /* Responsivo */
+    @media (max-width: 700px) {
+      .grid-phi { grid-template-columns: 1fr; }
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Ir para o conteúdo principal</a>
+
+  <!-- HEADER -->
+  <header>
+    <span class="ornament" aria-hidden="true">· ✦ ·</span>
+    <h1 class="artist-name">Eleonora di Castelvecchio</h1>
+    <span class="artist-dates">c. 1487 — 1542</span>
+    <span class="artist-location">Florença, República Florentina</span>
+    <span class="ornament" aria-hidden="true">· ✦ ·</span>
+  </header>
+
+  <!-- CITAÇÃO DE ABERTURA -->
+  <div class="opening-quote" role="complementary" aria-label="Citação de abertura">
+    <blockquote>
+      "Há em sua mão uma inteligência que não é aprendida mas herdada — como se os pigmentos obedecessem a uma lei anterior à razão, mais próxima da ordem das esferas do que do trabalho do ateliê."
+    </blockquote>
+    <cite>— Fra' Benedetto da Volterra, carta ao Prior de San Marco, 1531</cite>
+  </div>
+
+  <main id="main-content">
+
+    <!-- SEÇÃO 1: BIO -->
+    <section class="bio-section" aria-labelledby="bio-heading">
+      <div class="container">
+        <p class="section-label">Biografia</p>
+        <div class="grid-phi">
+          <div class="bio-content">
+            <h2 class="section-heading" id="bio-heading">A Mestra de Castelvecchio</h2>
+
+            <p class="drop-cap">
+              Nascida por volta de 1487 na pequena vila de Castelvecchio, nos arredores de Pistoia, Eleonora di Castelvecchio representa uma das descobertas mais perturbadoras da história da arte italiana recente. Filha de um farmacêutico de especiarias e de uma tecelã oriunda de Siena, ela cresceu em contato com pigmentos e óleos desde a infância — uma circunstância que seus biógrafos contemporâneos apontam como fundamental para a qualidade incomum de sua preparação de painéis.
+            </p>
+
+            <p>
+              Aos dezesseis anos, foi encaminhada ao ateliê de <em>Maestro Angiolo di Rocho</em>, um pintor de segunda linha que produzia principalmente retábulos para conventos rurais da Toscana. Ali, em vez de se limitar às tarefas de aprendiz — moer pigmentos, preparar a gesso, transferir esboços —, Eleonora começou a desenvolver uma técnica própria de velatura que chamava de <em>velo di fumo</em>: camadas quase imperceptíveis de têmpera translúcida que conferiam às figuras uma presença atmosférica raramente vista em painéis da época.
+            </p>
+
+            <p>
+              Após a morte de Maestro Angiolo em 1511, Eleonora assumiu a condução discreta do ateliê sob o nome do filho mais novo de seu mestre, <em>Giandomenico di Rocho</em>, que assinava as obras mas, segundo correspondência recentemente descoberta no Arquivo Estatal de Florença, reconhecia abertamente, em cartas privadas, a autoria real das peças. Essa prática de autoridade velada era comum no período mas raramente documentada com tal clareza.
+            </p>
+
+            <p>
+              Sua produção conhecida compreende quinze painéis em têmpera sobre madeira e pelo menos vinte e dois desenhos de estudo — sobretudo estudos anatômicos e de drapeado — atribuídos a ela nos últimos trinta anos por um grupo de historiadores liderados pela professora Vera Nannucci da Universidade de Bolonha. Os painéis, dispersos em coleções particulares na Toscana e em um museu de pequeno porte em Pistoia, apresentam características de execução que os distinguem radicalmente das obras de seu suposto autor oficial.
+            </p>
+
+            <p>
+              Eleonora morreu em 1542, provavelmente de febre tifóide, deixando uma filha e um conjunto de anotações técnicas que constituem um dos mais detalhados tratados práticos de pintura em têmpera do século XVI — e que permaneceram inéditos até 1998, quando foram identificados por Nannucci em meio a um inventário de bens de convento.
+            </p>
+          </div>
+
+          <aside class="bio-aside">
+            <blockquote class="bio-pullquote">
+              "O que a distingue dos contemporâneos não é apenas a qualidade do sfumato — é a inteligência da composição: cada figura olha para onde precisa olhar, cada luz cai onde precisa cair. Não há acidente em sua ordem."
+              <cite>— Vera Nannucci, <em>Presença Velada</em>, 2003</cite>
+            </blockquote>
+
+            <dl class="bio-details" aria-label="Dados biográficos">
+              <dt>Nascimento</dt>
+              <dd>c. 1487, Castelvecchio (Pistoia)</dd>
+
+              <dt>Morte</dt>
+              <dd>1542, Florença</dd>
+
+              <dt>Período</dt>
+              <dd>Alto Renascimento Italiano</dd>
+
+              <dt>Técnica principal</dt>
+              <dd>Têmpera sobre painel de álamo</dd>
+
+              <dt>Descoberta moderna</dt>
+              <dd>Vera Nannucci, 1998</dd>
+
+              <dt>Obras atribuídas</dt>
+              <dd>15 painéis · 22 desenhos de estudo</dd>
+
+              <dt>Localização principal</dt>
+              <dd>Museo Civico di Pistoia<br>Coleções privadas, Toscana</dd>
+            </dl>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">✦ ✦ ✦</div>
+
+    <!-- SEÇÃO 2: GALERIA (placeholders) -->
+    <section class="gallery-section" aria-labelledby="gallery-heading">
+      <div class="container">
+        <p class="section-label">Obras</p>
+        <h2 class="section-heading" id="gallery-heading">Catálogo Selecionado</h2>
+
+        <div class="gallery-grid">
+
+          <article class="artwork-card" tabindex="0" aria-label="Obra: Madonna com Paisagem ao Fundo, c. 1515">
+            <div class="artwork-placeholder" aria-hidden="true">
+              <p class="artwork-placeholder-text">SVG em V2</p>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Madonna com Paisagem ao Fundo</h3>
+              <p class="artwork-meta">
+                c. 1515 · <em>Têmpera e ouro sobre painel de álamo</em><br>
+                45 × 73 cm · Coleção privada, Florença
+              </p>
+            </div>
+          </article>
+
+          <article class="artwork-card" tabindex="0" aria-label="Obra: Val d'Arno ao Entardecer, c. 1518">
+            <div class="artwork-placeholder" aria-hidden="true">
+              <p class="artwork-placeholder-text">SVG em V2</p>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Val d'Arno ao Entardecer</h3>
+              <p class="artwork-meta">
+                c. 1518 · <em>Têmpera sobre painel de choupo</em><br>
+                60 × 37 cm · Museo Civico di Pistoia
+              </p>
+            </div>
+          </article>
+
+          <article class="artwork-card" tabindex="0" aria-label="Obra: Estudo de Mãos Femininas, c. 1512">
+            <div class="artwork-placeholder" aria-hidden="true">
+              <p class="artwork-placeholder-text">SVG em V2</p>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Estudo de Mãos Femininas</h3>
+              <p class="artwork-meta">
+                c. 1512 · <em>Pena e bistre sobre papel preparado</em><br>
+                22 × 31 cm · Arquivo Estatal de Florença
+              </p>
+            </div>
+          </article>
+
+          <article class="artwork-card" tabindex="0" aria-label="Obra: Natureza Morta com Romã e Cálice, c. 1525">
+            <div class="artwork-placeholder" aria-hidden="true">
+              <p class="artwork-placeholder-text">SVG em V2</p>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Natureza Morta com Romã e Cálice</h3>
+              <p class="artwork-meta">
+                c. 1525 · <em>Têmpera sobre painel de nogueira</em><br>
+                38 × 29 cm · Coleção privada, Pistoia
+              </p>
+            </div>
+          </article>
+
+          <article class="artwork-card" tabindex="0" aria-label="Obra: Retrato de Dama em Fundo Escuro, c. 1530">
+            <div class="artwork-placeholder" aria-hidden="true">
+              <p class="artwork-placeholder-text">SVG em V2</p>
+            </div>
+            <div class="artwork-caption">
+              <h3 class="artwork-title">Retrato de Dama em Fundo Escuro</h3>
+              <p class="artwork-meta">
+                c. 1530 · <em>Têmpera e óleo sobre painel de álamo</em><br>
+                41 × 52 cm · Coleção privada, Siena
+              </p>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <div class="divider" aria-hidden="true">✦ ✦ ✦</div>
+
+    <!-- SEÇÃO 3: ANÁLISE COMPOSITIVA (placeholder) -->
+    <section class="analysis-section" aria-labelledby="analysis-heading">
+      <div class="container">
+        <p class="section-label">Análise</p>
+        <h2 class="section-heading" id="analysis-heading">Composição e Proporção</h2>
+        <div class="grid-phi">
+          <div>
+            <div class="analysis-placeholder" aria-label="Análise compositiva — SVG em V3">
+              <p class="analysis-placeholder-text">Análise compositiva<br>com espiral de Fibonacci<br>em V3</p>
+            </div>
+          </div>
+          <div>
+            <p class="bio-content drop-cap">
+              A análise técnica dos painéis atribuídos a Eleonora revela um uso sistemático da proporção áurea que vai além do que seria esperado em uma formação de ateliê convencional. A divisão dos campos pictóricos em zonas de 61,8% e 38,2% aparece consistentemente, como se a artista tivesse internalizado φ não como fórmula, mas como instinto compositivo.
+            </p>
+            <p class="bio-content" style="margin-top:1em;">
+              Nos estudos de drapeado, a curvatura das pregas obedece a spirais aproximadas de Fibonacci com precisão que só hoje conseguimos verificar por sobreposição digital. Fra' Benedetto, em sua carta de 1531, intuía algo desta ordem quando escrevia sobre uma "lei anterior à razão" — sem vocabulário matemático para nomear o que via.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEÇÃO 4: CRONOLOGIA -->
+    <section class="timeline-section" aria-labelledby="timeline-heading">
+      <div class="container">
+        <p class="section-label" style="color:var(--ocre)">Cronologia</p>
+        <h2 class="section-heading" id="timeline-heading" style="color:var(--pergaminho)">Vida e Obra</h2>
+
+        <ul class="timeline-list" aria-label="Cronologia de Eleonora di Castelvecchio">
+          <li class="timeline-item">
+            <span class="timeline-year">c. 1487</span>
+            <div class="timeline-event">
+              <strong>Nascimento em Castelvecchio</strong>
+              Filha de Bartolomeo di Castelvecchio, farmacêutico, e Agnese Porcari, de Siena. Terceira de cinco irmãos.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">c. 1503</span>
+            <div class="timeline-event">
+              <strong>Entrada no ateliê de Maestro Angiolo di Rocho</strong>
+              Encaminhada ao ateliê de Pistoia provavelmente pela mediação de um tio paterno com ligações ao comércio de tintas.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">1508</span>
+            <div class="timeline-event">
+              <strong>Primeiros painéis documentados</strong>
+              Dois retábulos para a Igreja de Sant'Agostino di Montale, hoje atribuídos a Eleonora pelos estudos de Nannucci.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">1511</span>
+            <div class="timeline-event">
+              <strong>Morte de Maestro Angiolo</strong>
+              Eleonora assume a direção efetiva do ateliê sob o nome de Giandomenico di Rocho.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">c. 1515</span>
+            <div class="timeline-event">
+              <strong><em>Madonna com Paisagem ao Fundo</em></strong>
+              Considerada sua obra-mestra. Primeira aplicação documentada da técnica do <em>velo di fumo</em> em composição de grande formato.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">1531</span>
+            <div class="timeline-event">
+              <strong>Carta de Fra' Benedetto da Volterra</strong>
+              Documento que se tornaria central para as atribuições modernas, descrevendo a "mão feminina" por trás das obras do ateliê de Rocho.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">1542</span>
+            <div class="timeline-event">
+              <strong>Morte em Florença</strong>
+              Provavelmente de febre tifóide. Deixou uma filha, Isabetta, e um conjunto de anotações técnicas.
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-year">1998</span>
+            <div class="timeline-event">
+              <strong>Descoberta moderna</strong>
+              Vera Nannucci identifica o tratado técnico inédito no Convento de Santa Caterina, Prato, iniciando o processo formal de reatribuição.
+            </div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer role="contentinfo">
+    <p>
+      <strong>Eleonora di Castelvecchio — Obra Reunida</strong>
+    </p>
+    <p>
+      Com agradecimentos ao <strong>Museo Civico di Pistoia</strong>, ao <strong>Arquivo Estatal de Florença</strong>,<br>
+      à <strong>Università di Bologna</strong> (Departamento de História da Arte) e às <strong>coleções privadas da Toscana</strong><br>
+      que permitiram o estudo e a reprodução das obras.
+    </p>
+    <p style="margin-top:1rem;opacity:.5;font-size:.8rem;">
+      Projeto de pesquisa coordenado por Vera Nannucci · Texto: Chiara Lanzoni · 2024
+    </p>
+  </footer>
+</body>
+</html>
