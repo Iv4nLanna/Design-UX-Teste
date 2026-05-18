@@ -114,6 +114,7 @@
   // Web Audio — beeps retro
   const ctx = new (window.AudioContext || window.webkitAudioContext)();
   function beep(freq, dur, type = 'square') {
+    if (ctx.state === 'suspended') ctx.resume();
     const o = ctx.createOscillator();
     const g = ctx.createGain();
     o.type = type;
@@ -134,6 +135,7 @@
     3: 'Settings:\n[SCANLINES: ON]  [CURSOR: BLOCK]  [SFX: ON]'
   };
   let sel = 0;
+  let typeoutId = null;
 
   function moveSel(d) {
     items[sel].classList.remove('sel');
@@ -142,6 +144,7 @@
     beep(220, .07);
   }
   function openDialog(i) {
+    if (typeoutId) { clearTimeout(typeoutId); typeoutId = null; }
     beep(440, .12); beep(550, .08);
     dialog.classList.add('open');
     dtxt.textContent = '';
@@ -151,7 +154,7 @@
       if (j < text.length) {
         dtxt.textContent += text[j++];
         beep(880 + Math.random() * 200, .02, 'sawtooth');
-        setTimeout(type, 38);
+        typeoutId = setTimeout(type, 38);
       }
     }
     type();
