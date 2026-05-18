@@ -460,16 +460,12 @@ loader.setCrossOrigin('anonymous');
 const works3D = [];
 const rooms = []; // { idx, baseZ, dissolver?, works:[indices] }
 
-function placeholderTexture(palette){
-  const c = document.createElement('canvas'); c.width = c.height = 256;
-  const ctx = c.getContext('2d');
-  const hex = '#' + palette.map(v=> Math.floor(v*255).toString(16).padStart(2,'0')).join('');
-  const g = ctx.createLinearGradient(0,0,256,256);
-  g.addColorStop(0, hex); g.addColorStop(1, '#0a0806');
-  ctx.fillStyle = g; ctx.fillRect(0,0,256,256);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  return t;
+const txLoader = new THREE.TextureLoader();
+function placeholderTexture(work){
+  if(!work.imageUrl) return new THREE.ColorNode(0x0a0806);
+  const tex = txLoader.load(work.imageUrl, undefined, undefined, ()=>console.log('fallback'));
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 function buildRoom(roomIdx){
@@ -494,7 +490,7 @@ function buildRoom(roomIdx){
     group.add(innerFrame);
     const painting = new THREE.Mesh(
       new THREE.PlaneGeometry(wpx, h),
-      new THREE.MeshStandardMaterial({ map: placeholderTexture(w.palette), roughness: 0.62, metalness: 0, emissive: 0x1a1408, emissiveIntensity: 0.05 })
+      new THREE.MeshStandardMaterial({ map: placeholderTexture(w), roughness: 0.62, metalness: 0, emissive: 0x1a1408, emissiveIntensity: 0.05 })
     );
     painting.position.z = 0.061;
     group.add(painting);
