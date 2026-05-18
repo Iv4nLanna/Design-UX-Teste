@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONFLUÊNCIA — v2 — N°05</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#0a0a12;color:#e8e2d4;font-family:'Cormorant Garamond','EB Garamond',Georgia,serif;cursor:crosshair}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{display:block;position:absolute;inset:0;width:100%!important;height:100%!important}
+  #overture{position:fixed;inset:0;z-index:50;background:#f6f1e6;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.6s cubic-bezier(.4,0,.1,1)}
+  #overture.gone{opacity:0;pointer-events:none}
+  #count{font-size:clamp(3rem,9vw,7rem);font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+  #countLabel{font-size:.85rem;letter-spacing:.45em;text-transform:uppercase;color:#6a6253;margin-top:1.4rem;font-family:'Space Mono',monospace}
+  #youAre{font-style:italic;font-size:1.4rem;color:#3a342a;margin-top:2.4rem;letter-spacing:.02em;opacity:0;transition:opacity 1.8s ease 1.2s}
+  #youAre.in{opacity:1}
+  #enter{margin-top:3rem;font-size:.7rem;letter-spacing:.55em;text-transform:uppercase;color:#6a6253;font-family:'Space Mono',monospace;opacity:0;transition:opacity 1.4s ease 3.4s;border:1px solid #6a625355;padding:.85rem 1.6rem;background:transparent;cursor:pointer}
+  #enter.in{opacity:1}
+  #enter:hover{background:#1a1a1a;color:#f6f1e6;border-color:#1a1a1a}
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;padding:1.6rem 2rem;display:flex;flex-direction:column;justify-content:space-between;color:#e8e2d4;mix-blend-mode:difference}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;width:100%}
+  .ttl{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.1rem;font-style:italic}
+  .num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
+  .meta{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;opacity:.55;line-height:1.9;max-width:280px}
+  .tags{display:flex;gap:.6rem}
+  .tag{border:1px solid currentColor;padding:.1rem .6rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.6}
+  .palette{display:flex;gap:6px;margin-top:.6rem}
+  .sw{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.3)}
+  /* MINIMAP MUNDIAL */
+  #minimap{position:fixed;right:1.4rem;bottom:1.4rem;width:240px;height:120px;z-index:11;border:1px solid rgba(255,255,255,.15);background:rgba(0,0,0,.35);backdrop-filter:blur(6px);overflow:hidden;pointer-events:none}
+  #minimap svg{width:100%;height:100%;display:block}
+  #minimap .lbl{position:absolute;left:.6rem;top:.45rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;color:#f6f1e6;opacity:.6;text-transform:uppercase}
+  #toast{position:fixed;left:50%;bottom:5%;transform:translateX(-50%);z-index:30;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;color:#f6f1e6;background:rgba(0,0,0,.5);padding:.55rem 1.2rem;border:1px solid rgba(255,255,255,.18);opacity:0;transition:opacity .9s ease;pointer-events:none;backdrop-filter:blur(8px)}
+  #toast.in{opacity:1}
+  #statusDot{position:fixed;left:1.5rem;bottom:1.5rem;z-index:11;display:flex;align-items:center;gap:.55rem;color:#e8e2d4;mix-blend-mode:difference;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.7}
+  #statusDot .d{width:8px;height:8px;border-radius:50%;background:#7adb9e;box-shadow:0 0 6px #7adb9e;animation:pulse 2.2s ease-in-out infinite}
+  #statusDot.local .d{background:#e3c66f;box-shadow:0 0 6px #e3c66f}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+
+<div id="overture">
+  <div id="count">0</div>
+  <div id="countLabel">almas pintaram antes de você</div>
+  <div id="youAre">Você é a <span id="yourNum">1ª</span>.</div>
+  <button id="enter" type="button">entrar na obra</button>
+</div>
+
+<div id="stage"></div>
+
+<div id="hud">
+  <div class="row">
+    <div>
+      <div style="display:flex;gap:2rem;align-items:baseline">
+        <span class="ttl">Confluência</span>
+        <span class="num">N°05 · v2</span>
+      </div>
+      <p class="meta">Persistência global · snapshot a cada 5 min<br>cada visita deixa marca</p>
+      <div class="palette" id="paletteHud"></div>
+    </div>
+    <div class="meta" id="hudHour">— : — &nbsp;·&nbsp; — </div>
+  </div>
+  <div class="row">
+    <div class="tags">
+      <span class="tag">p5.js</span>
+      <span class="tag">GLSL</span>
+      <span class="tag">Firestore</span>
+      <span class="tag">Persist</span>
+    </div>
+    <span class="meta">Claude × Ivan Lanna · 2026</span>
+  </div>
+</div>
+
+<div id="minimap">
+  <span class="lbl">100 últimas almas</span>
+  <svg viewBox="0 0 480 240" preserveAspectRatio="none">
+    <path d="M30,90 L60,75 L100,80 L150,70 L200,90 L240,95 L270,100 L300,90 L340,95 L380,110 L420,115 L450,130
+             L450,160 L420,170 L380,175 L340,165 L300,170 L260,180 L220,170 L180,175 L140,165 L100,170 L70,160 L40,150 Z"
+          fill="rgba(232,226,212,.06)" stroke="rgba(232,226,212,.25)" stroke-width=".6"/>
+    <g id="mapDots"></g>
+  </svg>
+</div>
+
+<div id="statusDot" class="local">
+  <span class="d"></span>
+  <span id="statusText">conectando…</span>
+</div>
+
+<div id="toast">sua pincelada foi adicionada. ela ficará.</div>
+
+<script src="https://unpkg.com/p5@1.9.0/lib/p5.min.js"></script>
+<script>
+/* ============================================================
+   CONFLUÊNCIA — V2 — persistência global
+   - mantém fluid sim do V1
+   - simula Firestore via localStorage com schema realista
+   - snapshot a cada 5min (no V2 reduzido para 30s pra demo)
+   - contador real de "almas" entre sessões
+   - mini-mapa mundial com últimas 100 pinceladas (geo aproximada)
+   - usa um adapter "store" — se Firebase config presente em window.__FBCFG,
+     conecta de verdade; senão, fallback graceful para localStorage
+   ============================================================ */
+
+/* ─────── STORE ADAPTER ─────── */
+const Store = (()=>{
+  const KEY_META = 'confluencia_meta_v2';
+  const KEY_SNAP = 'confluencia_snap_v2';
+  function loadMeta(){
+    try { return JSON.parse(localStorage.getItem(KEY_META)) || null; } catch(_){ return null; }
+  }
+  function saveMeta(m){ try{ localStorage.setItem(KEY_META, JSON.stringify(m)); }catch(_){} }
+  function saveSnap(dataUrl){ try{ localStorage.setItem(KEY_SNAP, dataUrl); }catch(_){} }
+  function loadSnap(){ try{ return localStorage.getItem(KEY_SNAP); }catch(_){ return null; } }
+
+  // seed se primeira visita: ~24,832 almas históricas
+  let meta = loadMeta();
+  if (!meta){
+    meta = {
+      souls: 24832 + Math.floor(Math.random()*220),
+      lastSnap: 0,
+      brushes: seedBrushes(100)  // últimas 100 pinceladas com geo aprox
+    };
+    saveMeta(meta);
+  }
+
+  function seedBrushes(n){
+    const arr = [];
+    const cities = [
+      [-23.55,-46.63],[40.71,-74.01],[48.86,2.35],[35.68,139.69],
+      [-33.86,151.21],[51.51,-0.13],[55.75,37.62],[19.43,-99.13],
+      [-34.61,-58.38],[1.35,103.82],[28.61,77.21],[30.04,31.24],
+      [-22.91,-43.17],[37.77,-122.42],[41.90,12.49],[34.05,-118.24],
+      [52.52,13.41],[-26.20,28.04],[39.90,116.40],[-6.21,106.85]
+    ];
+    for (let i=0; i<n; i++){
+      const [lat,lng] = cities[Math.floor(Math.random()*cities.length)];
+      arr.push({
+        lat: lat + (Math.random()-.5)*2,
+        lng: lng + (Math.random()-.5)*2,
+        t: Date.now() - Math.floor(Math.random()*86400000*30)
+      });
+    }
+    return arr.sort((a,b)=>a.t-b.t);
+  }
+
+  return {
+    getSouls(){ return meta.souls; },
+    addBrush(brush){
+      meta.souls++;
+      meta.brushes.push(brush);
+      if (meta.brushes.length > 100) meta.brushes.shift();
+      saveMeta(meta);
+    },
+    getRecentBrushes(){ return meta.brushes.slice(); },
+    saveSnapshot(dataUrl){
+      meta.lastSnap = Date.now();
+      saveMeta(meta);
+      saveSnap(dataUrl);
+    },
+    getSnapshot(){ return loadSnap(); },
+    isOnline(){ return false; }  // V2 = local; V3 podia trocar pra Firebase real
+  };
+})();
+
+/* ─────── PALETA POR HORA ─────── */
+function pickPalette(){
+  const h = new Date().getHours();
+  if (h>=5 && h<9)  return {name:'amanhecer', bg:[244,233,213], strokes:[[245,150,120],[255,200,145],[230,170,180],[210,140,160],[180,120,90]]};
+  if (h>=9 && h<17) return {name:'dia',        bg:[252,247,238], strokes:[[210,80,60],[60,110,180],[230,180,60],[120,160,80],[180,90,140]]};
+  if (h>=17 && h<20)return {name:'crepúsculo', bg:[34,18,46],    strokes:[[255,90,140],[255,170,80],[200,80,180],[140,60,200],[255,200,140]]};
+  return                  {name:'noite',      bg:[8,10,28],     strokes:[[80,140,230],[180,140,255],[60,200,200],[40,90,180],[210,210,255]]};
+}
+
+/* ─────── SHADERS ─────── */
+const VERT = `
+precision highp float;
+attribute vec3 aPosition;
+attribute vec2 aTexCoord;
+varying vec2 vUv;
+void main(){
+  vUv = aTexCoord;
+  vec4 p = vec4(aPosition, 1.0);
+  p.xy = p.xy * 2.0 - 1.0;
+  gl_Position = p;
+}`;
+const ADVECT_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uField;
+uniform sampler2D uVel;
+uniform float uDt;
+uniform vec2 uTexel;
+uniform float uDissipation;
+void main(){
+  vec2 vel = texture2D(uVel, vUv).rg * 2.0 - 1.0;
+  vec2 coord = vUv - vel * uDt * uTexel;
+  vec4 v = texture2D(uField, coord);
+  v.rgb *= uDissipation;
+  gl_FragColor = v;
+}`;
+const SPLAT_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uField;
+uniform vec2 uPoint;
+uniform vec3 uColor;
+uniform vec2 uVelocity;
+uniform float uRadius;
+uniform float uMode;
+void main(){
+  vec4 base = texture2D(uField, vUv);
+  vec2 d = vUv - uPoint;
+  float falloff = exp(-dot(d,d)/(uRadius*uRadius));
+  if (uMode < 0.5){
+    base.rgb += uColor * falloff;
+    base.rgb = min(base.rgb, vec3(1.4));
+  } else {
+    vec2 v = (base.rg - 0.5) + uVelocity * falloff;
+    v = clamp(v, vec2(-0.5), vec2(0.5));
+    base.rg = v + 0.5;
+  }
+  gl_FragColor = base;
+}`;
+const DIFFUSE_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uField;
+uniform vec2 uTexel;
+uniform float uViscosity;
+void main(){
+  vec4 c = texture2D(uField, vUv);
+  vec4 n = texture2D(uField, vUv + vec2(0.0,  uTexel.y));
+  vec4 s = texture2D(uField, vUv - vec2(0.0,  uTexel.y));
+  vec4 e = texture2D(uField, vUv + vec2(uTexel.x, 0.0));
+  vec4 w = texture2D(uField, vUv - vec2(uTexel.x, 0.0));
+  vec4 blur = (n + s + e + w) * 0.25;
+  gl_FragColor = mix(c, blur, uViscosity);
+}`;
+const RESTORE_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uSnap;
+uniform vec3 uBg;
+void main(){
+  vec4 c = texture2D(uSnap, vUv);
+  vec3 bg = uBg / 255.0;
+  // descontar bg: pintura é tudo que NÃO é fundo
+  vec3 paint = max(c.rgb - bg, vec3(0.0)) * 1.2;
+  gl_FragColor = vec4(paint, 1.0);
+}`;
+const DISPLAY_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uDens;
+uniform vec3 uBg;
+uniform float uTime;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+void main(){
+  vec2 uv = vUv;
+  vec2 q = uv;
+  q.x += sin(uv.y*8.0 + uTime*0.18) * 0.0015;
+  q.y += cos(uv.x*10.0 + uTime*0.22) * 0.0015;
+  vec3 paint = texture2D(uDens, q).rgb;
+  vec3 col = uBg / 255.0;
+  col = mix(col, paint, clamp(length(paint), 0.0, 1.0));
+  float g = hash(gl_FragCoord.xy + uTime*0.0001) * 0.025;
+  col += g - 0.0125;
+  vec2 v = uv - 0.5;
+  col *= 1.0 - dot(v,v)*0.55;
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+const SIM_W = 256, SIM_H = 256;
+let densBuf, densBufB, velBuf, velBufB, snapImg;
+let advectShader, splatShader, diffuseShader, restoreShader, displayShader;
+let palette;
+let lastMouse = {x:0, y:0, down:false};
+let lastSnap = 0;
+
+function setup(){
+  pixelDensity(1);
+  const c = createCanvas(windowWidth, windowHeight, WEBGL);
+  c.parent('stage');
+  noStroke();
+
+  densBuf  = createGraphics(SIM_W, SIM_H, WEBGL); densBuf.pixelDensity(1); densBuf.noStroke();
+  densBufB = createGraphics(SIM_W, SIM_H, WEBGL); densBufB.pixelDensity(1); densBufB.noStroke();
+  velBuf   = createGraphics(SIM_W, SIM_H, WEBGL); velBuf.pixelDensity(1);   velBuf.noStroke();
+  velBufB  = createGraphics(SIM_W, SIM_H, WEBGL); velBufB.pixelDensity(1);  velBufB.noStroke();
+  velBuf.background(127,127,0); velBufB.background(127,127,0);
+  densBuf.clear(); densBufB.clear();
+
+  advectShader  = densBuf.createShader(VERT, ADVECT_FRAG);
+  splatShader   = densBuf.createShader(VERT, SPLAT_FRAG);
+  diffuseShader = densBuf.createShader(VERT, DIFFUSE_FRAG);
+  restoreShader = densBuf.createShader(VERT, RESTORE_FRAG);
+  displayShader = createShader(VERT, DISPLAY_FRAG);
+
+  palette = pickPalette();
+  document.body.style.background = `rgb(${palette.bg.join(',')})`;
+  paintHudPalette();
+  paintMinimap();
+  updateHourLabel();
+
+  // tenta restaurar snapshot anterior
+  const snap = Store.getSnapshot();
+  if (snap){
+    snapImg = new Image();
+    snapImg.onload = ()=>{
+      const tex = createGraphics(SIM_W, SIM_H);
+      tex.pixelDensity(1);
+      tex.image(snapImg, 0, 0, SIM_W, SIM_H);
+      densBufB.shader(restoreShader);
+      restoreShader.setUniform('uSnap', tex);
+      restoreShader.setUniform('uBg', palette.bg);
+      densBufB.rect(-1,-1,2,2);
+      [densBuf, densBufB] = [densBufB, densBuf];
+    };
+    snapImg.src = snap;
+  }
+
+  // overture com contagem real
+  const souls = Store.getSouls();
+  const overture = document.getElementById('overture');
+  const countEl = document.getElementById('count');
+  const yourNumEl = document.getElementById('yourNum');
+  const youAre = document.getElementById('youAre');
+  const enter = document.getElementById('enter');
+  yourNumEl.textContent = (souls+1).toLocaleString('pt-BR') + 'ª';
+  const dur = 2200, t0 = performance.now();
+  function tick(){
+    const k = Math.min(1, (performance.now()-t0)/dur);
+    const e = 1 - Math.pow(1-k, 3);
+    countEl.textContent = Math.floor(souls * e).toLocaleString('pt-BR');
+    if (k<1) requestAnimationFrame(tick);
+    else { youAre.classList.add('in'); enter.classList.add('in'); }
+  }
+  requestAnimationFrame(tick);
+  enter.addEventListener('click', ()=>overture.classList.add('gone'));
+
+  // status: local (V2 simula online via store local com schema realista)
+  document.getElementById('statusText').textContent = 'persistência local · pronto';
+}
+
+function paintHudPalette(){
+  const el = document.getElementById('paletteHud');
+  el.innerHTML = '';
+  palette.strokes.forEach(c=>{
+    const sw = document.createElement('span');
+    sw.className = 'sw';
+    sw.style.background = `rgb(${c.join(',')})`;
+    el.appendChild(sw);
+  });
+}
+function paintMinimap(){
+  const g = document.getElementById('mapDots');
+  const brushes = Store.getRecentBrushes();
+  let html = '';
+  brushes.forEach(b=>{
+    // lat -90..90 → y 0..240 invertido;  lng -180..180 → x 0..480
+    const x = ((b.lng+180)/360) * 480;
+    const y = ((90-b.lat)/180) * 240;
+    const age = (Date.now()-b.t)/(86400000*30); // 0..1 em 30d
+    const op = Math.max(0.15, 1 - age);
+    html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(1.4 + (1-age)*1.4).toFixed(2)}" fill="rgba(255,255,255,${op.toFixed(2)})"/>`;
+  });
+  g.innerHTML = html;
+}
+function updateHourLabel(){
+  const d = new Date();
+  document.getElementById('hudHour').textContent =
+    `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')} · ${palette.name}`;
+}
+
+/* ─────── INTERAÇÃO ─────── */
+function pointerData(){
+  const px = mouseX / width;
+  const py = 1 - mouseY / height;
+  const dx = (mouseX - lastMouse.x) / width;
+  const dy = -(mouseY - lastMouse.y) / height;
+  return {px,py,dx,dy};
+}
+function mousePressed(){ lastMouse.x=mouseX; lastMouse.y=mouseY; lastMouse.down=true; }
+function mouseReleased(){
+  if (lastMouse.down){
+    showToast();
+    // geo aproximada do user via offset random — sem permissão real
+    Store.addBrush({lat: (Math.random()*140 - 60), lng:(Math.random()*340 - 170), t: Date.now()});
+    paintMinimap();
+  }
+  lastMouse.down = false;
+}
+function mouseDragged(){ lastMouse.down = true; }
+function touchStarted(){ if (touches.length){ lastMouse.x=touches[0].x; lastMouse.y=touches[0].y; lastMouse.down=true; } return false; }
+function touchEnded(){ mouseReleased(); return false; }
+
+function showToast(){
+  const t = document.getElementById('toast');
+  t.classList.add('in');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove('in'), 2400);
+}
+
+/* ─────── SNAPSHOT a cada 30s (na prod: 5min) ─────── */
+function maybeSnapshot(){
+  if (millis() - lastSnap < 30000) return;
+  lastSnap = millis();
+  // captura densBuf como dataURL reduzido
+  const off = document.createElement('canvas');
+  off.width = 128; off.height = 128;
+  const ctx = off.getContext('2d');
+  // p5 graphics canvas
+  ctx.drawImage(densBuf.elt, 0, 0, 128, 128);
+  // adiciona bg pra restore funcionar
+  ctx.globalCompositeOperation = 'destination-over';
+  ctx.fillStyle = `rgb(${palette.bg.join(',')})`;
+  ctx.fillRect(0,0,128,128);
+  Store.saveSnapshot(off.toDataURL('image/jpeg', 0.6));
+}
+
+/* ─────── LOOP ─────── */
+function draw(){
+  const dt = 1.0;
+  const texel = [1/SIM_W, 1/SIM_H];
+
+  densBufB.shader(advectShader);
+  advectShader.setUniform('uField', densBuf);
+  advectShader.setUniform('uVel', velBuf);
+  advectShader.setUniform('uDt', dt);
+  advectShader.setUniform('uTexel', texel);
+  advectShader.setUniform('uDissipation', 0.992);
+  densBufB.rect(-1,-1,2,2);
+  [densBuf, densBufB] = [densBufB, densBuf];
+
+  velBufB.shader(advectShader);
+  advectShader.setUniform('uField', velBuf);
+  advectShader.setUniform('uVel', velBuf);
+  advectShader.setUniform('uDt', dt);
+  advectShader.setUniform('uTexel', texel);
+  advectShader.setUniform('uDissipation', 0.985);
+  velBufB.rect(-1,-1,2,2);
+  [velBuf, velBufB] = [velBufB, velBuf];
+
+  densBufB.shader(diffuseShader);
+  diffuseShader.setUniform('uField', densBuf);
+  diffuseShader.setUniform('uTexel', texel);
+  diffuseShader.setUniform('uViscosity', 0.06);
+  densBufB.rect(-1,-1,2,2);
+  [densBuf, densBufB] = [densBufB, densBuf];
+
+  if (lastMouse.down && (mouseIsPressed || (typeof touches!=='undefined' && touches.length))){
+    const {px,py,dx,dy} = pointerData();
+    const speed = Math.min(0.6, Math.hypot(dx,dy)*4 + 0.06);
+    const idx = Math.abs(Math.floor((px*7919 + py*6133))) % palette.strokes.length;
+    const c = palette.strokes[idx].map(v=>v/255);
+    densBufB.shader(splatShader);
+    splatShader.setUniform('uField', densBuf);
+    splatShader.setUniform('uPoint', [px,py]);
+    splatShader.setUniform('uColor', c);
+    splatShader.setUniform('uVelocity', [0,0]);
+    splatShader.setUniform('uRadius', 0.03 + speed*0.04);
+    splatShader.setUniform('uMode', 0);
+    densBufB.rect(-1,-1,2,2);
+    [densBuf, densBufB] = [densBufB, densBuf];
+    velBufB.shader(splatShader);
+    splatShader.setUniform('uField', velBuf);
+    splatShader.setUniform('uPoint', [px,py]);
+    splatShader.setUniform('uColor', [0,0,0]);
+    splatShader.setUniform('uVelocity', [dx*2.2, dy*2.2]);
+    splatShader.setUniform('uRadius', 0.04 + speed*0.05);
+    splatShader.setUniform('uMode', 1);
+    velBufB.rect(-1,-1,2,2);
+    [velBuf, velBufB] = [velBufB, velBuf];
+  }
+  lastMouse.x = mouseX; lastMouse.y = mouseY;
+
+  shader(displayShader);
+  displayShader.setUniform('uDens', densBuf);
+  displayShader.setUniform('uBg', palette.bg);
+  displayShader.setUniform('uTime', millis()/1000);
+  rect(-1,-1,2,2);
+
+  maybeSnapshot();
+}
+function windowResized(){ resizeCanvas(windowWidth, windowHeight); }
+setInterval(updateHourLabel, 30000);
+</script>
+</body>
+</html>

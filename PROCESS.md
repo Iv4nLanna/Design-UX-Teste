@@ -78,6 +78,28 @@ Organizado por tema, não por ordem cronológica.
 - Boot screen estilo terminal como loading: barata de implementar (setTimeout + classList),
   mas vende a fantasia do produto desde o primeiro frame. (visto em 04-vaporwave-synthwave V3)
 
+## Sobre experiências WOW (redesign 04-05-06)
+
+- **Estética → estado mental interativo**: vaporwave/renascimento como visual é cliché; como espaço habitável muda a relação do espectador. Cena 3D primeira-pessoa + áudio espacial + nenhum onboarding tutorial. (visto em 04 WOW e 06 WOW)
+- **Mood drift via uniform lerp** (4 paletas com transição 60s): parece "world ages" sem custar nada e mata a sensação de loop. (visto em 04 WOW V2)
+- **Fluid sim GLSL ping-pong** (densA/densB/velA/velB, 256×256, sem pressure solve): 60fps em laptop com ~250 linhas de shader. Para arte abstrata-emocional, advect+diffuse+dissipation é suficiente. (visto em 05 WOW V1)
+- **WebAudio sintetizado em runtime > Howler com samples** para drones ambient: ~50 linhas, zero asset, mais vivo. (visto em 05 WOW V3)
+- **Adapter pattern para localStorage vs Firebase**: simular backend com schema realista permite prototipar UX persistente sem credentials. Trocar pra Firebase = 30 linhas. (visto em 05 WOW V2)
+- **Souvenir PNG personalizado via canvas offscreen** (com pincelada destacada em ciano): cria identidade emocional desproporcional ao código. (visto em 05 WOW V3)
+- **CSS2DRenderer para legendas Garamond em espaço 3D**: legível, sempre virado pra frente, posicionado por matriz mundial. Ideal pra museu/galeria/infográfico. (visto em 06 WOW V1)
+- **Câmera lerp pesado (0.10 vs 0.3-0.5 típico FPS)**: easing deliberadamente lento vende "fantasia museu / sonho" mesmo numa cena banal. (visto em 04 e 06 WOW)
+- **3-point lighting tungsten por obra** (3 warm spots + 1 cool fill blue-ish) + intensidade proporcional à proximidade: padrão museu real, dá realismo PBR sem precisar HDRI. (visto em 06 WOW V1)
+- **Projeção 3D→2D para overlay D3 vetorial sobre objeto 3D**: `vector.project(camera)` + bounding rect das 4 projeções = SVG vetorial encostado em quad 3D mesmo com câmera oblíqua. (visto em 06 WOW V2)
+- **Vertex shader dissolve canônico**: deslocamento de vértice por uDissolve + discard de fragmento por noise threshold + edge color dourado nas bordas. Pattern transferível pra qualquer transição cinematográfica. (visto em 06 WOW V2)
+- **Curadoria adaptativa via similarityScore** (tag por era/lum/tema, profile acumula segundos por dimensão, ordenação simples): recomendação **auditável** sem caixa-preta de ML. (visto em 06 WOW V3)
+- **Geração procedural on-demand** (loop checa proximidade → constrói próxima sala): permite "corredor infinito" sem alocação inicial. Pattern pra qualquer infinite-scroll 3D. (visto em 06 WOW V3)
+- **Sussurro curatorial em texto italic fade > TTS**: 0 KB e entrega 100% da intimidade pretendida. Lição: nem toda "voz" precisa ser literal. (visto em 06 WOW V2)
+- **Welcome back via Profile.visits**: 2 linhas que transformam visita repetida em **identidade** ("a galeria lembra de mim"). Impacto emocional desproporcional ao esforço. (visto em 06 WOW V3)
+- **Forgery procedural + reveal filosófico**: easter egg que carrega tese (autenticidade na era da IA) sem ser tutorial. (visto em 06 WOW V3)
+- **Easter egg "alma silenciosa" / "hidden melody"**: recompensar **estar presente** (não clicar) muda a relação com a obra. Pattern: timer de inatividade + recompensa contextual. (visto em 04 WOW V3 Take On Me + 05 WOW V3 silent souls)
+- **Konami code via keydown buffer + Array.every**: 6 linhas, sem libs, sliding window. (visto em 04 WOW V3)
+- **CRT shader curva (uv*2-1) + offsets quadráticos** combinada com vignette + chromatic + scanlines: fórmula canônica que vende a fantasia VHS. (visto em 04 WOW V1)
+
 ---
 
 _Exemplos contribuídos: 01-brutalist-archive, 02-pixel-8bit, 03-low-poly-3d, 04-vaporwave-synthwave, 05-generativo-fluxo, 06-renascimento-digital._

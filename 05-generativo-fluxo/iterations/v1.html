@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CONFLUÊNCIA — v1 — N°05</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#0a0a12;color:#e8e2d4;font-family:'Cormorant Garamond','EB Garamond',Georgia,serif;cursor:crosshair}
+  #stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{display:block;position:absolute;inset:0;width:100%!important;height:100%!important}
+  /* OVERTURE */
+  #overture{position:fixed;inset:0;z-index:50;background:#f6f1e6;color:#1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1.6s cubic-bezier(.4,0,.1,1);font-family:'Cormorant Garamond',Georgia,serif}
+  #overture.gone{opacity:0;pointer-events:none}
+  #count{font-size:clamp(3rem,9vw,7rem);font-weight:300;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+  #countLabel{font-size:.85rem;letter-spacing:.45em;text-transform:uppercase;color:#6a6253;margin-top:1.4rem;font-family:'Space Mono',ui-monospace,monospace}
+  #youAre{font-style:italic;font-size:1.4rem;color:#3a342a;margin-top:2.4rem;letter-spacing:.02em;opacity:0;transition:opacity 1.8s ease 1.2s}
+  #youAre.in{opacity:1}
+  #enter{margin-top:3rem;font-size:.7rem;letter-spacing:.55em;text-transform:uppercase;color:#6a6253;font-family:'Space Mono',monospace;opacity:0;transition:opacity 1.4s ease 3.4s;border:1px solid #6a625355;padding:.85rem 1.6rem;background:transparent;cursor:pointer;font-weight:400}
+  #enter.in{opacity:1}
+  #enter:hover{background:#1a1a1a;color:#f6f1e6;border-color:#1a1a1a}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;padding:1.6rem 2rem;display:flex;flex-direction:column;justify-content:space-between;color:#e8e2d4;mix-blend-mode:difference}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;width:100%}
+  .ttl{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.1rem;font-weight:400;letter-spacing:.02em;font-style:italic}
+  .num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
+  .meta{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;opacity:.55;line-height:1.9;max-width:280px}
+  .tags{display:flex;gap:.6rem}
+  .tag{border:1px solid currentColor;padding:.1rem .6rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.6}
+  .palette{display:flex;gap:6px;margin-top:.6rem}
+  .sw{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.3)}
+  #toast{position:fixed;left:50%;bottom:5%;transform:translateX(-50%);z-index:30;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;font-size:1.05rem;letter-spacing:.04em;color:#f6f1e6;background:rgba(0,0,0,.5);padding:.55rem 1.2rem;border:1px solid rgba(255,255,255,.18);opacity:0;transition:opacity .9s ease;pointer-events:none;backdrop-filter:blur(8px)}
+  #toast.in{opacity:1}
+</style>
+</head>
+<body>
+
+<div id="overture">
+  <div id="count">0</div>
+  <div id="countLabel">almas pintaram antes de você</div>
+  <div id="youAre">Você é a <span id="yourNum">1ª</span>.</div>
+  <button id="enter" type="button">entrar na obra</button>
+</div>
+
+<div id="stage"></div>
+
+<div id="hud">
+  <div class="row">
+    <div>
+      <div style="display:flex;gap:2rem;align-items:baseline">
+        <span class="ttl">Confluência</span>
+        <span class="num">N°05 · v1</span>
+      </div>
+      <p class="meta">Toda visita pinta uma pincelada.<br>A obra é coletiva. E inacabável.</p>
+      <div class="palette" id="paletteHud" aria-hidden="true"></div>
+    </div>
+    <div class="meta" id="hudHour">— : — &nbsp;·&nbsp; — </div>
+  </div>
+  <div class="row">
+    <div class="tags">
+      <span class="tag">p5.js</span>
+      <span class="tag">WebGL</span>
+      <span class="tag">GLSL</span>
+      <span class="tag">Fluid</span>
+    </div>
+    <span class="meta">Claude × Ivan Lanna · 2026</span>
+  </div>
+</div>
+
+<div id="toast">sua pincelada foi adicionada. ela ficará.</div>
+
+<script src="https://unpkg.com/p5@1.9.0/lib/p5.min.js"></script>
+<script>
+/* ============================================================
+   CONFLUÊNCIA — V1
+   p5.js + WebGL + custom GLSL fluid (advect/diffuse, no pressure solve)
+   Paleta varia com a hora local (3 paletas: amanhecer, dia, noite)
+   Pincelada injeta velocidade + cor; densidade dissipa.
+   Persistência local (localStorage) entre sessões.
+   ============================================================ */
+
+const SIM_W = 256, SIM_H = 256;          // grid de simulação
+let densBuf, densBufB;                    // ping-pong density (RGB)
+let velBuf, velBufB;                      // ping-pong velocity (RG)
+let displayShader, advectShader, splatShader, diffuseShader;
+let lastMouse = {x:0, y:0, down:false};
+let palette;                              // {bg:[r,g,b], strokes:[[r,g,b]...], name}
+let toastTimer = 0;
+let strokeCount = 0;
+
+/* ─────── PALETAS POR HORA ─────── */
+function pickPalette(){
+  const h = new Date().getHours();
+  // 5–9 amanhecer; 9–17 dia; 17–20 crepúsculo; 20–5 noite
+  if (h>=5 && h<9)  return {name:'amanhecer', bg:[244,233,213], strokes:[[245,150,120],[255,200,145],[230,170,180],[210,140,160],[180,120,90]]};
+  if (h>=9 && h<17) return {name:'dia',        bg:[252,247,238], strokes:[[210,80,60],[60,110,180],[230,180,60],[120,160,80],[180,90,140]]};
+  if (h>=17 && h<20)return {name:'crepúsculo', bg:[34,18,46],    strokes:[[255,90,140],[255,170,80],[200,80,180],[140,60,200],[255,200,140]]};
+  return                  {name:'noite',      bg:[8,10,28],     strokes:[[80,140,230],[180,140,255],[60,200,200],[40,90,180],[210,210,255]]};
+}
+
+/* ─────── SHADERS ─────── */
+const VERT = `
+precision highp float;
+attribute vec3 aPosition;
+attribute vec2 aTexCoord;
+varying vec2 vUv;
+void main(){
+  vUv = aTexCoord;
+  vec4 p = vec4(aPosition, 1.0);
+  p.xy = p.xy * 2.0 - 1.0;
+  gl_Position = p;
+}`;
+
+const ADVECT_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uField;    // campo a ser advectado (densidade ou velocidade)
+uniform sampler2D uVel;      // campo de velocidade
+uniform float uDt;
+uniform vec2 uTexel;
+uniform float uDissipation;
+void main(){
+  vec2 vel = texture2D(uVel, vUv).rg * 2.0 - 1.0;  // [-1,1]
+  vec2 coord = vUv - vel * uDt * uTexel;            // semi-Lagrangian
+  vec4 v = texture2D(uField, coord);
+  v.rgb *= uDissipation;
+  // velocity stored as 0..1 (center .5); preserve for vel field
+  v.rg = v.rg;
+  gl_FragColor = v;
+}`;
+
+const SPLAT_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uField;
+uniform vec2 uPoint;
+uniform vec3 uColor;
+uniform vec2 uVelocity;      // delta xy normalizado
+uniform float uRadius;
+uniform float uMode;         // 0 = density (rgb), 1 = velocity (rg)
+void main(){
+  vec4 base = texture2D(uField, vUv);
+  vec2 d = vUv - uPoint;
+  float falloff = exp(-dot(d,d)/(uRadius*uRadius));
+  if (uMode < 0.5){
+    base.rgb += uColor * falloff;
+    base.rgb = min(base.rgb, vec3(1.4));
+  } else {
+    // velocity: bias 0.5 = neutral
+    vec2 v = (base.rg - 0.5) + uVelocity * falloff;
+    v = clamp(v, vec2(-0.5), vec2(0.5));
+    base.rg = v + 0.5;
+  }
+  gl_FragColor = base;
+}`;
+
+const DIFFUSE_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uField;
+uniform vec2 uTexel;
+uniform float uViscosity;
+void main(){
+  vec4 c = texture2D(uField, vUv);
+  vec4 n = texture2D(uField, vUv + vec2(0.0,  uTexel.y));
+  vec4 s = texture2D(uField, vUv - vec2(0.0,  uTexel.y));
+  vec4 e = texture2D(uField, vUv + vec2(uTexel.x, 0.0));
+  vec4 w = texture2D(uField, vUv - vec2(uTexel.x, 0.0));
+  vec4 blur = (n + s + e + w) * 0.25;
+  gl_FragColor = mix(c, blur, uViscosity);
+}`;
+
+const DISPLAY_FRAG = `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D uDens;
+uniform vec3 uBg;
+uniform float uTime;
+uniform vec2 uResolution;
+float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+void main(){
+  vec2 uv = vUv;
+  // breath: micro warping
+  vec2 q = uv;
+  q.x += sin(uv.y * 8.0 + uTime*0.18) * 0.0015;
+  q.y += cos(uv.x * 10.0 + uTime*0.22) * 0.0015;
+  vec3 paint = texture2D(uDens, q).rgb;
+  vec3 col = uBg / 255.0;
+  col = mix(col, paint, clamp(length(paint), 0.0, 1.0));
+  // canvas grain
+  float g = hash(gl_FragCoord.xy + uTime*0.0001) * 0.025;
+  col += g - 0.0125;
+  // vignette
+  vec2 v = (uv - 0.5);
+  col *= 1.0 - dot(v,v)*0.55;
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+/* ─────── p5 SETUP ─────── */
+function setup(){
+  pixelDensity(1);
+  const c = createCanvas(windowWidth, windowHeight, WEBGL);
+  c.parent('stage');
+  noStroke();
+
+  densBuf  = createGraphics(SIM_W, SIM_H, WEBGL); densBuf.pixelDensity(1); densBuf.noStroke();
+  densBufB = createGraphics(SIM_W, SIM_H, WEBGL); densBufB.pixelDensity(1); densBufB.noStroke();
+  velBuf   = createGraphics(SIM_W, SIM_H, WEBGL); velBuf.pixelDensity(1);   velBuf.noStroke();
+  velBufB  = createGraphics(SIM_W, SIM_H, WEBGL); velBufB.pixelDensity(1);  velBufB.noStroke();
+
+  // init velocity neutral (.5) — paint clear black
+  velBuf.background(127,127,0); velBufB.background(127,127,0);
+  densBuf.clear();              densBufB.clear();
+
+  advectShader  = densBuf.createShader(VERT, ADVECT_FRAG);
+  splatShader   = densBuf.createShader(VERT, SPLAT_FRAG);
+  diffuseShader = densBuf.createShader(VERT, DIFFUSE_FRAG);
+  displayShader = createShader(VERT, DISPLAY_FRAG);
+
+  palette = pickPalette();
+  document.body.style.background = `rgb(${palette.bg.join(',')})`;
+  paintHudPalette();
+  updateHourLabel();
+
+  // restaurar última visita
+  try {
+    const saved = localStorage.getItem('confluencia_count_v1');
+    if (saved) strokeCount = parseInt(saved, 10) || 0;
+  } catch(_){}
+
+  // overture
+  const overture = document.getElementById('overture');
+  const countEl = document.getElementById('count');
+  const yourNumEl = document.getElementById('yourNum');
+  const youAre = document.getElementById('youAre');
+  const enter = document.getElementById('enter');
+
+  const target = 24832 + strokeCount;
+  yourNumEl.textContent = (target+1).toLocaleString('pt-BR') + 'ª';
+  const dur = 2200;
+  const t0 = performance.now();
+  function tick(){
+    const k = Math.min(1, (performance.now()-t0)/dur);
+    const e = 1 - Math.pow(1-k, 3);
+    countEl.textContent = Math.floor(target * e).toLocaleString('pt-BR');
+    if (k<1) requestAnimationFrame(tick);
+    else {
+      youAre.classList.add('in');
+      enter.classList.add('in');
+    }
+  }
+  requestAnimationFrame(tick);
+  enter.addEventListener('click', ()=>overture.classList.add('gone'));
+}
+
+function paintHudPalette(){
+  const el = document.getElementById('paletteHud');
+  el.innerHTML = '';
+  palette.strokes.forEach(c=>{
+    const sw = document.createElement('span');
+    sw.className = 'sw';
+    sw.style.background = `rgb(${c.join(',')})`;
+    el.appendChild(sw);
+  });
+}
+function updateHourLabel(){
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const mm = String(d.getMinutes()).padStart(2,'0');
+  document.getElementById('hudHour').textContent = `${hh}:${mm} · ${palette.name}`;
+}
+
+/* ─────── HELPERS DE PASSE ─────── */
+function passQuad(target, shader, uniforms){
+  target.shader(shader);
+  for (const k in uniforms){
+    shader.setUniform(k, uniforms[k]);
+  }
+  target.rect(0,0,1,1);    // p5 WEBGL quad in clip space adjusted by shader
+}
+
+function swap(a,b){ return [b,a]; }
+
+/* ─────── INTERAÇÃO ─────── */
+function pointerData(){
+  const px = mouseX / width;
+  const py = 1 - mouseY / height;
+  const dx = (mouseX - lastMouse.x) / width;
+  const dy = -(mouseY - lastMouse.y) / height;
+  return {px, py, dx, dy};
+}
+
+function mouseDragged(){ lastMouse.down = true; }
+function mousePressed(){
+  lastMouse.x = mouseX; lastMouse.y = mouseY; lastMouse.down = true;
+}
+function mouseReleased(){
+  if (lastMouse.down){
+    showToast();
+    strokeCount++;
+    try{ localStorage.setItem('confluencia_count_v1', strokeCount); }catch(_){}
+  }
+  lastMouse.down = false;
+}
+function touchStarted(){ if (touches.length){ lastMouse.x=touches[0].x; lastMouse.y=touches[0].y; lastMouse.down=true; } return false; }
+function touchEnded(){ mouseReleased(); return false; }
+
+function showToast(){
+  const t = document.getElementById('toast');
+  t.classList.add('in');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=>t.classList.remove('in'), 2400);
+}
+
+/* ─────── DRAW LOOP ─────── */
+function draw(){
+  const dt = 1.0;
+  const texel = [1/SIM_W, 1/SIM_H];
+
+  // 1) ADVECT density along velocity → into densBufB
+  densBufB.shader(advectShader);
+  advectShader.setUniform('uField', densBuf);
+  advectShader.setUniform('uVel', velBuf);
+  advectShader.setUniform('uDt', dt);
+  advectShader.setUniform('uTexel', texel);
+  advectShader.setUniform('uDissipation', 0.992);
+  densBufB.rect(-1,-1,2,2);
+  [densBuf, densBufB] = [densBufB, densBuf];
+
+  // 2) ADVECT velocity along itself → velBufB
+  velBufB.shader(advectShader);
+  advectShader.setUniform('uField', velBuf);
+  advectShader.setUniform('uVel', velBuf);
+  advectShader.setUniform('uDt', dt);
+  advectShader.setUniform('uTexel', texel);
+  advectShader.setUniform('uDissipation', 0.985);
+  velBufB.rect(-1,-1,2,2);
+  [velBuf, velBufB] = [velBufB, velBuf];
+
+  // 3) DIFFUSE density (slight blur, dye spreading)
+  densBufB.shader(diffuseShader);
+  diffuseShader.setUniform('uField', densBuf);
+  diffuseShader.setUniform('uTexel', texel);
+  diffuseShader.setUniform('uViscosity', 0.06);
+  densBufB.rect(-1,-1,2,2);
+  [densBuf, densBufB] = [densBufB, densBuf];
+
+  // 4) SPLAT — if dragging, inject color + velocity at pointer
+  if (lastMouse.down && (mouseIsPressed || (typeof touches!=='undefined' && touches.length))){
+    const {px,py,dx,dy} = pointerData();
+    const speed = Math.min(0.6, Math.hypot(dx,dy)*4 + 0.06);
+    const colorIdx = Math.floor((px*7919 + py*6133)) % palette.strokes.length;
+    const c = palette.strokes[(Math.abs(colorIdx)) % palette.strokes.length].map(v=>v/255);
+    // density splat
+    densBufB.shader(splatShader);
+    splatShader.setUniform('uField', densBuf);
+    splatShader.setUniform('uPoint', [px,py]);
+    splatShader.setUniform('uColor', c);
+    splatShader.setUniform('uVelocity', [0,0]);
+    splatShader.setUniform('uRadius', 0.03 + speed*0.04);
+    splatShader.setUniform('uMode', 0);
+    densBufB.rect(-1,-1,2,2);
+    [densBuf, densBufB] = [densBufB, densBuf];
+    // velocity splat
+    velBufB.shader(splatShader);
+    splatShader.setUniform('uField', velBuf);
+    splatShader.setUniform('uPoint', [px,py]);
+    splatShader.setUniform('uColor', [0,0,0]);
+    splatShader.setUniform('uVelocity', [dx*2.2, dy*2.2]);
+    splatShader.setUniform('uRadius', 0.04 + speed*0.05);
+    splatShader.setUniform('uMode', 1);
+    velBufB.rect(-1,-1,2,2);
+    [velBuf, velBufB] = [velBufB, velBuf];
+  }
+  lastMouse.x = mouseX; lastMouse.y = mouseY;
+
+  // 5) DISPLAY
+  shader(displayShader);
+  displayShader.setUniform('uDens', densBuf);
+  displayShader.setUniform('uBg', palette.bg);
+  displayShader.setUniform('uTime', millis()/1000);
+  displayShader.setUniform('uResolution', [width, height]);
+  rect(-1,-1,2,2);
+}
+
+function windowResized(){
+  resizeCanvas(windowWidth, windowHeight);
+}
+
+setInterval(updateHourLabel, 30000);
+</script>
+</body>
+</html>

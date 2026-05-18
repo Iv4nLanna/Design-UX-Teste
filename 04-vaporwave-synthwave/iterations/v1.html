@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAPORWAVE DREAM ENGINE — v1 — N°04</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#0a0220;color:#ffd1f9;font-family:'Space Mono',ui-monospace,monospace;cursor:none}
+  canvas{display:block;position:fixed;inset:0}
+  #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#000;z-index:100;color:#ff77ff;font-family:ui-monospace,monospace;letter-spacing:.4em;text-transform:uppercase;font-size:.9rem;transition:opacity 1s ease}
+  #boot.gone{opacity:0;pointer-events:none}
+  #boot .cap{padding:1rem 1.5rem;border:1px solid #ff77ff55;text-shadow:0 0 12px #ff77ff;animation:flicker 2s steps(8) infinite}
+  @keyframes flicker{0%,18%,22%,25%,53%,57%,100%{opacity:1}20%,24%,55%{opacity:.3}}
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5;padding:1.5rem;display:flex;flex-direction:column;justify-content:space-between;mix-blend-mode:screen}
+  .top,.bot{display:flex;justify-content:space-between;align-items:flex-start;color:#ffd1f9;text-shadow:0 0 8px #ff77ff}
+  .ttl{font-size:.7rem;letter-spacing:.5em;text-transform:uppercase;opacity:.85}
+  .num{font-size:.7rem;letter-spacing:.3em;opacity:.45}
+  .desc{font-size:.6rem;letter-spacing:.18em;line-height:1.8;opacity:.55;max-width:280px;text-transform:uppercase;margin-top:.6rem}
+  .tags{display:flex;gap:.5rem}
+  .tag{border:1px solid #ff77ff55;padding:.1rem .55rem;font-size:.55rem;letter-spacing:.3em;text-transform:uppercase;background:rgba(255,119,255,.05)}
+  .compass{font-size:.55rem;letter-spacing:.3em;opacity:.45}
+  #reticle{position:fixed;left:50%;top:50%;width:8px;height:8px;border:1px solid #ff77ff;border-radius:50%;transform:translate(-50%,-50%);z-index:6;mix-blend-mode:screen;pointer-events:none;box-shadow:0 0 6px #ff77ff}
+  #reticle::after{content:"";position:absolute;left:50%;top:50%;width:24px;height:24px;border:1px solid #ff77ff33;border-radius:50%;transform:translate(-50%,-50%)}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+
+<div id="boot"><div class="cap">▸ Loading dream…</div></div>
+
+<div id="hud">
+  <div class="top">
+    <div>
+      <div style="display:flex;gap:2.5rem;align-items:baseline">
+        <span class="ttl">Vaporwave Dream Engine</span>
+        <span class="num">N°04 · v1</span>
+      </div>
+      <p class="desc">Você não vê o sonho. Você é o sonhador. Mouse = olhar · WASD = caminhar · Click = tocar.</p>
+    </div>
+    <div class="compass" id="compass">N 000°</div>
+  </div>
+  <div class="bot">
+    <div class="tags">
+      <span class="tag">Three.js</span>
+      <span class="tag">CRT Shader</span>
+      <span class="tag">FPS Cam</span>
+      <span class="tag">Bloom</span>
+    </div>
+    <span class="compass">Claude × Ivan Lanna · 2026</span>
+  </div>
+</div>
+<div id="reticle"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }    from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { ShaderPass }    from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass }    from 'three/addons/postprocessing/OutputPass.js';
+
+/* ─────── BOOT ─────── */
+setTimeout(()=>document.getElementById('boot').classList.add('gone'), 2400);
+
+/* ─────── SCENE ─────── */
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x1a0233, 0.018);
+
+const camera = new THREE.PerspectiveCamera(72, innerWidth/innerHeight, 0.1, 400);
+camera.position.set(0, 1.6, 8);
+
+const renderer = new THREE.WebGLRenderer({ antialias:false, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
+document.body.appendChild(renderer.domElement);
+
+/* ─────── COLORS ─────── */
+const C = {
+  bgTop:    new THREE.Color(0x0a0220),
+  bgMid:    new THREE.Color(0x3a0a4a),
+  bgHot:    new THREE.Color(0xff2a6d),
+  bgSun:    new THREE.Color(0xffd166),
+  gridPink: new THREE.Color(0xff2dff),
+  gridCyan: new THREE.Color(0x00f0ff),
+  palmDark: new THREE.Color(0x1a0033)
+};
+
+/* ─────── SKY GRADIENT (dome) ─────── */
+const skyGeo = new THREE.SphereGeometry(200, 32, 16);
+const skyMat = new THREE.ShaderMaterial({
+  side: THREE.BackSide,
+  uniforms: {
+    top:  { value: C.bgTop  },
+    mid:  { value: C.bgMid  },
+    hot:  { value: C.bgHot  },
+    sun:  { value: C.bgSun  },
+  },
+  vertexShader:`varying vec3 vP; void main(){ vP=position; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`
+    varying vec3 vP; uniform vec3 top,mid,hot,sun;
+    void main(){
+      float h = normalize(vP).y;        // -1 (down) → 1 (up)
+      float t = clamp((h+0.3)/1.3, 0., 1.);
+      vec3 col = mix(hot, mid, smoothstep(0., .55, t));
+      col = mix(col, top, smoothstep(.5, 1., t));
+      // pinkish horizon glow
+      col = mix(col, sun*0.6, smoothstep(0.05, -0.15, h)*0.4);
+      gl_FragColor = vec4(col,1.0);
+    }`
+});
+scene.add(new THREE.Mesh(skyGeo, skyMat));
+
+/* ─────── SUN with horizontal stripes ─────── */
+const sunGeo = new THREE.CircleGeometry(14, 64);
+const sunMat = new THREE.ShaderMaterial({
+  transparent:true,
+  uniforms:{ uTime:{ value:0 } },
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`
+    varying vec2 vUv; uniform float uTime;
+    void main(){
+      vec2 p = vUv - 0.5;
+      float r = length(p);
+      if (r > 0.5) discard;
+      // vertical gradient: hot pink top → orange → yellow bottom
+      float g = vUv.y;
+      vec3 hot   = vec3(1.0, 0.18, 0.55);
+      vec3 mid   = vec3(1.0, 0.45, 0.55);
+      vec3 ora   = vec3(1.0, 0.65, 0.30);
+      vec3 yel   = vec3(1.0, 0.92, 0.45);
+      vec3 col = mix(hot, mid, smoothstep(0.55, 0.85, g));
+      col = mix(ora, col, smoothstep(0.25, 0.55, g));
+      col = mix(yel, col, smoothstep(0.0,  0.25, g));
+      // animated horizontal dark bands (lower half only)
+      float band = step(0.5, fract((vUv.y*20.0) - uTime*0.4));
+      float mask = smoothstep(0.5, 0.0, vUv.y); // bottom heavy
+      col *= 1.0 - band*mask*0.85;
+      // soft edge
+      float edge = smoothstep(0.5, 0.46, r);
+      gl_FragColor = vec4(col, edge);
+    }`
+});
+const sun = new THREE.Mesh(sunGeo, sunMat);
+sun.position.set(0, 6, -60);
+scene.add(sun);
+
+/* ─────── GRID (procedural shader, not geometry) ─────── */
+const gridGeo = new THREE.PlaneGeometry(400, 400, 1, 1);
+const gridMat = new THREE.ShaderMaterial({
+  uniforms:{
+    uTime:{ value:0 }, uMouse:{ value:new THREE.Vector2(.5,.5) },
+    cPink:{ value:C.gridPink }, cCyan:{ value:C.gridCyan }
+  },
+  vertexShader:`varying vec2 vUv; varying vec3 vWp;
+    void main(){ vUv=uv; vec4 wp=modelMatrix*vec4(position,1.0); vWp=wp.xyz; gl_Position=projectionMatrix*viewMatrix*wp; }`,
+  fragmentShader:`
+    varying vec2 vUv; varying vec3 vWp;
+    uniform float uTime; uniform vec3 cPink, cCyan; uniform vec2 uMouse;
+    float gridLine(float v, float w){ return smoothstep(w, 0.0, abs(v)); }
+    void main(){
+      vec2 p = vWp.xz;
+      // moving Z (toward camera)
+      p.y += uTime * 4.0;
+      float cell = 2.5;
+      vec2 g = abs(fract(p/cell - 0.5) - 0.5) / fwidth(p/cell);
+      float line = 1.0 - min(min(g.x,g.y), 1.0);
+      // distance fade
+      float d = length(vWp.xz);
+      float fade = 1.0 - smoothstep(20., 140., d);
+      // color mix horizon→camera
+      float depth = smoothstep(60., 0., d);
+      vec3 col = mix(cPink, cCyan, depth);
+      vec3 base = mix(vec3(0.05,0.0,0.12), vec3(0.0), depth);
+      vec3 final = mix(base, col, line*fade);
+      // central glow
+      final += col * 0.07 * (1.-smoothstep(0., 20., d));
+      gl_FragColor = vec4(final, 1.0);
+    }`
+});
+const grid = new THREE.Mesh(gridGeo, gridMat);
+grid.rotation.x = -Math.PI/2;
+grid.position.y = 0;
+scene.add(grid);
+
+/* ─────── MIRROR WATER (subtle reflective floor strip) ─────── */
+// kept light; tinted plane that adds shimmering highlights via shader noise
+const waterGeo = new THREE.PlaneGeometry(60, 60, 1, 1);
+const waterMat = new THREE.ShaderMaterial({
+  transparent:true,
+  uniforms:{ uTime:{ value:0 } },
+  vertexShader:`varying vec2 vUv; varying vec3 vWp;
+    void main(){ vUv=uv; vec4 wp=modelMatrix*vec4(position,1.0); vWp=wp.xyz; gl_Position=projectionMatrix*viewMatrix*wp; }`,
+  fragmentShader:`
+    varying vec2 vUv; varying vec3 vWp; uniform float uTime;
+    float h(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
+    float n(vec2 p){ vec2 i=floor(p),f=fract(p);
+      float a=h(i),b=h(i+vec2(1,0)),c=h(i+vec2(0,1)),d=h(i+vec2(1,1));
+      vec2 u=f*f*(3.-2.*f);
+      return mix(a,b,u.x)+(c-a)*u.y*(1.-u.x)+(d-b)*u.x*u.y; }
+    void main(){
+      vec2 p = vWp.xz*0.15;
+      float w = n(p+uTime*0.2)*0.5+n(p*2.+uTime*0.05)*0.5;
+      vec3 col = mix(vec3(0.05,0.0,0.15), vec3(0.85,0.2,0.95), pow(w, 4.0));
+      // distance fade
+      float d = length(vWp.xz);
+      float fade = 1.0 - smoothstep(15., 30., d);
+      gl_FragColor = vec4(col, fade*0.35);
+    }`,
+  depthWrite:false
+});
+const water = new THREE.Mesh(waterGeo, waterMat);
+water.rotation.x = -Math.PI/2;
+water.position.y = 0.02;
+scene.add(water);
+
+/* ─────── STARS (3 parallax layers) ─────── */
+function makeStars(count, range, size, color){
+  const g = new THREE.BufferGeometry();
+  const pos = new Float32Array(count*3);
+  for(let i=0;i<count;i++){
+    const phi = Math.random()*Math.PI*2;
+    const cos = Math.random()*0.6 + 0.2;   // upper hemisphere
+    const r   = range;
+    pos[i*3]   = Math.cos(phi)*Math.sqrt(1-cos*cos)*r;
+    pos[i*3+1] = cos*r;
+    pos[i*3+2] = Math.sin(phi)*Math.sqrt(1-cos*cos)*r;
+  }
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  const m = new THREE.PointsMaterial({ color, size, sizeAttenuation:true, transparent:true, opacity:0.85 });
+  return new THREE.Points(g,m);
+}
+scene.add(makeStars(400, 90,  0.18, 0xffffff));
+scene.add(makeStars(250, 130, 0.30, 0xff77ff));
+scene.add(makeStars(120, 180, 0.55, 0x00f0ff));
+
+/* ─────── GREEK BUST (stylized procedural) ─────── */
+const bustGroup = new THREE.Group();
+bustGroup.position.set(0, 1.8, -3.5);
+scene.add(bustGroup);
+
+// pedestal
+const pedGeo = new THREE.CylinderGeometry(0.6, 0.7, 0.6, 12);
+const marbleMat = new THREE.MeshStandardMaterial({
+  color:0xf5e8ff, roughness:0.45, metalness:0.05, emissive:0x331144, emissiveIntensity:0.15
+});
+const pedestal = new THREE.Mesh(pedGeo, marbleMat);
+pedestal.position.y = -1.3;
+bustGroup.add(pedestal);
+
+// head: stretched sphere
+const headGeo = new THREE.SphereGeometry(0.55, 24, 24);
+// elongate to face-like
+const pos = headGeo.attributes.position;
+for(let i=0;i<pos.count;i++){
+  const y = pos.getY(i);
+  pos.setY(i, y*1.25);
+  // slight chin recess
+  if(y < -0.3) pos.setZ(i, pos.getZ(i)*0.85);
+  // forehead push
+  if(y > 0.3)  pos.setZ(i, pos.getZ(i)*1.05);
+}
+headGeo.computeVertexNormals();
+const head = new THREE.Mesh(headGeo, marbleMat);
+head.position.y = 0.3;
+bustGroup.add(head);
+
+// neck
+const neckGeo = new THREE.CylinderGeometry(0.22, 0.32, 0.35, 12);
+const neck = new THREE.Mesh(neckGeo, marbleMat);
+neck.position.y = -0.25;
+bustGroup.add(neck);
+
+// shoulders/torso bust cut
+const torsoGeo = new THREE.CylinderGeometry(0.55, 0.72, 0.55, 16, 1, false, 0, Math.PI*2);
+const torso = new THREE.Mesh(torsoGeo, marbleMat);
+torso.position.y = -0.7;
+bustGroup.add(torso);
+
+// nose
+const noseGeo = new THREE.ConeGeometry(0.07, 0.22, 6);
+const nose = new THREE.Mesh(noseGeo, marbleMat);
+nose.position.set(0, 0.32, 0.52); nose.rotation.x = Math.PI/2;
+bustGroup.add(nose);
+
+// eye sockets (subtle dark spheres)
+const sockMat = new THREE.MeshStandardMaterial({ color:0x1a0a2a, roughness:1 });
+const sockGeo = new THREE.SphereGeometry(0.07, 12, 12);
+const leye = new THREE.Mesh(sockGeo, sockMat); leye.position.set(-0.16, 0.44, 0.42); bustGroup.add(leye);
+const reye = new THREE.Mesh(sockGeo, sockMat); reye.position.set( 0.16, 0.44, 0.42); bustGroup.add(reye);
+
+// hair: cluster of small spheres on top
+const hairMat = new THREE.MeshStandardMaterial({ color:0xead8ff, roughness:0.7 });
+for(let i=0;i<28;i++){
+  const a = (i/28)*Math.PI*2;
+  const r = 0.35 + Math.random()*0.08;
+  const y = 0.78 + Math.random()*0.12;
+  const c = new THREE.Mesh(new THREE.SphereGeometry(0.12+Math.random()*0.05, 8, 8), hairMat);
+  c.position.set(Math.cos(a)*r*0.9, y, Math.sin(a)*r*0.6 - 0.05);
+  bustGroup.add(c);
+}
+
+/* ─────── PALMS (low-poly silhouettes) ─────── */
+function makePalm(){
+  const g = new THREE.Group();
+  const trunkMat = new THREE.MeshBasicMaterial({ color:0x0d001f });
+  const leafMat  = new THREE.MeshBasicMaterial({ color:0x190036 });
+  // trunk
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.14, 4.5, 6), trunkMat);
+  trunk.position.y = 2.25;
+  g.add(trunk);
+  // leaves: 6 elongated triangles
+  for(let i=0;i<6;i++){
+    const leaf = new THREE.Mesh(new THREE.ConeGeometry(0.3, 2.2, 4), leafMat);
+    const a = (i/6)*Math.PI*2;
+    leaf.position.set(Math.cos(a)*0.7, 4.4, Math.sin(a)*0.7);
+    leaf.rotation.z = Math.cos(a)*0.9;
+    leaf.rotation.x = Math.sin(a)*0.9;
+    g.add(leaf);
+  }
+  return g;
+}
+const palmPositions = [
+  [-9, -8], [10, -7], [-14, -22], [13, -25], [-22, -40], [22, -42]
+];
+palmPositions.forEach(([x,z])=>{
+  const p = makePalm();
+  p.position.set(x, 0, z);
+  p.rotation.y = Math.random()*Math.PI;
+  scene.add(p);
+});
+
+/* ─────── LIGHTS ─────── */
+scene.add(new THREE.AmbientLight(0xaa66ff, 0.6));
+const key = new THREE.DirectionalLight(0xff6ec7, 1.4);
+key.position.set(-4, 6, -3);
+scene.add(key);
+const rim = new THREE.DirectionalLight(0x00f0ff, 0.8);
+rim.position.set(5, 4, 6);
+scene.add(rim);
+const sunLight = new THREE.PointLight(0xffa86b, 1.2, 80);
+sunLight.position.set(0, 6, -55);
+scene.add(sunLight);
+
+/* ─────── FPS CAMERA (mouse-look + WASD) ─────── */
+const look = { yaw:0, pitch:0, tYaw:0, tPitch:0 };
+window.addEventListener('mousemove', e=>{
+  const nx = (e.clientX/innerWidth) - 0.5;
+  const ny = (e.clientY/innerHeight) - 0.5;
+  look.tYaw   = -nx * Math.PI * 0.6;
+  look.tPitch = -ny * Math.PI * 0.25;
+});
+const keys = {};
+addEventListener('keydown', e=>keys[e.code]=true);
+addEventListener('keyup',   e=>keys[e.code]=false);
+
+/* ─────── POST-PROCESSING (CRT + chromatic aberration + bloom) ─────── */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.95, 0.6, 0.0);
+composer.addPass(bloom);
+
+const CrtShader = {
+  uniforms:{
+    tDiffuse:{ value:null },
+    uTime:{ value:0 },
+    uRes:{ value:new THREE.Vector2(innerWidth, innerHeight) },
+    uChroma:{ value: 0.0025 }
+  },
+  vertexShader:`varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`
+    uniform sampler2D tDiffuse; uniform float uTime; uniform vec2 uRes; uniform float uChroma;
+    varying vec2 vUv;
+    vec2 curve(vec2 uv){
+      uv = uv*2.0 - 1.0;
+      vec2 off = uv.yx*uv.yx;
+      uv += uv*off*0.08;
+      return uv*0.5+0.5;
+    }
+    float scan(vec2 uv){ return sin(uv.y*uRes.y*1.5 - uTime*8.0)*0.04; }
+    void main(){
+      vec2 uv = curve(vUv);
+      if(uv.x<0.||uv.x>1.||uv.y<0.||uv.y>1.){ gl_FragColor=vec4(0.,0.,0.,1.); return; }
+      // chromatic aberration
+      vec2 c = (uv-0.5);
+      float r = texture2D(tDiffuse, uv + c*uChroma).r;
+      float g = texture2D(tDiffuse, uv).g;
+      float b = texture2D(tDiffuse, uv - c*uChroma).b;
+      vec3 col = vec3(r,g,b);
+      // scanlines
+      col -= scan(uv);
+      // vignette
+      float vig = smoothstep(1.0, 0.4, length(uv-0.5));
+      col *= 0.6 + 0.6*vig;
+      // subtle noise
+      float n = fract(sin(dot(uv*uRes+uTime, vec2(12.9898,78.233)))*43758.5453);
+      col += (n-0.5)*0.04;
+      // mask (rgb stripes very subtle)
+      float stripe = 0.94 + 0.06*sin(uv.x*uRes.x*2.0);
+      col *= stripe;
+      gl_FragColor = vec4(col, 1.0);
+    }`
+};
+const crtPass = new ShaderPass(CrtShader);
+composer.addPass(crtPass);
+composer.addPass(new OutputPass());
+
+/* ─────── COMPASS HUD ─────── */
+const compass = document.getElementById('compass');
+
+/* ─────── ANIMATE ─────── */
+const clock = new THREE.Clock();
+const tmp   = new THREE.Vector3();
+const forward = new THREE.Vector3();
+const right   = new THREE.Vector3();
+
+function animate(){
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t  = clock.elapsedTime;
+
+  // smooth FPS camera
+  look.yaw   += (look.tYaw   - look.yaw)   * 0.06;
+  look.pitch += (look.tPitch - look.pitch) * 0.06;
+  camera.rotation.order = 'YXZ';
+  camera.rotation.y = look.yaw;
+  camera.rotation.x = look.pitch;
+
+  // WASD walk (dreamlike speed)
+  const speed = 4.2;
+  camera.getWorldDirection(forward); forward.y = 0; forward.normalize();
+  right.crossVectors(forward, camera.up).normalize();
+  if(keys['KeyW']||keys['ArrowUp'])    camera.position.addScaledVector(forward,  speed*dt);
+  if(keys['KeyS']||keys['ArrowDown'])  camera.position.addScaledVector(forward, -speed*dt);
+  if(keys['KeyA']||keys['ArrowLeft'])  camera.position.addScaledVector(right,   -speed*dt);
+  if(keys['KeyD']||keys['ArrowRight']) camera.position.addScaledVector(right,    speed*dt);
+  // gentle bob
+  camera.position.y = 1.6 + Math.sin(t*2.0)*0.04;
+
+  // keep grid centered under user (infinite illusion)
+  grid.position.x = camera.position.x;
+  grid.position.z = camera.position.z;
+  water.position.x = camera.position.x;
+  water.position.z = camera.position.z;
+
+  // bust slow rotation
+  bustGroup.rotation.y = Math.sin(t*0.3)*0.5;
+  bustGroup.position.y = 1.8 + Math.sin(t*0.8)*0.08;
+
+  // sun stripes anim
+  sunMat.uniforms.uTime.value = t;
+  gridMat.uniforms.uTime.value = t;
+  waterMat.uniforms.uTime.value = t;
+  crtPass.uniforms.uTime.value = t;
+
+  // compass: yaw → degrees (0 = north = -Z)
+  const deg = Math.round(((-look.yaw*180/Math.PI)%360 + 360) % 360);
+  compass.textContent = `N ${String(deg).padStart(3,'0')}°`;
+
+  composer.render();
+}
+animate();
+
+/* ─────── RESIZE ─────── */
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  composer.setSize(innerWidth, innerHeight);
+  crtPass.uniforms.uRes.value.set(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

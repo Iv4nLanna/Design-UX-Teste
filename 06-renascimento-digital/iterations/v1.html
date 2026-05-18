@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INCUNABULA — v1 — N°06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#0c0a08;color:#e8dfcf;font-family:'EB Garamond','Cormorant Garamond',Georgia,serif;cursor:crosshair}
+  canvas{display:block;position:fixed;inset:0}
+  /* OVERTURE */
+  #overture{position:fixed;inset:0;z-index:60;background:#0c0a08;color:#e8dfcf;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;transition:opacity 2s ease}
+  #overture.gone{opacity:0;pointer-events:none}
+  #overture .ln{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.4rem,3.2vw,2.4rem);font-weight:300;font-style:italic;letter-spacing:.02em;line-height:1.5;max-width:30em;opacity:0;transition:opacity 2.4s ease}
+  #overture .ln.in{opacity:.9}
+  #overture .ln + .ln{margin-top:2.4rem}
+  #overture .cta{margin-top:4rem;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.55em;text-transform:uppercase;color:#9a8e72;opacity:0;transition:opacity 1.4s ease;cursor:pointer;border:1px solid #9a8e72;padding:.85rem 1.6rem;background:transparent}
+  #overture .cta.in{opacity:.85}
+  #overture .cta:hover{background:#e8dfcf;color:#0c0a08;border-color:#e8dfcf}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;padding:1.6rem 2rem;display:flex;flex-direction:column;justify-content:space-between;color:#e8dfcf;mix-blend-mode:difference}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;width:100%}
+  .ttl{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.15rem;font-weight:300;font-style:italic;letter-spacing:.02em}
+  .num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
+  .meta{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;opacity:.6;line-height:1.9;max-width:320px}
+  .tags{display:flex;gap:.6rem}
+  .tag{border:1px solid currentColor;padding:.1rem .6rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.55}
+  /* RETÍCULO */
+  #reticle{position:fixed;left:50%;top:50%;width:18px;height:18px;border:1px solid #d6c89a;transform:translate(-50%,-50%) rotate(45deg);z-index:8;pointer-events:none;mix-blend-mode:difference;opacity:.7}
+  #reticle::before,#reticle::after{content:"";position:absolute;background:#d6c89a}
+  #reticle::before{left:50%;top:-6px;width:1px;height:6px;transform:translateX(-50%)}
+  #reticle::after{left:50%;top:18px;width:1px;height:6px;transform:translateX(-50%)}
+  /* LEGENDA OBRA */
+  #plate{position:fixed;left:50%;bottom:6%;transform:translateX(-50%);max-width:560px;text-align:center;color:#e8dfcf;z-index:12;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
+  #plate.in{opacity:.92}
+  #plate .artist{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.5em;text-transform:uppercase;opacity:.7;margin-bottom:.55rem}
+  #plate .title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-style:italic;font-weight:300;letter-spacing:.005em;line-height:1.25}
+  #plate .meta-line{font-family:'EB Garamond',Georgia,serif;font-size:.95rem;font-style:italic;opacity:.75;margin-top:.6rem}
+  #plate .curatorial{font-family:'EB Garamond',Georgia,serif;font-size:.9rem;line-height:1.55;opacity:.7;margin-top:1.1rem;max-width:42em;text-align:left}
+  /* LOADING */
+  #loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.6em;text-transform:uppercase;color:#9a8e72;z-index:20;opacity:.7;animation:bl 1.6s ease-in-out infinite}
+  @keyframes bl{50%{opacity:.2}}
+  /* HINT */
+  #hint{position:fixed;left:50%;top:1.4rem;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.5em;text-transform:uppercase;color:#d6c89a;opacity:.45;z-index:11;mix-blend-mode:difference;pointer-events:none}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+
+<div id="overture">
+  <div class="ln" id="ln1">Você está prestes a entrar em um museu<br>que não existe.</div>
+  <div class="ln" id="ln2">Cada sala foi feita para você.<br>Mesmo que você ainda não saiba.</div>
+  <button class="cta" id="enter">entrar</button>
+</div>
+
+<div id="hud">
+  <div class="row">
+    <div>
+      <div style="display:flex;gap:2rem;align-items:baseline">
+        <span class="ttl">Incunabula</span>
+        <span class="num">N°06 · v1</span>
+      </div>
+      <p class="meta">Sala I · Corredor de Entrada<br>seis obras · iluminação tungsten</p>
+    </div>
+    <div class="meta" id="hudRoom">Sala I/∞</div>
+  </div>
+  <div class="row">
+    <div class="tags">
+      <span class="tag">Three.js</span>
+      <span class="tag">PBR</span>
+      <span class="tag">CSS3D</span>
+      <span class="tag">Rijksmuseum</span>
+    </div>
+    <span class="meta">Claude × Ivan Lanna · 2026</span>
+  </div>
+</div>
+
+<div id="reticle"></div>
+<div id="hint">[mover] WASD &nbsp;·&nbsp; [olhar] arraste o mouse &nbsp;·&nbsp; [aproximar] caminhe</div>
+<div id="plate">
+  <div class="artist" id="plArtist">—</div>
+  <div class="title" id="plTitle">—</div>
+  <div class="meta-line" id="plMeta">—</div>
+  <div class="curatorial" id="plCur">—</div>
+</div>
+
+<div id="loading">preparando a galeria…</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* ============================================================
+   INCUNABULA — V1
+   Galeria 3D museológica com 6 obras renascentistas reais.
+   Three.js PBR + 3-point lighting tungsten por obra.
+   Câmera FPS com easing pesado.
+   ============================================================ */
+
+const WORKS = [
+  {
+    artist: 'Johannes Vermeer',
+    title: 'A Leiteira',
+    year: 'c. 1660',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg/800px-Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg',
+    ratio: 0.892,
+    curatorial: 'A luz que cai pela janela esquerda divide o quadro em duas atmosferas: a parede silenciosa e a mesa carregada. Vermeer pinta o leite caindo como se fosse o tempo se derramando.',
+    palette: '#c9a96e',
+  },
+  {
+    artist: 'Rembrandt van Rijn',
+    title: 'Auto-retrato (1659)',
+    year: '1659',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg/640px-Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg',
+    ratio: 0.83,
+    curatorial: 'Aos 53 anos, Rembrandt se pinta com a têmpera reduzida e o gesto largo. A barba é sugerida; os olhos, fixos. O fundo desaparece — só importa o homem que olha de volta.',
+    palette: '#8a6b3a',
+  },
+  {
+    artist: 'Sandro Botticelli',
+    title: 'O Nascimento de Vênus',
+    year: 'c. 1485',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1024px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg',
+    ratio: 1.59,
+    curatorial: 'A deusa chega à praia em uma concha. O vento ocidental sopra rosas. Botticelli inventa uma linha que nenhuma anatomia confirmaria: o pescoço alongado, o ombro inclinado, a perfeição que só existe em pintura.',
+    palette: '#c8a878',
+  },
+  {
+    artist: 'Leonardo da Vinci',
+    title: 'A Dama do Arminho',
+    year: 'c. 1490',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Cecilia_Gallerani_-_Lady_with_an_Ermine.jpg/800px-Cecilia_Gallerani_-_Lady_with_an_Ermine.jpg',
+    ratio: 0.74,
+    curatorial: 'Cecília Gallerani sustenta o arminho como se sustentasse uma ideia. Leonardo vira o corpo num movimento que não termina — anuncia o retrato moderno em um único contraposto.',
+    palette: '#a07a4c',
+  },
+  {
+    artist: 'Caravaggio',
+    title: 'Narciso',
+    year: 'c. 1599',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Narcissus-Caravaggio_%281594-96%29_edited.jpg/800px-Narcissus-Caravaggio_%281594-96%29_edited.jpg',
+    ratio: 0.85,
+    curatorial: 'O reflexo é mais negro que o original. Caravaggio organiza o quadro em torno de um círculo formado pelos braços do jovem e do seu duplo: o mito virou geometria.',
+    palette: '#6a4a26',
+  },
+  {
+    artist: 'Albrecht Dürer',
+    title: 'Liebre',
+    year: '1502',
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Albrecht_D%C3%BCrer_-_Hare%2C_1502_-_Google_Art_Project.jpg/640px-Albrecht_D%C3%BCrer_-_Hare%2C_1502_-_Google_Art_Project.jpg',
+    ratio: 0.78,
+    curatorial: 'Dürer pinta cada pelo. A liebre não foi posada em estúdio — é construída pela memória de quem soube olhar uma vez. O fundo neutro é uma declaração: o real basta.',
+    palette: '#b09060',
+  },
+];
+
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x07060a);
+scene.fog = new THREE.Fog(0x07060a, 14, 38);
+
+const camera = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.05, 200);
+camera.position.set(0, 1.65, 14);
+
+const css = new CSS2DRenderer();
+css.setSize(innerWidth, innerHeight);
+css.domElement.style.position = 'fixed';
+css.domElement.style.inset = '0';
+css.domElement.style.pointerEvents = 'none';
+css.domElement.style.zIndex = '5';
+document.body.appendChild(css.domElement);
+
+/* ─── PISO MADEIRA ─── */
+const floorMat = new THREE.MeshStandardMaterial({
+  color: 0x2a1d10, roughness: 0.78, metalness: 0.05
+});
+{
+  // textura procedural ripas
+  const c = document.createElement('canvas'); c.width = c.height = 1024;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3a2516'; ctx.fillRect(0,0,1024,1024);
+  for (let y=0; y<1024; y+=64){
+    const off = (y/64)%2 ? 0 : 256;
+    for (let x=-256; x<1024; x+=256){
+      const w = 256, h = 64;
+      const tone = 30 + Math.random()*40;
+      ctx.fillStyle = `rgb(${50+tone},${30+tone*0.5},${15+tone*0.3})`;
+      ctx.fillRect(x+off, y, w, h);
+      // veios
+      ctx.strokeStyle = `rgba(20,10,5,${0.18+Math.random()*0.15})`;
+      ctx.lineWidth = 0.6;
+      for (let k=0; k<6; k++){
+        const yy = y + Math.random()*h;
+        ctx.beginPath();
+        ctx.moveTo(x+off, yy);
+        ctx.bezierCurveTo(x+off+80, yy + (Math.random()-.5)*4, x+off+170, yy + (Math.random()-.5)*4, x+off+w, yy);
+        ctx.stroke();
+      }
+      // borda escura
+      ctx.fillStyle = 'rgba(0,0,0,.4)';
+      ctx.fillRect(x+off, y+h-2, w, 2);
+      ctx.fillRect(x+off+w-2, y, 2, h);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(8, 16);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  floorMat.map = tex;
+}
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 80), floorMat);
+floor.rotation.x = -Math.PI/2;
+floor.position.y = 0;
+floor.receiveShadow = true;
+scene.add(floor);
+
+/* ─── PAREDES ─── */
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.95, metalness: 0 });
+const wallL = new THREE.Mesh(new THREE.PlaneGeometry(80, 8), wallMat);
+wallL.position.set(-6, 4, 0); wallL.rotation.y = Math.PI/2;
+wallL.receiveShadow = true;
+scene.add(wallL);
+const wallR = wallL.clone();
+wallR.position.x = 6; wallR.rotation.y = -Math.PI/2;
+scene.add(wallR);
+// parede do fundo (no V1, sólida — em V2 dissolve)
+const wallBack = new THREE.Mesh(new THREE.PlaneGeometry(12, 8), wallMat.clone());
+wallBack.position.set(0, 4, -30);
+scene.add(wallBack);
+// teto
+const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 80), new THREE.MeshStandardMaterial({ color: 0x0a0806, roughness: 1 }));
+ceiling.rotation.x = Math.PI/2;
+ceiling.position.y = 8;
+scene.add(ceiling);
+
+/* ─── ILUMINAÇÃO AMBIENT ─── */
+const ambient = new THREE.AmbientLight(0xfff0d0, 0.06);
+scene.add(ambient);
+const hemi = new THREE.HemisphereLight(0x3a2818, 0x0a0806, 0.05);
+scene.add(hemi);
+
+/* ─── OBRAS ─── */
+const loader = new THREE.TextureLoader();
+loader.setCrossOrigin('anonymous');
+
+const works3D = []; // {group, mesh, lights, work, plate, idx}
+
+function placeholderTexture(palette){
+  const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,256,256);
+  g.addColorStop(0, palette);
+  g.addColorStop(1, '#0a0806');
+  ctx.fillStyle = g; ctx.fillRect(0,0,256,256);
+  ctx.fillStyle = 'rgba(0,0,0,.4)';
+  ctx.font = '500 22px Cormorant Garamond, Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('—', 128, 134);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+WORKS.forEach((w, i)=>{
+  const side = i % 2 === 0 ? -1 : 1; // alternância esquerda/direita
+  const z = -2 - (Math.floor(i/2)) * 8.5;
+  const group = new THREE.Group();
+  group.position.set(side*5.85, 2.3, z);
+  group.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
+  scene.add(group);
+
+  // moldura (frame)
+  const h = 2.4;
+  const wpx = h * w.ratio;
+  const frameThick = 0.08;
+  const frameDepth = 0.12;
+  const frameMat = new THREE.MeshStandardMaterial({ color: 0x2a1c0e, roughness: 0.5, metalness: 0.15 });
+  const frameGeo = new THREE.BoxGeometry(wpx + frameThick*2, h + frameThick*2, frameDepth);
+  const frame = new THREE.Mesh(frameGeo, frameMat);
+  frame.castShadow = true;
+  group.add(frame);
+  // ouro fino na borda interna
+  const innerFrameMat = new THREE.MeshStandardMaterial({ color: 0xc9a460, roughness: 0.4, metalness: 0.8 });
+  const innerFrame = new THREE.Mesh(
+    new THREE.BoxGeometry(wpx + frameThick*0.4, h + frameThick*0.4, frameDepth*0.5),
+    innerFrameMat
+  );
+  innerFrame.position.z = frameDepth*0.45;
+  group.add(innerFrame);
+
+  // tela (mesh com texture)
+  const painting = new THREE.Mesh(
+    new THREE.PlaneGeometry(wpx, h),
+    new THREE.MeshStandardMaterial({
+      map: placeholderTexture(w.palette),
+      roughness: 0.62, metalness: 0,
+      emissive: 0x1a1408, emissiveIntensity: 0.05
+    })
+  );
+  painting.position.z = frameDepth*0.5 + 0.001;
+  painting.castShadow = false;
+  painting.receiveShadow = true;
+  group.add(painting);
+
+  // 3-point lighting tungsten (3 warm spots + 1 cool fill)
+  const lights = [];
+  for (let k=-1; k<=1; k++){
+    const sp = new THREE.SpotLight(0xffd9a8, 1.4, 7, Math.PI/7, 0.55, 1.4);
+    sp.position.set(k*0.8, 1.6, 1.6);
+    sp.target = painting;
+    sp.castShadow = false; // shadow muito custoso por spot, mantemos só ambient shadow
+    group.add(sp);
+    group.add(sp.target);
+    lights.push(sp);
+  }
+  // cool fill
+  const fill = new THREE.SpotLight(0x6e7a99, 0.45, 6, Math.PI/6, 0.7, 1.6);
+  fill.position.set(0, -1.5, 1.4);
+  fill.target = painting;
+  group.add(fill);
+  group.add(fill.target);
+
+  // legenda CSS2D
+  const plateEl = document.createElement('div');
+  plateEl.style.cssText = `
+    pointer-events:none;color:#e8dfcf;font-family:'EB Garamond',Georgia,serif;
+    text-align:left;width:200px;opacity:0;transition:opacity 1.2s ease;
+    transform:translate(0,-50%);
+    text-shadow:0 1px 4px rgba(0,0,0,.9)
+  `;
+  plateEl.innerHTML = `
+    <div style="font-family:'Space Mono',monospace;font-size:.48rem;letter-spacing:.5em;text-transform:uppercase;opacity:.7;margin-bottom:.4rem">${w.artist}</div>
+    <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;line-height:1.25">${w.title}</div>
+    <div style="font-family:'EB Garamond',Georgia,serif;font-size:.8rem;font-style:italic;opacity:.7;margin-top:.25rem">${w.year}</div>
+  `;
+  const plateObj = new CSS2DObject(plateEl);
+  plateObj.position.set(wpx*0.5 + 0.6, 0, 0);
+  group.add(plateObj);
+
+  works3D.push({ group, mesh: painting, lights, work: w, plateEl, idx: i });
+
+  // tenta carregar imagem real
+  loader.load(w.src, tex => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    painting.material.map = tex;
+    painting.material.needsUpdate = true;
+  }, undefined, () => { /* mantém placeholder */ });
+});
+
+// remove loading
+setTimeout(()=>{
+  const l = document.getElementById('loading');
+  if (l) l.style.display = 'none';
+}, 600);
+
+/* ─── CÂMERA FPS COM SMOOTHING ─── */
+const yaw = { v: 0, target: 0 };
+const pitch = { v: 0, target: 0 };
+let pointerLock = false;
+const move = { f:0, b:0, l:0, r:0 };
+const vel = new THREE.Vector3();
+const targetPos = camera.position.clone();
+let mouseDown = false;
+let lastMouse = {x:0, y:0};
+
+addEventListener('keydown', e=>{
+  if (e.code==='KeyW' || e.code==='ArrowUp') move.f = 1;
+  if (e.code==='KeyS' || e.code==='ArrowDown') move.b = 1;
+  if (e.code==='KeyA' || e.code==='ArrowLeft') move.l = 1;
+  if (e.code==='KeyD' || e.code==='ArrowRight') move.r = 1;
+});
+addEventListener('keyup', e=>{
+  if (e.code==='KeyW' || e.code==='ArrowUp') move.f = 0;
+  if (e.code==='KeyS' || e.code==='ArrowDown') move.b = 0;
+  if (e.code==='KeyA' || e.code==='ArrowLeft') move.l = 0;
+  if (e.code==='KeyD' || e.code==='ArrowRight') move.r = 0;
+});
+
+canvas.addEventListener('mousedown', e=>{ mouseDown = true; lastMouse.x = e.clientX; lastMouse.y = e.clientY; });
+addEventListener('mouseup', ()=> mouseDown = false);
+addEventListener('mousemove', e=>{
+  if (!mouseDown) return;
+  const dx = e.clientX - lastMouse.x;
+  const dy = e.clientY - lastMouse.y;
+  yaw.target -= dx * 0.0024;
+  pitch.target -= dy * 0.0018;
+  pitch.target = Math.max(-0.6, Math.min(0.6, pitch.target));
+  lastMouse.x = e.clientX; lastMouse.y = e.clientY;
+});
+
+// touch
+let lastTouch = null;
+canvas.addEventListener('touchstart', e=>{ lastTouch = {x:e.touches[0].clientX, y:e.touches[0].clientY}; });
+canvas.addEventListener('touchmove', e=>{
+  if (!lastTouch) return;
+  const dx = e.touches[0].clientX - lastTouch.x;
+  const dy = e.touches[0].clientY - lastTouch.y;
+  yaw.target -= dx * 0.0024;
+  pitch.target -= dy * 0.0018;
+  pitch.target = Math.max(-0.6, Math.min(0.6, pitch.target));
+  lastTouch = {x:e.touches[0].clientX, y:e.touches[0].clientY};
+  e.preventDefault();
+}, { passive: false });
+
+/* ─── PLATE NEAR LOGIC (qual obra você está olhando) ─── */
+const plate = document.getElementById('plate');
+const plArtist = document.getElementById('plArtist');
+const plTitle = document.getElementById('plTitle');
+const plMeta = document.getElementById('plMeta');
+const plCur = document.getElementById('plCur');
+const hudRoom = document.getElementById('hudRoom');
+let currentNear = -1;
+
+function updateNear(){
+  let nearestIdx = -1;
+  let nearestDist = 6.0; // só ativa <6m
+  works3D.forEach((w, i)=>{
+    const dx = camera.position.x - w.group.position.x;
+    const dz = camera.position.z - w.group.position.z;
+    const d = Math.sqrt(dx*dx + dz*dz);
+    // intensidade dos lights cresce com proximidade
+    const targetInt = THREE.MathUtils.clamp(1.4 + (5 - d)*0.4, 0.6, 3.2);
+    w.lights.forEach(l => { if (l.color.r > 0.5) l.intensity += (targetInt - l.intensity)*0.05; });
+    // legenda CSS2D fade
+    w.plateEl.style.opacity = d < 5 ? '0.85' : '0';
+    if (d < nearestDist){ nearestDist = d; nearestIdx = i; }
+  });
+  if (nearestIdx !== currentNear){
+    currentNear = nearestIdx;
+    if (nearestIdx >= 0){
+      const w = WORKS[nearestIdx];
+      plArtist.textContent = w.artist;
+      plTitle.textContent = w.title;
+      plMeta.textContent = w.year;
+      plCur.textContent = w.curatorial;
+      plate.classList.add('in');
+    } else {
+      plate.classList.remove('in');
+    }
+  }
+}
+
+/* ─── LOOP ─── */
+const clock = new THREE.Clock();
+function loop(){
+  const dt = Math.min(clock.getDelta(), 0.033);
+  // lerp pesado da câmera
+  yaw.v   += (yaw.target - yaw.v) * 0.10;
+  pitch.v += (pitch.target - pitch.v) * 0.10;
+  camera.rotation.set(0, 0, 0, 'YXZ');
+  camera.rotation.y = yaw.v;
+  camera.rotation.x = pitch.v;
+  // walking
+  const speed = 2.4;
+  const fwd = (move.f - move.b);
+  const side = (move.r - move.l);
+  const dx = (Math.sin(yaw.v) * -fwd + Math.cos(yaw.v) * side) * speed * dt;
+  const dz = (Math.cos(yaw.v) * -fwd - Math.sin(yaw.v) * side) * speed * dt;
+  targetPos.x += dx; targetPos.z += dz;
+  targetPos.x = Math.max(-5.4, Math.min(5.4, targetPos.x));
+  targetPos.z = Math.max(-29.5, Math.min(13.6, targetPos.z));
+  camera.position.x += (targetPos.x - camera.position.x) * 0.12;
+  camera.position.z += (targetPos.z - camera.position.z) * 0.12;
+  // bob sutil
+  const t = clock.elapsedTime;
+  const isMoving = (fwd !== 0 || side !== 0);
+  camera.position.y = 1.65 + (isMoving ? Math.sin(t * 7) * 0.025 : Math.sin(t*1.2)*0.005);
+
+  updateNear();
+  renderer.render(scene, camera);
+  css.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+loop();
+
+/* ─── RESIZE ─── */
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  css.setSize(innerWidth, innerHeight);
+});
+
+/* ─── OVERTURE TIMING ─── */
+const ln1 = document.getElementById('ln1');
+const ln2 = document.getElementById('ln2');
+const enterBtn = document.getElementById('enter');
+setTimeout(()=> ln1.classList.add('in'), 600);
+setTimeout(()=> ln2.classList.add('in'), 3800);
+setTimeout(()=> enterBtn.classList.add('in'), 6600);
+enterBtn.addEventListener('click', ()=>{
+  document.getElementById('overture').classList.add('gone');
+});
+</script>
+</body>
+</html>

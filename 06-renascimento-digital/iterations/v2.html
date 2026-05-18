@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>INCUNABULA — v2 — N°06</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden;background:#0c0a08;color:#e8dfcf;font-family:'EB Garamond','Cormorant Garamond',Georgia,serif;cursor:crosshair}
+  canvas{display:block;position:fixed;inset:0}
+  #overture{position:fixed;inset:0;z-index:60;background:#0c0a08;color:#e8dfcf;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;transition:opacity 2s ease}
+  #overture.gone{opacity:0;pointer-events:none}
+  #overture .ln{font-family:'Cormorant Garamond',Georgia,serif;font-size:clamp(1.4rem,3.2vw,2.4rem);font-weight:300;font-style:italic;letter-spacing:.02em;line-height:1.5;max-width:30em;opacity:0;transition:opacity 2.4s ease}
+  #overture .ln.in{opacity:.9}
+  #overture .ln + .ln{margin-top:2.4rem}
+  #overture .cta{margin-top:4rem;font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.55em;text-transform:uppercase;color:#9a8e72;opacity:0;transition:opacity 1.4s ease;cursor:pointer;border:1px solid #9a8e72;padding:.85rem 1.6rem;background:transparent}
+  #overture .cta.in{opacity:.85}
+  #overture .cta:hover{background:#e8dfcf;color:#0c0a08;border-color:#e8dfcf}
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;padding:1.6rem 2rem;display:flex;flex-direction:column;justify-content:space-between;color:#e8dfcf;mix-blend-mode:difference}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:2rem;width:100%}
+  .ttl{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.15rem;font-weight:300;font-style:italic;letter-spacing:.02em}
+  .num{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.4em;text-transform:uppercase;opacity:.7}
+  .meta{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.32em;text-transform:uppercase;opacity:.6;line-height:1.9;max-width:320px}
+  .tags{display:flex;gap:.6rem}
+  .tag{border:1px solid currentColor;padding:.1rem .6rem;font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.35em;text-transform:uppercase;opacity:.55}
+  #reticle{position:fixed;left:50%;top:50%;width:18px;height:18px;border:1px solid #d6c89a;transform:translate(-50%,-50%) rotate(45deg);z-index:8;pointer-events:none;mix-blend-mode:difference;opacity:.7}
+  #reticle::before,#reticle::after{content:"";position:absolute;background:#d6c89a}
+  #reticle::before{left:50%;top:-6px;width:1px;height:6px;transform:translateX(-50%)}
+  #reticle::after{left:50%;top:18px;width:1px;height:6px;transform:translateX(-50%)}
+  #plate{position:fixed;left:50%;bottom:6%;transform:translateX(-50%);max-width:560px;text-align:center;color:#e8dfcf;z-index:12;pointer-events:none;opacity:0;transition:opacity 1.2s ease}
+  #plate.in{opacity:.92}
+  #plate .artist{font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.5em;text-transform:uppercase;opacity:.7;margin-bottom:.55rem}
+  #plate .title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.6rem;font-style:italic;font-weight:300;letter-spacing:.005em;line-height:1.25}
+  #plate .meta-line{font-family:'EB Garamond',Georgia,serif;font-size:.95rem;font-style:italic;opacity:.75;margin-top:.6rem}
+  #plate .curatorial{font-family:'EB Garamond',Georgia,serif;font-size:.9rem;line-height:1.55;opacity:.7;margin-top:1.1rem;max-width:42em;text-align:left}
+  /* ANALYSIS OVERLAY */
+  #analysis{position:fixed;inset:0;pointer-events:none;z-index:14;opacity:0;transition:opacity .8s ease}
+  #analysis.in{opacity:1}
+  #analysis svg{width:100%;height:100%;display:block}
+  #analysis .lbl{fill:#f0e3b8;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.3em;text-transform:uppercase;opacity:.9}
+  #toolbar{position:fixed;left:50%;bottom:1.4rem;transform:translateX(-50%);display:flex;gap:.5rem;z-index:18;opacity:0;transition:opacity .8s ease}
+  #toolbar.in{opacity:1}
+  .btn{pointer-events:auto;background:rgba(0,0,0,.5);border:1px solid #6a5a3c;color:#d6c89a;padding:.5rem .85rem;font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.35em;text-transform:uppercase;cursor:pointer;backdrop-filter:blur(6px);transition:all .3s}
+  .btn:hover{border-color:#e8dfcf;color:#fff}
+  .btn.active{background:#d6c89a;color:#0c0a08;border-color:#d6c89a}
+  #hint{position:fixed;left:50%;top:1.4rem;transform:translateX(-50%);font-family:'Space Mono',monospace;font-size:.5rem;letter-spacing:.5em;text-transform:uppercase;color:#d6c89a;opacity:.45;z-index:11;mix-blend-mode:difference;pointer-events:none}
+  #loading{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'Space Mono',monospace;font-size:.55rem;letter-spacing:.6em;text-transform:uppercase;color:#9a8e72;z-index:20;opacity:.7;animation:bl 1.6s ease-in-out infinite}
+  @keyframes bl{50%{opacity:.2}}
+  /* WHISPER */
+  #whisper{position:fixed;left:6%;bottom:18%;max-width:380px;color:#e8dfcf;font-family:'EB Garamond',Georgia,serif;font-size:1rem;font-style:italic;line-height:1.6;opacity:0;z-index:13;pointer-events:none;transition:opacity 2.4s ease;text-shadow:0 1px 6px rgba(0,0,0,.95)}
+  #whisper.in{opacity:.85}
+  #whisper::before{content:"";display:block;width:30px;height:1px;background:#d6c89a;margin-bottom:.8rem;opacity:.5}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+}}
+</script>
+</head>
+<body>
+
+<div id="overture">
+  <div class="ln" id="ln1">Você está prestes a entrar em um museu<br>que não existe.</div>
+  <div class="ln" id="ln2">Cada sala foi feita para você.<br>Mesmo que você ainda não saiba.</div>
+  <button class="cta" id="enter">entrar</button>
+</div>
+
+<div id="hud">
+  <div class="row">
+    <div>
+      <div style="display:flex;gap:2rem;align-items:baseline">
+        <span class="ttl">Incunabula</span>
+        <span class="num">N°06 · v2</span>
+      </div>
+      <p class="meta">Sala <span id="roomName">I</span> · análise compositiva<br>[F] fibonacci · [L] luz · [P] pirâmide · [C] paleta</p>
+    </div>
+    <div class="meta" id="hudRoom">Sala I/∞</div>
+  </div>
+  <div class="row">
+    <div class="tags">
+      <span class="tag">Three.js</span>
+      <span class="tag">PBR</span>
+      <span class="tag">D3.js</span>
+      <span class="tag">Whisper</span>
+    </div>
+    <span class="meta">Claude × Ivan Lanna · 2026</span>
+  </div>
+</div>
+
+<div id="reticle"></div>
+<div id="hint">[WASD] caminhar · [mouse] olhar · [F/L/P/C] análise</div>
+
+<div id="analysis">
+  <svg id="analysisSvg" preserveAspectRatio="none"></svg>
+</div>
+
+<div id="toolbar">
+  <button class="btn" data-mode="F">[F] fibonacci</button>
+  <button class="btn" data-mode="L">[L] direção de luz</button>
+  <button class="btn" data-mode="P">[P] pirâmide</button>
+  <button class="btn" data-mode="C">[C] paleta</button>
+</div>
+
+<div id="plate">
+  <div class="artist" id="plArtist">—</div>
+  <div class="title" id="plTitle">—</div>
+  <div class="meta-line" id="plMeta">—</div>
+  <div class="curatorial" id="plCur">—</div>
+</div>
+
+<div id="whisper"></div>
+
+<div id="loading">preparando a galeria…</div>
+
+<script src="https://unpkg.com/d3@7.8.5/dist/d3.min.js"></script>
+<script type="module">
+import * as THREE from 'three';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
+
+/* ============================================================
+   INCUNABULA — V2 — análise interativa + sussurro
+   - 2 corredores hardcoded (Sala I + Sala II)
+   - parede do fundo dissolve em vertex shader displacement
+   - Overlays D3: Fibonacci, golden ratio, vetores de luz, pirâmide, paleta
+   - Sussurro curatorial em texto fade após dwell >10s
+   ============================================================ */
+
+const ROOMS = [
+  // Sala I
+  [
+    { artist:'Johannes Vermeer', title:'A Leiteira', year:'c. 1660',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg/800px-Johannes_Vermeer_-_Het_melkmeisje_-_Google_Art_Project.jpg',
+      ratio:0.892, palette:'#c9a96e',
+      curatorial:'A luz cai da janela esquerda. A parede silenciosa contrasta com a mesa carregada. Vermeer pinta o leite caindo como tempo se derramando.',
+      whisper:'Note como Vermeer constrói o quadro em duas zonas — silêncio à esquerda, abundância à direita. O leite, no centro, é a costura entre as duas.',
+      lightDir:[-0.7, -0.6], compPoints:'pyramid', paletteSwatches:['#8a6332','#c9a96e','#3a3027','#d4c4a0','#1b150e'] },
+    { artist:'Rembrandt', title:'Auto-retrato (1659)', year:'1659',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg/640px-Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg',
+      ratio:0.83, palette:'#8a6b3a',
+      curatorial:'Aos 53, Rembrandt se pinta com tinta reduzida, gesto largo. A barba é sugerida, os olhos fixos. O fundo desaparece.',
+      whisper:'Rembrandt aplica a tinta com a faca de paleta nas zonas iluminadas. As sombras são glacis transparentes. A diferença material constrói a profundidade psicológica.',
+      lightDir:[-0.6, -0.55], compPoints:'central', paletteSwatches:['#1c130b','#8a6b3a','#c19a5e','#3a2a1c','#0b0805'] },
+    { artist:'Botticelli', title:'O Nascimento de Vênus', year:'c. 1485',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg/1024px-Sandro_Botticelli_-_La_nascita_di_Venere_-_Google_Art_Project_-_edited.jpg',
+      ratio:1.59, palette:'#c8a878',
+      curatorial:'A deusa chega à praia em uma concha. O vento ocidental sopra rosas. A linha desafia anatomia: pescoço alongado, ombro inclinado.',
+      whisper:'Observe que Vênus não pisa firmemente — flutua sobre a concha. Botticelli desenha figuras que nenhuma anatomia confirmaria. É linha, não corpo.',
+      lightDir:[-0.4, -0.7], compPoints:'pyramid', paletteSwatches:['#c8a878','#7a9a8a','#d4c4a0','#3a4a3a','#e8dfcf'] },
+    { artist:'Leonardo da Vinci', title:'A Dama do Arminho', year:'c. 1490',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Cecilia_Gallerani_-_Lady_with_an_Ermine.jpg/800px-Cecilia_Gallerani_-_Lady_with_an_Ermine.jpg',
+      ratio:0.74, palette:'#a07a4c',
+      curatorial:'Cecília Gallerani sustenta o arminho como sustentaria uma ideia. Leonardo inventa o retrato moderno num contraposto.',
+      whisper:'Leonardo gira o corpo de Cecília em sentido oposto ao olhar. O contraposto que ele inventa aqui será a base do retrato europeu pelos quatro séculos seguintes.',
+      lightDir:[-0.65, -0.6], compPoints:'diagonal', paletteSwatches:['#1a1208','#a07a4c','#d4c4a0','#5a3a1c','#0b0805'] },
+    { artist:'Caravaggio', title:'Narciso', year:'c. 1599',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Narcissus-Caravaggio_%281594-96%29_edited.jpg/800px-Narcissus-Caravaggio_%281594-96%29_edited.jpg',
+      ratio:0.85, palette:'#6a4a26',
+      curatorial:'O reflexo é mais negro que o original. Caravaggio organiza o quadro em torno de um círculo formado pelos braços.',
+      whisper:'O quadro pode ser virado de cabeça pra baixo e funciona. Caravaggio constrói uma simetria que o mito demanda: o espelho perfeito que se devora.',
+      lightDir:[-0.5, -0.7], compPoints:'circle', paletteSwatches:['#0b0805','#6a4a26','#a07a4c','#1a1208','#c19a5e'] },
+    { artist:'Albrecht Dürer', title:'Liebre', year:'1502',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Albrecht_D%C3%BCrer_-_Hare%2C_1502_-_Google_Art_Project.jpg/640px-Albrecht_D%C3%BCrer_-_Hare%2C_1502_-_Google_Art_Project.jpg',
+      ratio:0.78, palette:'#b09060',
+      curatorial:'Dürer pinta cada pelo. A liebre não foi posada — é memória disciplinada. O fundo neutro é declaração: o real basta.',
+      whisper:'Dürer trabalha com pincel de um pelo só nas zonas críticas. Não pinta uma liebre — pinta o ato de olhar.',
+      lightDir:[-0.7, -0.5], compPoints:'central', paletteSwatches:['#3a2a1a','#b09060','#d4c4a0','#7a5a3a','#e8dfcf'] },
+  ],
+  // Sala II
+  [
+    { artist:'Jan van Eyck', title:'Retrato Arnolfini', year:'1434',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Van_Eyck_-_Arnolfini_Portrait.jpg/640px-Van_Eyck_-_Arnolfini_Portrait.jpg',
+      ratio:0.74, palette:'#5a3a1c',
+      curatorial:'Tudo é símbolo: o cão, a fruta, a vela, o espelho convexo. Van Eyck inscreve no fundo: "Johannes de eyck fuit hic, 1434."',
+      whisper:'O espelho convexo no fundo contém duas figuras adicionais — uma delas é o próprio Van Eyck. A pintura é também documento, prova de presença.',
+      lightDir:[-0.55, -0.55], compPoints:'central', paletteSwatches:['#1a1208','#5a3a1c','#a07a4c','#d4c4a0','#3a2a1a'] },
+    { artist:'Hieronymus Bosch', title:'O Jardim das Delícias (detalhe)', year:'c. 1500',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg/1024px-The_Garden_of_Earthly_Delights_by_Bosch_High_Resolution.jpg',
+      ratio:1.78, palette:'#7a9a8a',
+      curatorial:'O paraíso, o pecado, o inferno. Bosch pinta sem hierarquia narrativa óbvia: cada figura tem o mesmo peso. É a primeira pintura sem centro.',
+      whisper:'Os animais e os humanos têm escalas trocadas. Bosch usa a desproporção como argumento moral antes de ser argumento visual.',
+      lightDir:[0, -1], compPoints:'distributed', paletteSwatches:['#7a9a8a','#c8a878','#3a4a3a','#a07a4c','#d4c4a0'] },
+    { artist:'El Greco', title:'Vista de Toledo', year:'c. 1599',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/El_Greco_View_of_Toledo.jpg/640px-El_Greco_View_of_Toledo.jpg',
+      ratio:0.85, palette:'#3a4a5a',
+      curatorial:'A paisagem se eletrifica. El Greco antecipa o expressionismo em 320 anos: o céu não é descrição, é estado.',
+      whisper:'A topografia de Toledo está errada — El Greco moveu a catedral. A paisagem é um pensamento, não um registro.',
+      lightDir:[-0.3, -0.9], compPoints:'vertical', paletteSwatches:['#1a2230','#3a4a5a','#7a8a9a','#0b0f15','#d4c4a0'] },
+    { artist:'Vermeer', title:'Moça com Brinco de Pérola', year:'c. 1665',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/640px-1665_Girl_with_a_Pearl_Earring.jpg',
+      ratio:0.85, palette:'#c19a5e',
+      curatorial:'O fundo é negro absoluto — Vermeer subtrai o mundo para que reste o olhar. A pérola é dois pontos de tinta.',
+      whisper:'Aproxime. A pérola é apenas dois traços de tinta — um claro, um quase preto. É a definição mais econômica de luz já pintada.',
+      lightDir:[-0.7, -0.5], compPoints:'central', paletteSwatches:['#0b0805','#c19a5e','#3a4a5a','#d4c4a0','#8a6332'] },
+    { artist:'Titian', title:'Vênus de Urbino', year:'1538',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg/800px-Tiziano_-_Venere_di_Urbino_-_Google_Art_Project.jpg',
+      ratio:1.54, palette:'#a07a4c',
+      curatorial:'Tiziano lança o corpo deitado horizontal — a Vênus deixa de ser deusa e vira mulher real, num quarto real, com cães e criadas.',
+      whisper:'A diagonal do corpo organiza o quadro. O olhar dela rompe a quarta parede em 1538 — séculos antes do cinema.',
+      lightDir:[-0.5, -0.5], compPoints:'horizontal', paletteSwatches:['#3a1c14','#a07a4c','#d4c4a0','#5a3a1c','#e8dfcf'] },
+    { artist:'Raphael', title:'A Escola de Atenas (detalhe)', year:'1511',
+      src:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg/1024px-%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg',
+      ratio:1.6, palette:'#9a8e72',
+      curatorial:'Platão aponta para cima, Aristóteles para o chão. Toda a perspectiva converge no gesto da disputa.',
+      whisper:'O ponto de fuga está entre as duas mãos. A arquitetura inteira foi pintada para servir a esse vetor — geometria a serviço da filosofia.',
+      lightDir:[-0.4, -0.4], compPoints:'pyramid', paletteSwatches:['#3a2a1a','#9a8e72','#d4c4a0','#1a1208','#c8a878'] },
+  ],
+];
+
+const canvas = document.createElement('canvas');
+document.body.appendChild(canvas);
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x07060a);
+scene.fog = new THREE.Fog(0x07060a, 14, 38);
+const camera = new THREE.PerspectiveCamera(58, innerWidth/innerHeight, 0.05, 200);
+camera.position.set(0, 1.65, 14);
+
+const css = new CSS2DRenderer();
+css.setSize(innerWidth, innerHeight);
+css.domElement.style.position = 'fixed';
+css.domElement.style.inset = '0';
+css.domElement.style.pointerEvents = 'none';
+css.domElement.style.zIndex = '5';
+document.body.appendChild(css.domElement);
+
+/* ─── PISO (procedural ripas) ─── */
+const floorMat = new THREE.MeshStandardMaterial({ color: 0x2a1d10, roughness: 0.78, metalness: 0.05 });
+{
+  const c = document.createElement('canvas'); c.width = c.height = 1024;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#3a2516'; ctx.fillRect(0,0,1024,1024);
+  for (let y=0; y<1024; y+=64){
+    const off = (y/64)%2 ? 0 : 256;
+    for (let x=-256; x<1024; x+=256){
+      const tone = 30 + Math.random()*40;
+      ctx.fillStyle = `rgb(${50+tone},${30+tone*0.5},${15+tone*0.3})`;
+      ctx.fillRect(x+off, y, 256, 64);
+      ctx.strokeStyle = `rgba(20,10,5,${0.18+Math.random()*0.15})`;
+      ctx.lineWidth = 0.6;
+      for (let k=0; k<6; k++){
+        const yy = y + Math.random()*64;
+        ctx.beginPath();
+        ctx.moveTo(x+off, yy);
+        ctx.bezierCurveTo(x+off+80, yy + (Math.random()-.5)*4, x+off+170, yy + (Math.random()-.5)*4, x+off+256, yy);
+        ctx.stroke();
+      }
+      ctx.fillStyle = 'rgba(0,0,0,.4)';
+      ctx.fillRect(x+off, y+62, 256, 2);
+      ctx.fillRect(x+off+254, y, 2, 64);
+    }
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(8, 32);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  floorMat.map = tex;
+}
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 160), floorMat);
+floor.rotation.x = -Math.PI/2;
+floor.position.set(0, 0, -40);
+scene.add(floor);
+
+/* ─── PAREDES laterais longas (cobrem 2 salas) ─── */
+const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1612, roughness: 0.95, metalness: 0 });
+const wallL = new THREE.Mesh(new THREE.PlaneGeometry(160, 8), wallMat);
+wallL.position.set(-6, 4, -40); wallL.rotation.y = Math.PI/2;
+scene.add(wallL);
+const wallR = wallL.clone(); wallR.position.x = 6; wallR.rotation.y = -Math.PI/2;
+scene.add(wallR);
+const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(12, 160), new THREE.MeshStandardMaterial({ color: 0x0a0806, roughness: 1 }));
+ceiling.rotation.x = Math.PI/2; ceiling.position.set(0, 8, -40);
+scene.add(ceiling);
+
+/* ─── PAREDE DIVISORA (DISSOLVE COM SHADER) ─── */
+const dissolveMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uTime: { value: 0 },
+    uDissolve: { value: 0 }, // 0 = sólida, 1 = totalmente dissolvida
+    uColor: { value: new THREE.Color(0x1a1612) },
+    uEdgeColor: { value: new THREE.Color(0xc9a460) }
+  },
+  vertexShader: `
+    varying vec2 vUv;
+    varying vec3 vPos;
+    uniform float uTime;
+    uniform float uDissolve;
+    void main(){
+      vUv = uv;
+      vPos = position;
+      vec3 p = position;
+      p.z += sin(p.x*1.2 + uTime*0.5)*uDissolve*0.25;
+      p.x += cos(p.y*1.0 + uTime*0.4)*uDissolve*0.18;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+    }`,
+  fragmentShader: `
+    precision highp float;
+    varying vec2 vUv;
+    varying vec3 vPos;
+    uniform float uTime;
+    uniform float uDissolve;
+    uniform vec3 uColor;
+    uniform vec3 uEdgeColor;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+    float noise(vec2 p){
+      vec2 i = floor(p); vec2 f = fract(p);
+      float a = hash(i), b = hash(i+vec2(1,0)), c = hash(i+vec2(0,1)), d = hash(i+vec2(1,1));
+      vec2 u = f*f*(3.0-2.0*f);
+      return mix(mix(a,b,u.x), mix(c,d,u.x), u.y);
+    }
+    void main(){
+      vec2 uv = vUv;
+      float n = noise(uv*5.0 + uTime*0.1) * 0.6 + noise(uv*15.0) * 0.4;
+      float threshold = 1.0 - uDissolve;
+      if (n < threshold - 0.04) {
+        gl_FragColor = vec4(uColor, 1.0);
+      } else if (n < threshold) {
+        float edge = (n - (threshold-0.04)) / 0.04;
+        vec3 col = mix(uColor, uEdgeColor, edge);
+        gl_FragColor = vec4(col, 1.0);
+      } else {
+        discard;
+      }
+    }`,
+  side: THREE.DoubleSide
+});
+const dissolverGeo = new THREE.PlaneGeometry(12, 8, 60, 30);
+const dissolver = new THREE.Mesh(dissolverGeo, dissolveMat);
+dissolver.position.set(0, 4, -25); // entre sala I e sala II
+scene.add(dissolver);
+
+const ambient = new THREE.AmbientLight(0xfff0d0, 0.06);
+scene.add(ambient);
+const hemi = new THREE.HemisphereLight(0x3a2818, 0x0a0806, 0.05);
+scene.add(hemi);
+
+/* ─── OBRAS (2 corredores) ─── */
+const loader = new THREE.TextureLoader();
+loader.setCrossOrigin('anonymous');
+const works3D = [];
+
+function placeholderTexture(palette){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,256,256);
+  g.addColorStop(0, palette); g.addColorStop(1, '#0a0806');
+  ctx.fillStyle = g; ctx.fillRect(0,0,256,256);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+ROOMS.forEach((room, roomIdx)=>{
+  // Sala I começa em z=-2 e vai até z=-23 (Z step 4.2)
+  // Sala II começa em z=-28 e vai até z=-49
+  const baseZ = roomIdx === 0 ? -2 : -28;
+  room.forEach((w, i)=>{
+    const side = i % 2 === 0 ? -1 : 1;
+    const z = baseZ - Math.floor(i/2) * 8;
+    const group = new THREE.Group();
+    group.position.set(side*5.85, 2.3, z);
+    group.rotation.y = side > 0 ? -Math.PI/2 : Math.PI/2;
+    scene.add(group);
+
+    const h = 2.4;
+    const wpx = h * w.ratio;
+    const frameMat = new THREE.MeshStandardMaterial({ color: 0x2a1c0e, roughness: 0.5, metalness: 0.15 });
+    const frame = new THREE.Mesh(new THREE.BoxGeometry(wpx + 0.16, h + 0.16, 0.12), frameMat);
+    group.add(frame);
+    const innerFrameMat = new THREE.MeshStandardMaterial({ color: 0xc9a460, roughness: 0.4, metalness: 0.8 });
+    const innerFrame = new THREE.Mesh(new THREE.BoxGeometry(wpx + 0.04, h + 0.04, 0.06), innerFrameMat);
+    innerFrame.position.z = 0.055;
+    group.add(innerFrame);
+    const painting = new THREE.Mesh(
+      new THREE.PlaneGeometry(wpx, h),
+      new THREE.MeshStandardMaterial({ map: placeholderTexture(w.palette), roughness: 0.62, metalness: 0, emissive: 0x1a1408, emissiveIntensity: 0.05 })
+    );
+    painting.position.z = 0.061;
+    group.add(painting);
+
+    const lights = [];
+    for (let k=-1; k<=1; k++){
+      const sp = new THREE.SpotLight(0xffd9a8, 1.4, 7, Math.PI/7, 0.55, 1.4);
+      sp.position.set(k*0.8, 1.6, 1.6);
+      sp.target = painting;
+      group.add(sp); group.add(sp.target);
+      lights.push(sp);
+    }
+    const fill = new THREE.SpotLight(0x6e7a99, 0.45, 6, Math.PI/6, 0.7, 1.6);
+    fill.position.set(0, -1.5, 1.4);
+    fill.target = painting;
+    group.add(fill); group.add(fill.target);
+
+    const plateEl = document.createElement('div');
+    plateEl.style.cssText = `pointer-events:none;color:#e8dfcf;font-family:'EB Garamond',Georgia,serif;text-align:left;width:200px;opacity:0;transition:opacity 1.2s ease;transform:translate(0,-50%);text-shadow:0 1px 4px rgba(0,0,0,.9)`;
+    plateEl.innerHTML = `
+      <div style="font-family:'Space Mono',monospace;font-size:.48rem;letter-spacing:.5em;text-transform:uppercase;opacity:.7;margin-bottom:.4rem">${w.artist}</div>
+      <div style="font-family:'Cormorant Garamond',Georgia,serif;font-size:1rem;font-style:italic;line-height:1.25">${w.title}</div>
+      <div style="font-family:'EB Garamond',Georgia,serif;font-size:.8rem;font-style:italic;opacity:.7;margin-top:.25rem">${w.year}</div>
+    `;
+    const plateObj = new CSS2DObject(plateEl);
+    plateObj.position.set(wpx*0.5 + 0.6, 0, 0);
+    group.add(plateObj);
+
+    works3D.push({ group, mesh: painting, lights, work: w, plateEl, idx: i, roomIdx });
+    loader.load(w.src, tex => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      painting.material.map = tex;
+      painting.material.needsUpdate = true;
+    });
+  });
+});
+
+setTimeout(()=>{ const l = document.getElementById('loading'); if (l) l.style.display = 'none'; }, 600);
+
+/* ─── CÂMERA FPS ─── */
+const yaw = { v: 0, target: 0 };
+const pitch = { v: 0, target: 0 };
+const move = { f:0, b:0, l:0, r:0 };
+const targetPos = camera.position.clone();
+let mouseDown = false; let lastMouse = {x:0, y:0};
+
+addEventListener('keydown', e=>{
+  if (e.code==='KeyW'||e.code==='ArrowUp') move.f = 1;
+  if (e.code==='KeyS'||e.code==='ArrowDown') move.b = 1;
+  if (e.code==='KeyA'||e.code==='ArrowLeft') move.l = 1;
+  if (e.code==='KeyD'||e.code==='ArrowRight') move.r = 1;
+  if (e.code==='KeyF') toggleMode('F');
+  if (e.code==='KeyL') toggleMode('L');
+  if (e.code==='KeyP') toggleMode('P');
+  if (e.code==='KeyC') toggleMode('C');
+});
+addEventListener('keyup', e=>{
+  if (e.code==='KeyW'||e.code==='ArrowUp') move.f = 0;
+  if (e.code==='KeyS'||e.code==='ArrowDown') move.b = 0;
+  if (e.code==='KeyA'||e.code==='ArrowLeft') move.l = 0;
+  if (e.code==='KeyD'||e.code==='ArrowRight') move.r = 0;
+});
+canvas.addEventListener('mousedown', e=>{ mouseDown = true; lastMouse.x=e.clientX; lastMouse.y=e.clientY; });
+addEventListener('mouseup', ()=> mouseDown = false);
+addEventListener('mousemove', e=>{
+  if (!mouseDown) return;
+  yaw.target -= (e.clientX-lastMouse.x)*0.0024;
+  pitch.target -= (e.clientY-lastMouse.y)*0.0018;
+  pitch.target = Math.max(-0.6, Math.min(0.6, pitch.target));
+  lastMouse.x=e.clientX; lastMouse.y=e.clientY;
+});
+
+/* ─── ANALYSIS MODES ─── */
+const analysisModes = { F:false, L:false, P:false, C:false };
+const svgRoot = document.getElementById('analysisSvg');
+const analysisEl = document.getElementById('analysis');
+
+function toggleMode(k){
+  analysisModes[k] = !analysisModes[k];
+  document.querySelectorAll('#toolbar .btn').forEach(b=>{
+    if (b.dataset.mode === k) b.classList.toggle('active', analysisModes[k]);
+  });
+  redrawAnalysis();
+}
+document.querySelectorAll('#toolbar .btn').forEach(b=>{
+  b.addEventListener('click', ()=> toggleMode(b.dataset.mode));
+});
+
+/* projeta o quad da obra atual em screen-space */
+function getCurrentObraBox(){
+  if (currentNear < 0) return null;
+  const w = works3D[currentNear];
+  const wpx = 2.4 * w.work.ratio;
+  // 4 cantos no espaço local da pintura
+  const local = [
+    new THREE.Vector3(-wpx/2, -1.2, 0.07),
+    new THREE.Vector3( wpx/2, -1.2, 0.07),
+    new THREE.Vector3( wpx/2,  1.2, 0.07),
+    new THREE.Vector3(-wpx/2,  1.2, 0.07),
+  ];
+  const screenPts = local.map(v=>{
+    const world = v.clone().applyMatrix4(w.group.matrixWorld);
+    const sp = world.project(camera);
+    return [(sp.x*0.5+0.5)*innerWidth, (1 - (sp.y*0.5+0.5))*innerHeight, sp.z];
+  });
+  // se tudo atrás da câmera, descarta
+  if (screenPts.every(p => p[2] > 1)) return null;
+  return screenPts;
+}
+
+function redrawAnalysis(){
+  const any = Object.values(analysisModes).some(v=>v);
+  analysisEl.classList.toggle('in', any && currentNear >= 0);
+  if (!any || currentNear < 0){ svgRoot.innerHTML = ''; return; }
+  const box = getCurrentObraBox();
+  if (!box) { svgRoot.innerHTML=''; return; }
+  // bounding rect das 4 projeções
+  const xs = box.map(p=>p[0]); const ys = box.map(p=>p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs);
+  const minY = Math.min(...ys), maxY = Math.max(...ys);
+  const W = maxX - minX, H = maxY - minY;
+  svgRoot.setAttribute('width', innerWidth);
+  svgRoot.setAttribute('height', innerHeight);
+  svgRoot.setAttribute('viewBox', `0 0 ${innerWidth} ${innerHeight}`);
+  const work = works3D[currentNear].work;
+  const overlays = [];
+
+  // moldura sutil
+  overlays.push(`<polygon points="${box.map(p=>p[0]+','+p[1]).join(' ')}"
+    fill="none" stroke="rgba(214,200,154,.35)" stroke-width="1" stroke-dasharray="3 4"/>`);
+
+  if (analysisModes.F){
+    // Fibonacci / Golden ratio
+    const phi = 1.618;
+    const goldenX = minX + W/phi;
+    const goldenX2 = minX + W*(1 - 1/phi);
+    const goldenY = minY + H/phi;
+    const goldenY2 = minY + H*(1 - 1/phi);
+    overlays.push(`<line x1="${goldenX}" y1="${minY}" x2="${goldenX}" y2="${maxY}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
+    overlays.push(`<line x1="${goldenX2}" y1="${minY}" x2="${goldenX2}" y2="${maxY}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
+    overlays.push(`<line x1="${minX}" y1="${goldenY}" x2="${maxX}" y2="${goldenY}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
+    overlays.push(`<line x1="${minX}" y1="${goldenY2}" x2="${maxX}" y2="${goldenY2}" stroke="#d6c89a" stroke-width="1" opacity=".7"/>`);
+    // espiral aproximada (4 quartos de círculo decrescentes)
+    const sp = goldenSpiralPath(minX, minY, W, H);
+    overlays.push(`<path d="${sp}" fill="none" stroke="#f0e3b8" stroke-width="1.2" stroke-dasharray="4 3" opacity=".9"/>`);
+    overlays.push(`<text x="${minX+6}" y="${minY+14}" class="lbl">φ · 1.618</text>`);
+  }
+  if (analysisModes.L){
+    const [lx, ly] = work.lightDir;
+    // vetores
+    const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
+    const arrowLen = Math.min(W,H)*0.35;
+    for (let i=0; i<3; i++){
+      const sx = cx + (i-1)*Math.min(W,H)*0.22;
+      const sy = cy + (i-1)*Math.min(W,H)*0.16;
+      const ex = sx + lx*arrowLen, ey = sy + ly*arrowLen;
+      overlays.push(`<line x1="${sx}" y1="${sy}" x2="${ex}" y2="${ey}" stroke="#ffd9a8" stroke-width="1.4" opacity=".85"/>`);
+      // ponta
+      overlays.push(`<polygon points="${ex},${ey} ${ex- lx*8 + ly*5},${ey - ly*8 - lx*5} ${ex- lx*8 - ly*5},${ey - ly*8 + lx*5}" fill="#ffd9a8"/>`);
+    }
+    overlays.push(`<text x="${minX+6}" y="${minY+14}" class="lbl">DIREÇÃO DE LUZ</text>`);
+  }
+  if (analysisModes.P){
+    // pirâmide compositiva — varia por work.compPoints
+    if (work.compPoints === 'pyramid'){
+      const apex = [(minX+maxX)/2, minY + H*0.18];
+      const left = [minX + W*0.15, maxY - H*0.10];
+      const right = [maxX - W*0.15, maxY - H*0.10];
+      overlays.push(`<polygon points="${apex[0]},${apex[1]} ${left[0]},${left[1]} ${right[0]},${right[1]}" fill="none" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
+    } else if (work.compPoints === 'circle'){
+      overlays.push(`<circle cx="${(minX+maxX)/2}" cy="${(minY+maxY)/2}" r="${Math.min(W,H)*0.35}" fill="none" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
+    } else if (work.compPoints === 'diagonal'){
+      overlays.push(`<line x1="${minX}" y1="${maxY}" x2="${maxX}" y2="${minY}" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
+      overlays.push(`<line x1="${minX}" y1="${minY}" x2="${maxX}" y2="${maxY}" stroke="rgba(255,217,168,.4)" stroke-width="1" stroke-dasharray="3 4"/>`);
+    } else if (work.compPoints === 'horizontal'){
+      overlays.push(`<line x1="${minX}" y1="${minY+H*0.6}" x2="${maxX}" y2="${minY+H*0.6}" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
+    } else if (work.compPoints === 'vertical'){
+      overlays.push(`<line x1="${minX+W*0.5}" y1="${minY}" x2="${minX+W*0.5}" y2="${maxY}" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
+    } else if (work.compPoints === 'distributed'){
+      for (let i=0; i<6; i++){
+        const x = minX + W * (0.15 + Math.random()*0.7);
+        const y = minY + H * (0.15 + Math.random()*0.7);
+        overlays.push(`<circle cx="${x}" cy="${y}" r="6" fill="none" stroke="rgba(255,217,168,.55)" stroke-width="1"/>`);
+      }
+    } else { // central
+      overlays.push(`<circle cx="${(minX+maxX)/2}" cy="${(minY+maxY)/2}" r="${Math.min(W,H)*0.18}" fill="none" stroke="rgba(255,217,168,.7)" stroke-width="1.2"/>`);
+    }
+    overlays.push(`<text x="${minX+6}" y="${minY+14}" class="lbl">COMPOSIÇÃO</text>`);
+  }
+  if (analysisModes.C){
+    // paleta swatches
+    const sw = 28; const gap = 6;
+    const totalW = sw*work.paletteSwatches.length + gap*(work.paletteSwatches.length-1);
+    const startX = (minX+maxX)/2 - totalW/2;
+    const y0 = maxY + 20;
+    work.paletteSwatches.forEach((c, i)=>{
+      const x = startX + i*(sw+gap);
+      overlays.push(`<rect x="${x}" y="${y0}" width="${sw}" height="${sw}" fill="${c}" stroke="rgba(232,223,207,.4)" stroke-width="1"/>`);
+    });
+    overlays.push(`<text x="${(minX+maxX)/2}" y="${y0 + sw + 18}" class="lbl" text-anchor="middle">PALETA DOMINANTE</text>`);
+  }
+  svgRoot.innerHTML = overlays.join('');
+}
+
+function goldenSpiralPath(x, y, w, h){
+  // gera path SVG de espiral de Fibonacci (4 arcos)
+  let path = '';
+  let cx = x + w, cy = y + h, r = Math.min(w,h);
+  const phi = 1.618;
+  // arco 1: lower-right quadrant
+  path += `M ${x+w-r} ${y+h} A ${r} ${r} 0 0 1 ${x+w} ${y+h-r}`;
+  let r2 = r / phi;
+  path += ` A ${r2} ${r2} 0 0 1 ${x+w-r2} ${y+h-r}`;
+  let r3 = r2 / phi;
+  path += ` A ${r3} ${r3} 0 0 1 ${x+w-r2} ${y+h-r+r3}`;
+  let r4 = r3 / phi;
+  path += ` A ${r4} ${r4} 0 0 1 ${x+w-r2+r4} ${y+h-r+r3}`;
+  return path;
+}
+
+/* ─── PLATE / NEAR / DWELL ─── */
+const plate = document.getElementById('plate');
+const plArtist = document.getElementById('plArtist');
+const plTitle = document.getElementById('plTitle');
+const plMeta = document.getElementById('plMeta');
+const plCur = document.getElementById('plCur');
+const hudRoom = document.getElementById('hudRoom');
+const roomName = document.getElementById('roomName');
+const whisperEl = document.getElementById('whisper');
+let currentNear = -1;
+let dwellStart = 0;
+let whisperShown = false;
+let dissolveStart = -1;
+
+function updateNear(){
+  let nearestIdx = -1, nearestDist = 6.0;
+  works3D.forEach((w, i)=>{
+    const dx = camera.position.x - w.group.position.x;
+    const dz = camera.position.z - w.group.position.z;
+    const d = Math.sqrt(dx*dx + dz*dz);
+    const targetInt = THREE.MathUtils.clamp(1.4 + (5 - d)*0.4, 0.6, 3.2);
+    w.lights.forEach(l => { if (l.color.r > 0.5) l.intensity += (targetInt - l.intensity)*0.05; });
+    w.plateEl.style.opacity = d < 5 ? '0.85' : '0';
+    if (d < nearestDist){ nearestDist = d; nearestIdx = i; }
+  });
+  if (nearestIdx !== currentNear){
+    currentNear = nearestIdx;
+    dwellStart = performance.now();
+    whisperShown = false;
+    whisperEl.classList.remove('in');
+    if (nearestIdx >= 0){
+      const w = works3D[nearestIdx];
+      plArtist.textContent = w.work.artist;
+      plTitle.textContent = w.work.title;
+      plMeta.textContent = w.work.year;
+      plCur.textContent = w.work.curatorial;
+      plate.classList.add('in');
+      hudRoom.textContent = `Sala ${w.roomIdx===0?'I':'II'}/∞ · obra ${w.idx+1}/6`;
+      roomName.textContent = w.roomIdx===0 ? 'I' : 'II';
+    } else {
+      plate.classList.remove('in');
+    }
+  }
+  redrawAnalysis();
+  // dwell whisper
+  if (currentNear >= 0 && !whisperShown && performance.now() - dwellStart > 10000){
+    const w = works3D[currentNear].work;
+    whisperEl.textContent = w.whisper;
+    whisperEl.classList.add('in');
+    whisperShown = true;
+  }
+}
+
+/* ─── DISSOLVE LOGIC ─── */
+function maybeDissolve(){
+  // quando câmera ultrapassa z=-22 começa dissolver
+  const z = camera.position.z;
+  if (z < -22 && dissolveMat.uniforms.uDissolve.value < 1){
+    if (dissolveStart < 0) dissolveStart = performance.now();
+    const t = (performance.now() - dissolveStart)/2200;
+    dissolveMat.uniforms.uDissolve.value = Math.min(1, t);
+  } else if (z > -19 && dissolveMat.uniforms.uDissolve.value > 0){
+    dissolveMat.uniforms.uDissolve.value = Math.max(0, dissolveMat.uniforms.uDissolve.value - 0.01);
+  }
+}
+
+/* ─── LOOP ─── */
+const clock = new THREE.Clock();
+function loop(){
+  const dt = Math.min(clock.getDelta(), 0.033);
+  yaw.v += (yaw.target - yaw.v)*0.10;
+  pitch.v += (pitch.target - pitch.v)*0.10;
+  camera.rotation.set(0,0,0,'YXZ');
+  camera.rotation.y = yaw.v;
+  camera.rotation.x = pitch.v;
+  const speed = 2.4;
+  const fwd = (move.f - move.b);
+  const side = (move.r - move.l);
+  const dx = (Math.sin(yaw.v)*-fwd + Math.cos(yaw.v)*side)*speed*dt;
+  const dz = (Math.cos(yaw.v)*-fwd - Math.sin(yaw.v)*side)*speed*dt;
+  targetPos.x += dx; targetPos.z += dz;
+  targetPos.x = Math.max(-5.4, Math.min(5.4, targetPos.x));
+  targetPos.z = Math.max(-55, Math.min(13.6, targetPos.z));
+  camera.position.x += (targetPos.x - camera.position.x)*0.12;
+  camera.position.z += (targetPos.z - camera.position.z)*0.12;
+  const t = clock.elapsedTime;
+  const isMoving = (fwd!==0||side!==0);
+  camera.position.y = 1.65 + (isMoving ? Math.sin(t*7)*0.025 : Math.sin(t*1.2)*0.005);
+
+  dissolveMat.uniforms.uTime.value = t;
+  maybeDissolve();
+  updateNear();
+  renderer.render(scene, camera);
+  css.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+loop();
+
+addEventListener('resize', ()=>{
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  css.setSize(innerWidth, innerHeight);
+  redrawAnalysis();
+});
+
+/* ─── OVERTURE ─── */
+const ln1 = document.getElementById('ln1');
+const ln2 = document.getElementById('ln2');
+const enterBtn = document.getElementById('enter');
+setTimeout(()=> ln1.classList.add('in'), 600);
+setTimeout(()=> ln2.classList.add('in'), 3800);
+setTimeout(()=> enterBtn.classList.add('in'), 6600);
+enterBtn.addEventListener('click', ()=>{
+  document.getElementById('overture').classList.add('gone');
+  setTimeout(()=> document.getElementById('toolbar').classList.add('in'), 1400);
+});
+</script>
+</body>
+</html>
