@@ -11,12 +11,12 @@ funcionou e o que virou aprendizado transferível.
 
 | N° | Conceito | Estilo | Live Preview | Processo |
 |----|----------|--------|--------------|----------|
-| 01 | Brutalist Archive | brutalism | [abrir](https://iv4nlanna.github.io/Design-UX-Teste/01-brutalist-archive/) | [README](01-brutalist-archive/README.md) |
-| 02 | Pixel 8-bit | pixel-art | [abrir](https://iv4nlanna.github.io/Design-UX-Teste/02-pixel-8bit/) | [README](02-pixel-8bit/README.md) |
-| 03 | Low-poly 3D | low-poly | [abrir](https://iv4nlanna.github.io/Design-UX-Teste/03-low-poly-3d/) | [README](03-low-poly-3d/README.md) |
-| 04 | Vaporwave / Synthwave | vaporwave | [abrir](https://iv4nlanna.github.io/Design-UX-Teste/04-vaporwave-synthwave/) | [README](04-vaporwave-synthwave/README.md) |
-| 05 | Campo de Fluxo Generativo | generative | [abrir](https://iv4nlanna.github.io/Design-UX-Teste/05-generativo-fluxo/) | [README](05-generativo-fluxo/README.md) |
-| 06 | Renascimento Digital | renaissance | [abrir](https://iv4nlanna.github.io/Design-UX-Teste/06-renascimento-digital/) | [README](06-renascimento-digital/README.md) |
+| 01 | Brutalist Archive | brutalism | [abrir](https://iv4nlanna.github.io/Design-UX-LABS/01-brutalist-archive/) | [README](01-brutalist-archive/README.md) |
+| 02 | Pixel 8-bit | pixel-art | [abrir](https://iv4nlanna.github.io/Design-UX-LABS/02-pixel-8bit/) | [README](02-pixel-8bit/README.md) |
+| 03 | Low-poly 3D | low-poly | [abrir](https://iv4nlanna.github.io/Design-UX-LABS/03-low-poly-3d/) | [README](03-low-poly-3d/README.md) |
+| 04 | Vaporwave / Synthwave | vaporwave | [abrir](https://iv4nlanna.github.io/Design-UX-LABS/04-vaporwave-synthwave/) | [README](04-vaporwave-synthwave/README.md) |
+| 05 | Campo de Fluxo Generativo | generative | [abrir](https://iv4nlanna.github.io/Design-UX-LABS/05-generativo-fluxo/) | [README](05-generativo-fluxo/README.md) |
+| 06 | Renascimento Digital | renaissance | [abrir](https://iv4nlanna.github.io/Design-UX-LABS/06-renascimento-digital/) | [README](06-renascimento-digital/README.md) |
 
 ## Como adicionar um exemplo
 
