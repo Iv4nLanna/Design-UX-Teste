@@ -12,6 +12,10 @@ Você será avaliado pelo processo documentado, não só pelo artefato final.
    "Significativa" = mudou direção visual. Ajuste de cor isolado não conta.
 5. Quando satisfeito com vN, copie pra `index.html` da pasta.
 
+> **Nota sobre deploy:** as iterações (`iterations/vN.html`) ficam no repositório como
+> documentação de processo — não são deployadas automaticamente. Só o `index.html` de
+> cada pasta aparece no live preview do GitHub Pages.
+
 ## Estrutura obrigatória de cada exemplo
 
 ```
