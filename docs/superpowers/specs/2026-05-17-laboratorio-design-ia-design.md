@@ -26,6 +26,7 @@ Função dupla:
 ```
 Design-UX-Teste/
 ├── README.md                          # vitrine: lista de exemplos + links live
+├── AGENTS.md                          # instruções pra IA que vai contribuir
 ├── PROCESS.md                         # aprendizados acumulados sobre processo
 ├── .github/workflows/pages.yml        # deploy automático GitHub Pages
 ├── _template/                         # esqueleto pra novos exemplos
@@ -34,6 +35,7 @@ Design-UX-Teste/
 ├── 01-brutalist-archive/
 │   ├── README.md                      # experimento documentado
 │   ├── index.html                     # versão final
+│   ├── references/                    # opcional: screenshots, tokens extraídos, links
 │   └── iterations/
 │       ├── v1.html
 │       ├── v2.html
@@ -138,13 +140,51 @@ Resumo: ...
 | `style` | brutalism, glassmorphism, claymorphism, pixel-art, low-poly, swiss, vaporwave, ... | Estilo visual principal |
 | `tags` | array livre | Atributos descritivos |
 | `techniques` | array livre | Tecnologias/técnicas usadas (css-grid, threejs, webgl, svg-animation, ...) |
-| `process_pattern` | iterative-refinement, one-shot, reference-driven, conversational-design | Como o processo se desenrolou |
+| `process_pattern` | from-scratch, skill-driven, reference-driven, iterative-refinement, one-shot, conversational-design | Como o processo se desenrolou |
+| `starting_point` | scratch, skill:`<nome>`, reference:`<url-ou-pasta>` | De onde o experimento partiu |
 | `ai_role` | co-designer, gerador, refinador, executor | Papel do Claude nesse experimento |
 | `iterations` | número | Quantas rodadas significativas |
 | `inspiration` | array livre | Referências visuais externas |
 | `difficulty` | 1/5 — 5/5 | Quão difícil foi chegar no resultado |
 
 `process_pattern` é o eixo mais importante pro laboratório — é o que vamos cruzar pra encontrar padrões.
+
+### Pasta `references/` (opcional)
+
+Quando um experimento parte de uma referência externa (site, peça gráfica, design system extraído), salvar nessa pasta:
+- Screenshots da referência (PNGs)
+- Output de ferramentas como [designlang](https://github.com/Manavarya09/design-extract) (tokens, paleta, tipografia extraída de site)
+- `references.md` com URLs e notas
+
+Manter a referência junto do experimento é parte da reprodutibilidade — em 6 meses o site referência pode ter mudado.
+
+## Três modos de partida
+
+Cada experimento começa de um dos três pontos. Isso vira o valor do campo `starting_point` no frontmatter:
+
+### `scratch` — do zero
+Briefing textual puro, sem referência ou skill de partida. Mede a "criatividade nativa" do Claude num estilo. Exemplo: "faz uma landing brutalista anos 90 com tipografia gigante".
+
+### `skill:<nome>` — partindo de skill pronta
+Usa uma skill de design existente como baseline. Ex: `npx typeui.sh pull glassmorphism` do [awesome-design-skills](https://github.com/bergside/awesome-design-skills), ou um dos 72 design systems do [open-design](https://github.com/nexu-io/open-design). Mede quanto valor o processo iterativo adiciona sobre uma skill genérica.
+
+### `reference:<url>` — partindo de referência externa
+Site, peça gráfica, ou output de extração com [designlang](https://github.com/Manavarya09/design-extract). Foco em capturar/transformar uma estética existente. Mede precisão de reprodução e capacidade de remix.
+
+Os três modos não são exclusivos — um experimento pode começar com `skill:brutalism` + `reference:bloomberg-businessweek`. Nesse caso, registre os dois no campo (array).
+
+## AGENTS.md raiz
+
+Documento curto (≤ 100 linhas) com instruções pra Claude (ou qualquer agente) que vai contribuir com um exemplo novo. Não é documentação pra humanos — é briefing operacional pra IA. Inspirado no padrão do [beautiful-html-templates](https://github.com/zarazhangrui/beautiful-html-templates).
+
+Conteúdo:
+
+1. **Contexto**: "este repo é um laboratório de processo, não galeria — você está sendo medido pelo processo, não só pelo resultado".
+2. **Onde colocar arquivos novos**: estrutura de pastas esperada.
+3. **Formato obrigatório do README do exemplo**: o template do frontmatter + seções obrigatórias.
+4. **Disciplina de iteração**: salvar `vN.html` sempre que mudar abordagem.
+5. **Como destilar aprendizados pro `PROCESS.md`**: critério do que vira aprendizado transferível vs anotação local.
+6. **Convenção de commits**: atômicos, mensagem em pt-BR, formato `feat: add NN-slug`.
 
 ## README raiz
 
@@ -192,13 +232,15 @@ GitHub Pages, branch `main`, root do repositório. Workflow mínimo em `.github/
 ## Workflow pra adicionar exemplo novo
 
 1. `cp -r _template/ NN-novo-conceito/`
-2. Preencher briefing inicial no README
-3. Iterar com Claude — salvar cada `vN.html` significativa em `iterations/`
-4. Atualizar README do exemplo: prompts (resumo + `<details>`), decisões, aprendizados
-5. Promover versão final pra `index.html` da pasta
-6. Adicionar linha na tabela do README raiz
-7. Destilar aprendizados pro `PROCESS.md`
-8. Commit atômico: `feat: add NN-novo-conceito`
+2. Decidir `starting_point`: scratch, skill (que skill?) ou reference (que URL?)
+3. Se `reference` ou `skill`: popular `references/` com material de partida
+4. Preencher briefing inicial no README
+5. Iterar com Claude — salvar cada `vN.html` significativa em `iterations/`
+6. Atualizar README do exemplo: prompts (resumo + `<details>`), decisões, aprendizados
+7. Promover versão final pra `index.html` da pasta
+8. Adicionar linha na tabela do README raiz
+9. Destilar aprendizados pro `PROCESS.md`
+10. Commit atômico: `feat: add NN-novo-conceito`
 
 ## Seed inicial (3 exemplos)
 
@@ -225,6 +267,15 @@ Three.js via CDN, geometria facetada estilo origami, paleta saturada (8-10 cores
 - Testes automatizados.
 - Sistema de comentários ou feedback.
 - Tradução multi-idioma.
+
+## Inspirações e ferramentas relacionadas
+
+Repositórios que influenciaram este design e que podem ser usados como ponto de partida (`starting_point`):
+
+- **[bergside/awesome-design-skills](https://github.com/bergside/awesome-design-skills)** — 67 design skills (glassmorphism, brutalism, etc) prontas pra Claude Code via `npx typeui.sh pull <estilo>`. Boa fonte de baseline pro modo `skill-driven`.
+- **[nexu-io/open-design](https://github.com/nexu-io/open-design)** — Plataforma local-first com 72 design systems prontos (Linear, Stripe, Apple, Tesla...) + 31 skills de geração. Bom cardápio de referências estilísticas.
+- **[Manavarya09/design-extract](https://github.com/Manavarya09/design-extract)** (designlang) — Extrai design tokens, paleta, tipografia e voz de marca de qualquer site ao vivo. Usar pra alimentar a pasta `references/` no modo `reference-driven`.
+- **[zarazhangrui/beautiful-html-templates](https://github.com/zarazhangrui/beautiful-html-templates)** — 34 templates HTML standalone com `AGENTS.md` e `index.json`. Modelo direto de estrutura de catálogo pra IA navegar.
 
 ## Critério de sucesso
 
