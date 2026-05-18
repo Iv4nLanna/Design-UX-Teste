@@ -461,11 +461,17 @@ const works3D = [];
 const rooms = []; // { idx, baseZ, dissolver?, works:[indices] }
 
 const txLoader = new THREE.TextureLoader();
+const txCache = {};
 function placeholderTexture(work){
-  if(!work.imageUrl) return new THREE.ColorNode(0x0a0806);
-  const tex = txLoader.load(work.imageUrl, undefined, undefined, ()=>console.log('fallback'));
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  if(!work || !work.imageUrl) {
+    const c = document.createElement('canvas'); c.width = c.height = 256;
+    const ctx = c.getContext('2d'); ctx.fillStyle = '#1a1408'; ctx.fillRect(0,0,256,256);
+    return new THREE.CanvasTexture(c);
+  }
+  if(!txCache[work.imageUrl]) {
+    txCache[work.imageUrl] = txLoader.load(work.imageUrl);
+  }
+  return txCache[work.imageUrl];
 }
 
 function buildRoom(roomIdx){
