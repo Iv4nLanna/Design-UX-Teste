@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html><body style="margin:0;background:#000">
+<div id="info" style="position:fixed;top:10px;left:10px;color:#0f0;font-family:monospace;font-size:14px;z-index:100;background:rgba(0,0,0,.8);padding:10px;max-width:500px"></div>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const info = document.getElementById('info');
+function log(msg) { info.innerHTML += msg + '<br>'; }
+
+log('=== DIAGNÓSTICO THREE.JS ===');
+
+// 1. WebGL support
+const canvas = document.createElement('canvas');
+const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+log('1. WebGL: ' + (gl ? 'OK v' + gl.getParameter(gl.VERSION) : 'FALHOU'));
+
+if (!gl) { log('FATAL: sem WebGL'); return; }
+
+// 2. Three.js import
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(400, 300);
+renderer.domElement.style.position = 'fixed';
+renderer.domElement.style.bottom = '10px';
+renderer.domElement.style.right = '10px';
+renderer.domElement.style.border = '2px solid #0f0';
+document.body.appendChild(renderer.domElement);
+log('2. Three.js renderer: OK');
+
+// 3. Scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x333333);
+const camera = new THREE.PerspectiveCamera(60, 4/3, 0.1, 100);
+camera.position.set(0, 0, 4);
+log('3. Scene + camera: OK');
+
+// 4. Light
+const light = new THREE.DirectionalLight(0xffffff, 1);
+light.position.set(1, 2, 3);
+scene.add(light);
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+log('4. Lights: OK');
+
+// 5. Load texture
+const loader = new THREE.TextureLoader();
+log('5. Carregando textura...');
+const imgUrl = 'images/vermeer-leiteira.jpg';
+loader.load(
+  imgUrl,
+  tex => {
+    log('6. TEXTURA CARREGADA: ' + tex.image.naturalWidth + 'x' + tex.image.naturalHeight);
+    log('6b. colorSpace: ' + tex.colorSpace);
+    
+    const mat = new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide });
+    const geo = new THREE.PlaneGeometry(2, 1.78);
+    const mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+    log('7. Mesh criado com textura');
+    
+    // render
+    renderer.render(scene, camera);
+    log('8. Renderizado!');
+    
+    // Teste canvas 2D com a mesma imagem
+    const img = new Image();
+    img.onload = () => {
+      const c2 = document.createElement('canvas');
+      c2.width = 100; c2.height = 100;
+      const ctx = c2.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      try {
+        ctx.getImageData(0, 0, 1, 1);
+        log('9. Canvas 2D: getImageData OK (imagem usavel)');
+      } catch(e) {
+        log('9. CANVAS 2D TAINTED: ' + e.message);
+      }
+    };
+    img.src = imgUrl;
+  },
+  undefined,
+  err => {
+    log('6. ERRO AO CARREGAR TEXTURA: ' + (err?.message || err));
+  }
+);
+</script>
+</body></html>

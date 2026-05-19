@@ -81,6 +81,22 @@
 </script>
 </head>
 <body>
+<div id="diag" style="position:fixed;top:0;left:0;right:0;z-index:9999;background:#f00;color:#fff;font:12px monospace;padding:6px;display:none">diag</div>
+<script>
+(function(){
+  const d = document.getElementById('diag') || document.createElement('div');
+  window.onerror = function(msg, url, line) {
+    d.style.display = 'block';
+    d.innerHTML = 'ERR: ' + msg + ' (linha ' + line + ')';
+    console.error('CAPTURADO:', msg, line);
+  };
+  addEventListener('unhandledrejection', e => {
+    d.style.display = 'block';
+    d.innerHTML = 'PROMISE: ' + e.reason;
+    console.error('PROMISE:', e.reason);
+  });
+})();
+</script>
 
 <div id="overture">
   <div class="ln" id="ln1">Você está prestes a entrar em um museu<br>que não existe.</div>
