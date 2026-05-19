@@ -472,6 +472,7 @@ const ambient = new THREE.AmbientLight(0xfff0d0, 0.06); scene.add(ambient);
 const hemi = new THREE.HemisphereLight(0x3a2818, 0x0a0806, 0.05); scene.add(hemi);
 
 const loader = new THREE.TextureLoader();
+loader.setCrossOrigin('anonymous');
 const works3D = [];
 const rooms = []; // { idx, baseZ, dissolver?, works:[indices] }
 
@@ -545,8 +546,6 @@ function buildRoom(roomIdx){
         tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         painting.material.map = tex;
         painting.material.needsUpdate = true;
-      }, undefined, err => {
-        console.error('Erro ao carregar textura:', w.title, err);
       });
     } else if (w.src && w.src.startsWith('data:')){
       const img = new Image();
