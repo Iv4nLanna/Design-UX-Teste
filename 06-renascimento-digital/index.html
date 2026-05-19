@@ -511,7 +511,7 @@ function buildRoom(roomIdx){
       new THREE.PlaneGeometry(wpx, h),
       new THREE.MeshStandardMaterial({ map: placeholderTexture(w.palette), roughness: 0.62, metalness: 0, emissive: 0x1a1408, emissiveIntensity: 0.05 })
     );
-    painting.position.z = 0.061;
+    painting.position.z = 0.095;
     group.add(painting);
     const lights = [];
     for (let k=-1; k<=1; k++){
